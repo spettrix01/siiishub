@@ -1,0 +1,20 @@
+mod shared;
+mod settings;
+mod userdata;
+mod addons;
+mod media;
+mod downloads;
+mod remote;
+mod torrents;
+mod mpv;
+mod window;
+
+pub use addons::*;
+pub use downloads::*;
+pub use media::*;
+pub use mpv::*;
+pub use remote::*;
+pub use settings::*;
+pub use torrents::*;
+pub use userdata::*;
+pub use window::*;

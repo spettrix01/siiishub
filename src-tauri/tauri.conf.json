@@ -1,0 +1,38 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "SIIISHUB",
+  "version": "1.0.0",
+  "identifier": "dev.siiis.siiishub",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": null,
+    "beforeDevCommand": null,
+    "beforeBuildCommand": null
+  },
+  "app": {
+    "windows": [],
+    "security": {
+      "csp": "default-src 'self' ipc: http://ipc.localhost; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self' ipc: http://ipc.localhost blob:; connect-src 'self' ipc: http://ipc.localhost https://api.themoviedb.org; frame-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+      "assetProtocol": {
+        "enable": false,
+        "scope": []
+      }
+    },
+    "withGlobalTauri": true
+  },
+  "bundle": {
+    "active": true,
+    "publisher": "siiis",
+    "category": "Video",
+    "shortDescription": "Self-hosted streaming hub",
+    "longDescription": "SIIISHUB: movies and series from TMDB, streams and subtitles from Stremio addons, direct torrent streaming with librqbit, Real-Debrid and AllDebrid, all played in an embedded mpv player.",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  },
+  "plugins": {}
+}

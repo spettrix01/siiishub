@@ -1,0 +1,15 @@
+{
+  "mainBinaryName": "SIIISHUB",
+  "bundle": {
+    "targets": ["deb", "appimage"],
+    "linux": {
+      "deb": {
+        "depends": ["libmpv2", "ffmpeg"],
+        "section": "video"
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    }
+  }
+}

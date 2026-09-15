@@ -1,0 +1,15 @@
+[package]
+name = "librqbit-sha1-wrapper"
+version = "4.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Pure-Rust SHA-1 backend for librqbit (local patch: keeps OpenSSL and aws-lc out of the Android build)"
+
+[dependencies]
+sha1 = "0.10"
+
+# librqbit selects one of these; both map to the same pure-Rust backend here.
+[features]
+default = ["sha1-crypto-hash"]
+sha1-crypto-hash = []
+sha1-ring = []

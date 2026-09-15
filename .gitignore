@@ -1,0 +1,27 @@
+# Build output
+/src-tauri/target/
+/src-tauri/gen/
+/installers/
+
+# Windows libmpv: downloaded and generated locally (see docs/BUILDING.md)
+/src-tauri/binaries/
+
+# Android plugin build output
+/src-tauri/plugins/android-player/android/build/
+/src-tauri/plugins/android-player/android/.tauri/
+/src-tauri/plugins/android-player/target/
+/src-tauri/plugins/android-player/Cargo.lock
+
+# Signing material
+*.keystore
+*.jks
+keystore.properties
+local.properties
+
+# Tooling
+node_modules/
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

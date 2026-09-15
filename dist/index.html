@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#0c0a14" />
+<title>SIIISHUB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css" />
+<script>
+  (function(){
+    var t = (typeof window !== 'undefined' && window.__INITIAL_THEME__) || localStorage.getItem('siiishub-theme');
+    if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+  })();
+</script>
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231a1428'/><stop offset='1' stop-color='%23120f1c'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='32' y='45' font-family='system-ui,-apple-system,Segoe UI,sans-serif' font-size='34' font-weight='800' fill='%23b07cff' text-anchor='middle' letter-spacing='-1'>SH</text></svg>" />
+</head>
+<body>
+
+<header class="topbar" data-tauri-drag-region>
+  <button class="brand" type="button" data-go-movies aria-label="Vai a Film">
+    <span class="brand-name">SIIIS<em>HUB</em></span>
+  </button>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" data-section="movie" role="tab" aria-selected="true" data-i18n="nav.movies">Film</button>
+    <button class="tab" data-section="series" role="tab" aria-selected="false" data-i18n="nav.series">Serie TV</button>
+    <button class="tab" data-section="library" role="tab" aria-selected="false"><span data-i18n="nav.library">Libreria</span><span class="tab-badge" id="libraryBadge" hidden data-i18n-aria="nav.libraryNewBadge" aria-label="Nuovi download completati">!</span></button>
+  </nav>
+
+  <div class="searchbox">
+    <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m20 20-4.2-4.2M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
+    <input id="search" type="search" data-i18n-ph="search.placeholder" placeholder="Cerca film, serie…" autocomplete="off" spellcheck="false" />
+    <span class="searchbox-divider" aria-hidden="true"></span>
+    <button class="searchbox-settings" id="openSettings" data-i18n-title="topbar.settings" data-i18n-aria="topbar.settings" title="Impostazioni" aria-label="Impostazioni">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7.5-3.5q0 .55-.06 1.07l2.13 1.66a.5.5 0 0 1 .12.64l-2.02 3.5a.5.5 0 0 1-.61.22l-2.51-1a7.5 7.5 0 0 1-1.85 1.07l-.38 2.66a.5.5 0 0 1-.5.43h-4.04a.5.5 0 0 1-.5-.43l-.38-2.66a7.5 7.5 0 0 1-1.85-1.07l-2.51 1a.5.5 0 0 1-.61-.22L2.31 15.4a.5.5 0 0 1 .12-.64l2.13-1.66Q4.5 12.55 4.5 12t.06-1.1L2.43 9.24a.5.5 0 0 1-.12-.64l2.02-3.5a.5.5 0 0 1 .61-.22l2.51 1a7.5 7.5 0 0 1 1.85-1.07l.38-2.66A.5.5 0 0 1 10.18 2h4.04a.5.5 0 0 1 .5.43l.38 2.66a7.5 7.5 0 0 1 1.85 1.07l2.51-1a.5.5 0 0 1 .61.22l2.02 3.5a.5.5 0 0 1-.12.64l-2.13 1.66q.06.55.06 1.1Z"/></svg>
+    </button>
+  </div>
+
+  <div class="winctl" aria-label="Controlli finestra">
+    <button class="winctl-btn" id="winMin" type="button" data-i18n-title="win.minimize" data-i18n-aria="win.minimize" title="Riduci a icona" aria-label="Riduci a icona">
+      <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" d="M2 6h8"/></svg>
+    </button>
+    <button class="winctl-btn" id="winMax" type="button" data-i18n-title="win.maximize" data-i18n-aria="win.maximize" title="Massimizza" aria-label="Massimizza">
+      <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><rect x="2.5" y="2.5" width="7" height="7" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <button class="winctl-btn winctl-btn--close" id="winClose" type="button" data-i18n-title="win.close" data-i18n-aria="win.close" title="Chiudi" aria-label="Chiudi">
+      <svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" d="M3 3l6 6M9 3l-6 6"/></svg>
+    </button>
+  </div>
+</header>
+
+<div id="page-scroll">
+
+<section class="trending" id="trendingRail" hidden data-i18n-aria="trending.title" aria-label="Top di oggi">
+  <div class="trending-head">
+    <div class="trending-head-text">
+      <h2 class="trending-title" data-i18n="trending.title">Top di oggi</h2>
+    </div>
+  </div>
+  <div class="trending-rail-wrap">
+    <button class="trending-nav trending-nav-prev" id="trendingNavPrev" type="button" aria-label="Indietro" hidden>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>
+    </button>
+    <div class="trending-rail" id="trendingRailList" role="list"></div>
+    <button class="trending-nav trending-nav-next" id="trendingNavNext" type="button" aria-label="Avanti" hidden>
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<section class="filter-bar">
+  <div class="genre-dropdown" id="genreDropdown">
+    <button class="genre-trigger" id="genreTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+      <span class="genre-label">Tutti i generi</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m6 9 6 6 6-6"/></svg>
+    </button>
+    <div class="genre-menu" id="genreMenu" role="listbox" hidden></div>
+  </div>
+</section>
+
+<section class="filter-bar library-bar" id="libraryBar" hidden>
+  <nav class="seg" role="tablist" aria-label="Libreria">
+    <button type="button" class="seg-btn is-active" data-library-tab="continua" role="tab" aria-selected="true" data-i18n="library.tab.continue">Continua</button>
+    <button type="button" class="seg-btn" data-library-tab="preferiti" role="tab" aria-selected="false" data-i18n="library.tab.favorites">Preferiti</button>
+    <button type="button" class="seg-btn" data-library-tab="download" role="tab" aria-selected="false"><span data-i18n="library.tab.downloads">Download</span><span class="seg-badge" id="downloadBadge" hidden data-i18n-aria="library.activeDownloads" aria-label="Download attivi">0</span></button>
+  </nav>
+</section>
+
+<section id="dlMagnetBar" class="dl-magnet-bar" hidden>
+  <div class="dl-magnet-bar-inner">
+    <label class="dl-magnet-field dl-magnet-field--p2p">
+      <div class="dl-magnet-header">
+        <div class="dl-magnet-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 4v6a7 7 0 0 0 14 0V4M5 4h4v6M19 4h-4v6"/></svg>
+        </div>
+        <div class="dl-magnet-titles">
+          <span class="dl-magnet-title" data-i18n="dl.p2p.title">Torrent P2P</span>
+          <span class="dl-magnet-sub" data-i18n="dl.p2p.sub">Download diretto peer-to-peer</span>
+        </div>
+      </div>
+      <div class="dl-magnet-row">
+        <input id="dlMagnetTorrent" type="text" placeholder="magnet:?xt=urn:btih:…" autocomplete="off" spellcheck="false" />
+        <button class="dl-magnet-btn dl-magnet-btn--p2p" id="dlMagnetTorrentBtn" type="button">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14"/></svg>
+          <span data-i18n="dl.download">Scarica</span>
+        </button>
+        <button class="dl-magnet-clip" id="dlMagnetTorrentClip" type="button" data-i18n-title="dl.uploadTorrent" data-i18n-aria="dl.uploadTorrent" title="Carica file .torrent" aria-label="Carica file .torrent">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m21 12-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 8"/></svg>
+        </button>
+        <input id="dlMagnetTorrentFile" type="file" accept=".torrent,application/x-bittorrent" hidden />
+      </div>
+    </label>
+
+    <label class="dl-magnet-field dl-magnet-field--debrid">
+      <div class="dl-magnet-header">
+        <div class="dl-magnet-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>
+        </div>
+        <div class="dl-magnet-titles">
+          <span class="dl-magnet-title" data-i18n="dl.debrid.title">Debrid</span>
+          <span class="dl-magnet-sub" id="dlMagnetDebridSub">Real-Debrid · CDN ad alta velocità</span>
+        </div>
+      </div>
+      <div class="dl-magnet-row">
+        <input id="dlMagnetRd" type="text" placeholder="magnet:?xt=urn:btih:…" autocomplete="off" spellcheck="false" />
+        <button class="dl-magnet-btn dl-magnet-btn--debrid" id="dlMagnetRdBtn" type="button">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>
+          <span data-i18n="dl.download">Scarica</span>
+        </button>
+        <button class="dl-magnet-clip" id="dlMagnetRdClip" type="button" data-i18n-title="dl.uploadTorrent" data-i18n-aria="dl.uploadTorrent" title="Carica file .torrent" aria-label="Carica file .torrent">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="m21 12-8.5 8.5a5 5 0 0 1-7-7L14 5a3.5 3.5 0 0 1 5 5l-8.5 8.5a2 2 0 0 1-3-3L15 8"/></svg>
+        </button>
+        <input id="dlMagnetRdFile" type="file" accept=".torrent,application/x-bittorrent" hidden />
+      </div>
+    </label>
+  </div>
+  <div class="dl-magnet-status">
+    <p class="dl-magnet-hint" id="dlMagnetHint"></p>
+    <button class="dl-magnet-cancel" id="dlMagnetCancel" type="button" hidden>
+      <svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>
+      <span data-i18n="common.cancel">Annulla</span>
+    </button>
+  </div>
+</section>
+
+<main id="grid" class="grid" aria-live="polite"></main>
+
+<div id="sentinel" class="sentinel"></div>
+
+<footer class="status" id="status"></footer>
+
+</div>
+
+<div class="dossier" id="detailsModal" hidden>
+  <div class="dossier-scrim" data-close></div>
+  <article class="dossier-card" role="dialog" aria-modal="true" aria-labelledby="detailsTitle">
+    <button class="modal-close dossier-close" type="button" data-close data-i18n-aria="common.close" aria-label="Chiudi">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <div class="dossier-body" id="detailsBody"></div>
+  </article>
+</div>
+
+<div class="player" id="playerModal" hidden>
+  <div class="player-scrim" data-close></div>
+  <div class="player-stage" role="dialog" aria-modal="true" aria-label="Player">
+    <div class="player-frame" id="playerFrame">
+      <div id="playerVideo" class="player-video" aria-hidden="true"></div>
+
+      <div class="player-status" id="playerStatus" hidden></div>
+      <div class="player-torrent-stats" id="playerTorrentStats" hidden></div>
+      <div class="player-speed-hint" id="playerSpeedHint" hidden>2× <span class="psh-arrows">▶▶</span></div>
+
+      <header class="player-top" id="playerTop">
+        <button class="player-iconbtn" type="button" data-close data-i18n-aria="common.close" aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 6l-6 6 6 6"/></svg>
+        </button>
+        <div class="player-meta">
+          <p class="player-eyebrow" id="playerEyebrow"></p>
+          <h2 class="player-title" id="playerTitle"></h2>
+        </div>
+        <div class="player-pickers" id="playerPickers"></div>
+      </header>
+
+      <button class="player-bigplay" id="playerBigPlay" type="button" data-i18n-aria="player.playPause" aria-label="Play/Pausa">
+        <svg class="ico-play" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72c0 .79.87 1.27 1.54.84l10.54-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/></svg>
+        <svg class="ico-pause" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      </button>
+
+      <aside class="player-side-pane" id="playerSidePane">
+        <header class="psp-head">
+          <h3 class="psp-title" id="playerSidePaneTitle" data-i18n="player.sidepane.cast">Cast</h3>
+        </header>
+        <div class="psp-body" id="playerSidePaneBody"></div>
+      </aside>
+
+      <aside class="player-log-pane" id="playerLogPane">
+        <header class="plp-head">
+          <h3 class="plp-title" data-i18n="player.log.title">Log</h3>
+          <button class="player-iconbtn plp-close" id="playerLogClose" type="button" data-i18n-aria="player.log.hide" aria-label="Nascondi log">
+            <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18"/></svg>
+          </button>
+        </header>
+        <div class="plp-body" id="playerLogBody"></div>
+      </aside>
+
+      <div class="player-controls" id="playerControls">
+        <div class="player-progress" id="playerProgress" tabindex="0" role="slider" data-snav-axis="x" data-i18n-aria="player.position" aria-label="Posizione" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0">
+          <div class="player-progress-track">
+            <div class="player-progress-buffered" id="playerProgressBuffered"></div>
+            <div class="player-progress-played" id="playerProgressPlayed"></div>
+            <div class="player-progress-thumb" id="playerProgressThumb"></div>
+          </div>
+          <div class="player-progress-tip" id="playerProgressTip" hidden>0:00</div>
+        </div>
+        <div class="player-row">
+          <button class="player-iconbtn" id="playerPlayBtn" type="button" data-i18n-aria="player.playPause" aria-label="Play/Pausa">
+            <svg class="ico-play" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72c0 .79.87 1.27 1.54.84l10.54-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/></svg>
+            <svg class="ico-pause" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+          </button>
+          <div class="player-volume">
+            <button class="player-iconbtn" id="playerMuteBtn" type="button" data-state="high" data-i18n-aria="player.mute" aria-label="Muto">
+              <svg class="ico-vol-high" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 9v6h3l5 4V5L8 9H5z M16 8.5a4 4 0 0 1 0 7 M19 6a7 7 0 0 1 0 12"/></svg>
+              <svg class="ico-vol-mid" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 9v6h3l5 4V5L8 9H5z M16 8.5a4 4 0 0 1 0 7"/></svg>
+              <svg class="ico-vol-mute" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 9v6h3l5 4V5L8 9H5z M16 9l5 6m0-6-5 6"/></svg>
+            </button>
+            <div class="player-volume-bar">
+              <input type="range" id="playerVol" min="0" max="200" step="1" value="100" data-snav-axis="y" data-i18n-aria="player.volume" aria-label="Volume" />
+            </div>
+            <span class="player-vol-pct" id="playerVolPct" aria-hidden="true">100%</span>
+          </div>
+          <span class="player-time">
+            <span id="playerCurTime">0:00</span>
+            <span class="player-time-sep">/</span>
+            <span class="player-time-total" id="playerTotalTime">0:00</span>
+          </span>
+          <span class="player-spacer"></span>
+          <div class="player-settings-wrap">
+            <button class="player-iconbtn" id="playerSettingsBtn" type="button" data-i18n-aria="player.settings" aria-label="Impostazioni" aria-haspopup="true" aria-expanded="false">
+              <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm7.5-3.5q0 .55-.06 1.07l2.13 1.66a.5.5 0 0 1 .12.64l-2.02 3.5a.5.5 0 0 1-.61.22l-2.51-1a7.5 7.5 0 0 1-1.85 1.07l-.38 2.66a.5.5 0 0 1-.5.43h-4.04a.5.5 0 0 1-.5-.43l-.38-2.66a7.5 7.5 0 0 1-1.85-1.07l-2.51 1a.5.5 0 0 1-.61-.22L2.31 15.4a.5.5 0 0 1 .12-.64l2.13-1.66Q4.5 12.55 4.5 12t.06-1.1L2.43 9.24a.5.5 0 0 1-.12-.64l2.02-3.5a.5.5 0 0 1 .61-.22l2.51 1a7.5 7.5 0 0 1 1.85-1.07l.38-2.66A.5.5 0 0 1 10.18 2h4.04a.5.5 0 0 1 .5.43l.38 2.66a7.5 7.5 0 0 1 1.85 1.07l2.51-1a.5.5 0 0 1 .61.22l2.02 3.5a.5.5 0 0 1-.12.64l-2.13 1.66q.06.55.06 1.1Z"/></svg>
+            </button>
+            <div class="player-settings" id="playerSettings" hidden role="dialog">
+              <div class="player-settings-tabs" role="tablist">
+                <button type="button" data-pst-tab="audio" class="is-active" role="tab" data-i18n="player.tab.audio">Audio</button>
+                <button type="button" data-pst-tab="sub" role="tab" data-i18n="player.tab.sub">Sottotitoli</button>
+                <button type="button" data-pst-tab="opensubtitles" role="tab" hidden data-i18n="player.tab.opensubtitles">OpenSubtitles</button>
+                <button type="button" data-pst-tab="speed" role="tab" data-i18n="player.tab.speed">Velocità</button>
+              </div>
+              <div class="player-settings-body" id="playerSettingsBody"></div>
+            </div>
+          </div>
+          <button class="player-iconbtn" id="playerSplitBtn" type="button" data-i18n-aria="player.sidePanel" data-i18n-title="player.sidePanel" aria-label="Pannello laterale" title="Pannello laterale" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M14 5v14" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+          <button class="player-iconbtn" id="playerFsBtn" type="button" data-i18n-aria="player.fullscreen" aria-label="Schermo intero">
+            <svg class="ico-fs-enter" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+            <svg class="ico-fs-exit" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="settingsModal" hidden>
+  <div class="modal-overlay" data-close></div>
+  <article class="modal-card settings-card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <button class="modal-close settings-close" type="button" data-close data-i18n-aria="common.close" aria-label="Chiudi">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+    <nav class="settings-nav" id="settingsNav" data-i18n-aria="settings.heading" aria-label="Impostazioni">
+      <h1 id="settingsTitle" class="display settings-nav-title" data-i18n="settings.heading">Impostazioni</h1>
+      <div class="settings-nav-list" id="settingsNavList" role="tablist" aria-orientation="vertical"></div>
+    </nav>
+    <header class="settings-head">
+      <h2 class="display settings-pane-title" id="settingsPaneTitle"></h2>
+    </header>
+
+    <section class="pane is-active" data-pane="language">
+      <p class="pane-desc" data-i18n="settings.language.uiDesc">Scegli la lingua dell'interfaccia e dei contenuti caricati da TMDB.</p>
+
+      <label class="field">
+        <div id="appLanguageSlot"></div>
+      </label>
+      <p class="hint" id="appLanguageHint"></p>
+
+      <p class="pane-desc" data-i18n="settings.language.tracksDesc">Preferenze linguistiche del player. MPV selezionerà automaticamente la prima traccia audio e sottotitoli che corrisponde alla lista, in ordine di preferenza.</p>
+
+      <div class="player-langs-row">
+        <label class="field">
+          <span data-i18n="settings.language.audioLabel">Lingue audio preferite</span>
+          <div id="playerAudioLangsSlot"></div>
+        </label>
+        <label class="field">
+          <span data-i18n="settings.language.subLabel">Lingue sottotitoli preferite</span>
+          <div id="playerSubLangsSlot"></div>
+        </label>
+      </div>
+
+      <p class="hint" id="playerLangsHint"></p>
+    </section>
+
+    <section class="pane" data-pane="appearance">
+      <p class="pane-desc" data-i18n="settings.appearance.desc">Scegli l'aspetto dell'interfaccia.</p>
+      <div class="theme-grid" id="themeGrid" role="radiogroup" data-i18n-aria="settings.appearance.title" aria-label="Tema">
+        <button class="theme-option" type="button" role="radio" data-theme-value="dark-orange" aria-checked="false">
+          <span class="theme-swatch theme-swatch--dark-orange" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.darkOrange">Nero arancio</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-theme-value="light-orange" aria-checked="false">
+          <span class="theme-swatch theme-swatch--light-orange" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.lightOrange">Bianco arancio</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-theme-value="dark-purple" aria-checked="false">
+          <span class="theme-swatch theme-swatch--dark-purple" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.darkPurple">Nero viola</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-theme-value="light-purple" aria-checked="false">
+          <span class="theme-swatch theme-swatch--light-purple" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.lightPurple">Bianco viola</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-theme-value="dark-teal" aria-checked="false">
+          <span class="theme-swatch theme-swatch--dark-teal" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.darkTeal">Nero verde acqua</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-theme-value="light-teal" aria-checked="false">
+          <span class="theme-swatch theme-swatch--light-teal" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.lightTeal">Bianco verde acqua</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="tmdb">
+      <p class="pane-desc" data-i18n="settings.tmdb.desc">Inserisci la tua API key TMDB v3 per caricare film e serie.</p>
+      <label class="field">
+        <span data-i18n="settings.tmdb.label">API key TMDB</span>
+        <div class="field-row">
+          <input id="tmdbKeyInput" type="password" placeholder="es. 0a1b2c3d4e5f…" autocomplete="off" spellcheck="false" />
+          <button class="ghost" id="tmdbReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
+            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          </button>
+        </div>
+      </label>
+      <div class="actions">
+        <a class="link" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener" data-i18n="settings.tmdb.findKey">Crea / trova la tua key →</a>
+      </div>
+      <p class="hint" id="tmdbHint"></p>
+      <div class="tmdb-attribution">
+        <img class="tmdb-attribution-logo" src="/img/tmdb-logo.svg" alt="TMDB" width="108" height="14">
+        <p class="hint">This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="addons">
+      <p class="pane-desc" data-i18n-html="settings.addons.desc">Aggiungi addon Stremio incollando l'URL del manifest. Gli addon attualmente supportati sono <strong>Torrentio</strong>, <strong>Comet</strong>, <strong>MediaFusion</strong>, <strong>OpenSubtitles v3</strong>.</p>
+
+      <div class="addon-add">
+        <input id="addonUrl" type="url" data-i18n-ph="settings.addons.urlPlaceholder" placeholder="https://torrentio.strem.fun/…/manifest.json" />
+        <button class="primary" id="addAddon" data-i18n="common.add">Aggiungi</button>
+      </div>
+      <p class="hint" id="addonHint"></p>
+
+      <ul class="addon-list" id="addonList"></ul>
+    </section>
+
+    <section class="pane" data-pane="trackers">
+      <p class="pane-desc" data-i18n-html="settings.trackers.desc1">Tracker pubblici che <strong>l'interfaccia</strong> allega a ogni magnet. Uno per riga, formato <code>udp://host:porta/announce</code> o <code>https://host/announce</code>. Lasciala vuota per affidarti solo al DHT.</p>
+      <p class="pane-desc" data-i18n-html="settings.trackers.desc2">Tracker consigliati:<br><a href="https://github.com/ngosang/trackerslist" target="_blank" rel="noreferrer noopener">https://github.com/ngosang/trackerslist</a></p>
+
+      <label class="field">
+        <span data-i18n="settings.trackers.label">Lista tracker (uno per riga)</span>
+        <textarea id="trackerList" rows="3" spellcheck="false" placeholder="udp://tracker.opentrackr.org:1337/announce&#10;udp://open.stealth.si:80/announce&#10;…"></textarea>
+      </label>
+      <p class="hint" id="trackerHint"></p>
+    </section>
+
+    <section class="pane" data-pane="download">
+      <p class="pane-desc" data-i18n="settings.download.desc">Cartella in cui vengono salvati i file personali.</p>
+      <button type="button" class="download-dir-link" id="openDownloadDir" data-i18n-title="settings.download.openFolder" title="Apri nella cartella">
+        <svg class="ddl-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>
+        <span class="ddl-path"></span>
+        <svg class="ddl-arrow" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M7 17 17 7M9 7h8v8"/></svg>
+      </button>
+
+      <div class="debrid-section">
+        <h3 class="debrid-section-title" data-i18n="settings.debrid.title">Servizio Debrid</h3>
+        <p class="pane-desc" data-i18n="settings.debrid.desc">Imposta il tuo provider e la API key per la sezione download Debrid</p>
+
+        <label class="field">
+          <span data-i18n="settings.debrid.provider">Provider</span>
+          <div id="debridProviderSlot"></div>
+        </label>
+
+        <label class="field" id="debridTokenField" hidden>
+          <span data-i18n="settings.debrid.apikey">API key</span>
+          <div class="field-row">
+            <input id="debridTokenInput" type="password" data-i18n-ph="settings.debrid.keyPlaceholder" placeholder="Incolla la tua API key" autocomplete="off" spellcheck="false" />
+            <button class="ghost" id="debridReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
+              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            </button>
+          </div>
+          <a class="debrid-key-link" id="debridGetKeyLink" href="#" hidden></a>
+        </label>
+
+        <p class="hint" id="debridHint"></p>
+      </div>
+    </section>
+
+    <section class="pane" data-pane="remote">
+      <p class="pane-desc" data-i18n="settings.remote.desc">Controlla l'interfaccia dal telefono connesso alla stessa rete: scansiona il QR code o apri l'indirizzo nel browser.</p>
+
+      <label class="field">
+        <span data-i18n="settings.remote.port">Porta</span>
+        <div class="field-row">
+          <input id="remotePortInput" type="number" min="1024" max="65535" step="1" placeholder="9871" />
+        </div>
+      </label>
+
+      <div class="remote-info" id="remoteInfoBox" hidden>
+        <ul class="remote-ifaces" id="remoteIfaceList"></ul>
+      </div>
+
+      <div class="remote-info remote-devices-box" id="remoteDevicesBox" hidden>
+        <h3 class="remote-group-title" data-i18n="settings.remote.devicesTitle">Dispositivi collegati</h3>
+        <ul class="remote-devices" id="remoteDeviceList"></ul>
+      </div>
+
+      <p class="hint" id="remoteHint"></p>
+    </section>
+  </article>
+</div>
+
+<template id="cardTpl">
+  <a class="card" href="#">
+    <div class="poster">
+      <img loading="lazy" decoding="async" alt="" />
+      <span class="card-rating"></span>
+      <div class="card-progress" hidden><div class="card-progress-fill"></div></div>
+    </div>
+    <div class="card-meta">
+      <h3 class="card-title"></h3>
+      <span class="card-year"></span>
+    </div>
+  </a>
+</template>
+
+<div class="qr-overlay" id="qrOverlay" hidden>
+  <div class="qr-overlay-card">
+    <div class="qr-overlay-svg" id="qrOverlaySvg"></div>
+    <p class="qr-overlay-caption" id="qrOverlayCaption"></p>
+  </div>
+</div>
+
+<div class="dl-drop-overlay" id="dlDropOverlay" hidden>
+  <div class="dl-drop-box">
+    <svg viewBox="0 0 24 24" width="48" height="48" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+    <span data-i18n="dl.dropHint">Rilascia qui file audio o video</span>
+  </div>
+</div>
+
+<div class="modal" id="alertModal" hidden>
+  <div class="modal-overlay" data-close></div>
+  <article class="modal-card alert-card" role="alertdialog" aria-modal="true" aria-labelledby="alertTitle" aria-describedby="alertBody">
+    <header class="alert-head">
+      <span class="alert-icon" data-alert-icon aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M12 8v5m0 3.5h.01M4.5 19h15a1.5 1.5 0 0 0 1.3-2.25l-7.5-13a1.5 1.5 0 0 0-2.6 0l-7.5 13A1.5 1.5 0 0 0 4.5 19Z"/></svg>
+      </span>
+      <h2 id="alertTitle" class="alert-title" data-i18n="alert.title.error">Errore</h2>
+    </header>
+    <div id="alertBody" class="alert-body"></div>
+    <div class="alert-actions">
+      <button class="primary" type="button" data-alert-ok data-i18n="alert.ok">OK</button>
+    </div>
+  </article>
+</div>
+
+<!-- Android: bottom navigation (shown by js/bottom-nav.js, mirrors the top tabs). -->
+<nav class="bottom-nav" id="bottomNav" hidden aria-label="Navigazione">
+  <button class="bottom-nav-item" type="button" data-bn-section="movie">
+    <span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/></svg></span>
+    <span data-i18n="nav.movies">Film</span>
+  </button>
+  <button class="bottom-nav-item" type="button" data-bn-section="series">
+    <span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M17 2l-5 5-5-5"/></svg></span>
+    <span data-i18n="nav.series">Serie TV</span>
+  </button>
+  <button class="bottom-nav-item" type="button" data-bn-section="library">
+    <span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span class="bottom-nav-badge" id="bottomNavBadge" hidden></span></span>
+    <span data-i18n="nav.library">Libreria</span>
+  </button>
+  <button class="bottom-nav-item" type="button" data-bn-settings>
+    <span class="bottom-nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span>
+    <span data-i18n="settings.heading">Impostazioni</span>
+  </button>
+</nav>
+
+<script src="/app.js?v=35" type="module"></script>
+</body>
+</html>

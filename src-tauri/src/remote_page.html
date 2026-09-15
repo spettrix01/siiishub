@@ -1,0 +1,1713 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no" />
+<meta name="theme-color" content="#0c0a14" />
+<title>SIIISHUB Remote</title>
+<style>
+  :root {
+    --bg: #0c0a14;
+    --surface: #18141e;
+    --surface-2: #221c2e;
+    --line: #2a2335;
+    --text: #f3eafe;
+    --text-2: #b9aacb;
+    --text-3: #6f6280;
+    --violet: #ffae5e;
+    --violet-soft: rgba(255, 154, 60, 0.16);
+    --danger: #ff6b8a;
+    --good: #6affb0;
+    --on-violet: #1a0f04;
+  }
+  [data-accent="purple"] {
+    --violet: #c4a3ff;
+    --violet-soft: rgba(168, 117, 255, 0.18);
+  }
+  [data-accent="teal"] {
+    --violet: #5eead4;
+    --violet-soft: rgba(45, 212, 191, 0.18);
+  }
+  [data-theme="light"] {
+    --bg: #f7f7f9;
+    --surface: #ffffff;
+    --surface-2: #eeeff2;
+    --line: #d9dae0;
+    --text: #18181b;
+    --text-2: #4e4e56;
+    --text-3: #8a8a92;
+    --violet: #d47012;
+    --violet-soft: rgba(212, 112, 18, 0.14);
+    --on-violet: #ffffff;
+  }
+  [data-theme="light"][data-accent="purple"] {
+    --violet: #7c3aed;
+    --violet-soft: rgba(124, 58, 237, 0.14);
+    --on-violet: #ffffff;
+  }
+  [data-theme="light"][data-accent="teal"] {
+    --violet: #0d9488;
+    --violet-soft: rgba(13, 148, 136, 0.14);
+    --on-violet: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    overflow-x: hidden;
+  }
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 16px;
+    gap: 16px;
+  }
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-3);
+    transition: background .2s;
+  }
+  .status.is-connected .status-dot { background: var(--good); box-shadow: 0 0 8px var(--good); }
+  .status.is-error .status-dot { background: var(--danger); }
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 4px 6px 4px 14px;
+  }
+  .search-bar > svg { color: var(--text-3); flex-shrink: 0; }
+  .search-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 16px;
+    padding: 10px 0;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .search-input::placeholder { color: var(--text-3); }
+  .search-go {
+    flex-shrink: 0;
+    border: none;
+    background: var(--violet);
+    color: var(--on-violet);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  .search-go:active { transform: scale(0.95); }
+  .progress-wrap {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .progress-track {
+    position: relative;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    touch-action: none;
+  }
+  .progress-bar {
+    position: absolute;
+    left: 0; right: 0;
+    height: 6px;
+    background: var(--line);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--violet), color-mix(in srgb, var(--violet) 70%, white));
+    border-radius: 999px;
+    width: 0%;
+    transition: width .15s linear;
+  }
+  .progress-thumb {
+    position: absolute;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--violet);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    left: 0;
+    transform: translateX(-50%);
+    transition: left .15s linear;
+  }
+  .progress-times {
+    display: flex;
+    justify-content: space-between;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 12px 16px;
+  }
+  .volume-icon { color: var(--text-2); flex-shrink: 0; }
+  .volume-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+    outline: none;
+  }
+  .volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--violet);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+  .volume-slider::-moz-range-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--violet);
+    border: none;
+    cursor: pointer;
+  }
+  .volume-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    color: var(--text-2);
+    min-width: 32px;
+    text-align: right;
+  }
+  .footer {
+    margin-top: auto;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-3);
+    letter-spacing: 0.04em;
+  }
+  .footer b { color: var(--violet); }
+
+  .track-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .track-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: transform .1s, background .15s, border-color .15s;
+  }
+  .track-chip:active { transform: scale(0.97); }
+  .track-chip:disabled { opacity: 0.4; pointer-events: none; }
+  .track-chip-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    font-weight: 600;
+  }
+  .track-chip-label {
+    font-size: 13px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+
+  .dpad-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 4px 0 2px;
+  }
+  .dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 74px);
+    grid-template-rows: repeat(3, 74px);
+    gap: 10px;
+  }
+  .dpad-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 16px;
+    cursor: pointer;
+    font-family: inherit;
+    touch-action: none;
+    transition: transform .1s, background .15s, border-color .15s;
+  }
+  .dpad-btn:active { transform: scale(0.92); background: var(--surface-2); border-color: var(--violet); }
+  .dpad-btn svg { display: block; }
+  .dpad-up { grid-column: 2; grid-row: 1; }
+  .dpad-left { grid-column: 1; grid-row: 2; }
+  .dpad-ok { grid-column: 2; grid-row: 2; }
+  .dpad-right { grid-column: 3; grid-row: 2; }
+  .dpad-down { grid-column: 2; grid-row: 3; }
+  .dpad-home { grid-column: 1; grid-row: 3; }
+  .dpad-back { grid-column: 3; grid-row: 3; }
+  .dpad-ok {
+    border: none;
+    background: linear-gradient(135deg, var(--violet), color-mix(in srgb, var(--violet) 60%, white));
+    color: var(--on-violet);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+  .dpad-corner {
+    width: 54px;
+    height: 54px;
+    align-self: center;
+    justify-self: center;
+    border-radius: 50%;
+    color: var(--text-2);
+  }
+
+  .sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease;
+    z-index: 90;
+  }
+  .sheet-backdrop.is-open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .sheet {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface-2);
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    padding: 16px 16px max(24px, env(safe-area-inset-bottom, 24px));
+    transform: translateY(110%);
+    transition: transform .25s cubic-bezier(.16, 1, .3, 1);
+    max-height: 75vh;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.5);
+  }
+  .sheet.is-open { transform: translateY(0); }
+  .sheet-handle {
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--text-3);
+    margin: 0 auto 14px;
+    opacity: 0.5;
+  }
+  .sheet-title {
+    margin: 0 4px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-3);
+  }
+  .sheet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sheet-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 16px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+  }
+  .sheet-option:active { background: var(--surface); }
+  .sheet-option.is-active {
+    background: var(--violet-soft);
+    border-color: var(--violet);
+    color: var(--violet);
+  }
+  .sheet-option-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sheet-option-check {
+    width: 18px;
+    height: 18px;
+    opacity: 0;
+    color: var(--violet);
+    flex-shrink: 0;
+  }
+  .sheet-option.is-active .sheet-option-check { opacity: 1; }
+  .sheet-empty {
+    padding: 22px 16px;
+    text-align: center;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  .gate {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 200;
+  }
+  .gate[hidden] { display: none; }
+  .gate-card {
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .gate-spinner {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 3px solid var(--line);
+    border-top-color: var(--violet);
+    animation: gate-spin .9s linear infinite;
+  }
+  @keyframes gate-spin { to { transform: rotate(360deg); } }
+  .gate-icon { color: var(--danger); }
+  .gate:not(.is-denied) .gate-icon { display: none; }
+  .gate.is-denied .gate-spinner { display: none; }
+  .gate-title { margin: 0; font-size: 18px; font-weight: 700; color: var(--text); }
+  .gate-sub { margin: 0; font-size: 14px; color: var(--text-2); line-height: 1.5; }
+  .gate-retry {
+    margin-top: 4px;
+    border: none;
+    background: var(--violet);
+    color: var(--on-violet);
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s;
+  }
+  .gate-retry:active { transform: scale(0.96); }
+  .gate-retry[hidden] { display: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="status" id="status">
+    <span class="status-dot"></span>
+    <span id="statusText">Connessione…</span>
+  </div>
+
+  <div class="search-bar">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m20 20-4.2-4.2M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg>
+    <input type="search" class="search-input" id="remoteSearch" placeholder="Cerca film, serie…" autocomplete="off" enterkeyhint="search" />
+    <button class="search-go" id="remoteSearchGo" type="button">Cerca</button>
+  </div>
+
+  <div class="dpad-section">
+    <div class="dpad">
+      <button class="dpad-btn dpad-corner dpad-home" data-nav="home" aria-label="Home">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 11 12 4l8 7M6 10v9h12v-9"/></svg>
+      </button>
+      <button class="dpad-btn dpad-up" data-nav="up" aria-label="Su">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 15 7-7 7 7"/></svg>
+      </button>
+      <button class="dpad-btn dpad-corner dpad-back" data-nav="back" aria-label="Indietro">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 14 4 9l5-5M4 9h10a6 6 0 0 1 0 12h-3"/></svg>
+      </button>
+      <button class="dpad-btn dpad-left" data-nav="left" aria-label="Sinistra">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m15 5-7 7 7 7"/></svg>
+      </button>
+      <button class="dpad-btn dpad-ok" data-nav="ok" aria-label="OK / Seleziona">OK</button>
+      <button class="dpad-btn dpad-right" data-nav="right" aria-label="Destra">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7"/></svg>
+      </button>
+      <button class="dpad-btn dpad-down" data-nav="down" aria-label="Giù">
+        <svg viewBox="0 0 24 24" width="26" height="26"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 9 7 7 7-7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-track" id="progressTrack">
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-thumb" id="progressThumb"></div>
+    </div>
+    <div class="progress-times">
+      <span id="curTime">0:00</span>
+      <span id="totTime">0:00</span>
+    </div>
+  </div>
+
+  <div class="volume-wrap">
+    <button class="volume-icon" id="btnMute" aria-label="Muto" style="border:0;background:transparent;padding:0;display:flex;cursor:pointer;">
+      <svg id="iconVolHigh" viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 9v6h3l5 4V5L8 9H5z M16 8.5a4 4 0 0 1 0 7 M19 6a7 7 0 0 1 0 12"/></svg>
+      <svg id="iconVolMute" viewBox="0 0 24 24" width="22" height="22" style="display:none"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M5 9v6h3l5 4V5L8 9H5z M16 9l5 6m0-6-5 6"/></svg>
+    </button>
+    <input type="range" class="volume-slider" id="volume" min="0" max="100" step="1" value="100" />
+    <span class="volume-value" id="volumeValue">100</span>
+  </div>
+
+  <div class="track-row">
+    <button class="track-chip" id="audioChip" disabled>
+      <span class="track-chip-eyebrow">Audio</span>
+      <span class="track-chip-label" id="audioChipLabel">—</span>
+    </button>
+    <button class="track-chip" id="subChip" disabled>
+      <span class="track-chip-eyebrow">Sottotitoli</span>
+      <span class="track-chip-label" id="subChipLabel">—</span>
+    </button>
+  </div>
+
+  <div class="footer">SIIISHUB <b>Remote</b></div>
+</div>
+
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <div class="gate-spinner" id="gateSpinner"></div>
+    <svg class="gate-icon" id="gateIcon" viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 8l8 8M16 8l-8 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <h2 class="gate-title" id="gateTitle">Connessione…</h2>
+    <p class="gate-sub" id="gateSub"></p>
+    <button class="gate-retry" id="gateRetry" type="button" hidden>Riprova</button>
+  </div>
+</div>
+
+<div class="sheet-backdrop" id="sheetBackdrop"></div>
+<div class="sheet" id="sheet" role="dialog">
+  <div class="sheet-handle"></div>
+  <h3 class="sheet-title" id="sheetTitle">Audio</h3>
+  <div class="sheet-list" id="sheetList"></div>
+</div>
+
+<script>
+(function () {
+  // Pairing token handed out by SIIISHUB when the user remembers this device;
+  // presenting it on connect skips the approval prompt on the desktop.
+  // localStorage is scoped to host AND port, while cookies ignore the port:
+  // the token is kept in both so the pairing survives a port change in the app.
+  const TOKEN_KEY = 'siiishub-remote-token';
+  const COOKIE_ATTRS = '; Max-Age=31536000; Path=/; SameSite=Lax';
+  function cookieToken() {
+    try {
+      const m = document.cookie.match(new RegExp('(?:^|; )' + TOKEN_KEY + '=([^;]*)'));
+      return m ? decodeURIComponent(m[1]) : '';
+    } catch (e) { return ''; }
+  }
+  function localToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; } }
+  function saveToken(tok) {
+    try { localStorage.setItem(TOKEN_KEY, tok); } catch (e) {}
+    try { document.cookie = TOKEN_KEY + '=' + encodeURIComponent(tok) + COOKIE_ATTRS; } catch (e) {}
+  }
+  function clearToken() {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    try { document.cookie = TOKEN_KEY + '=; Max-Age=0; Path=/; SameSite=Lax'; } catch (e) {}
+  }
+  // The cookie is shared by every port, so it is the freshest copy; a token
+  // found in only one store is copied to the other.
+  function storedToken() {
+    const local = localToken();
+    const cookie = cookieToken();
+    const tok = cookie || local;
+    if (tok && (tok !== local || !cookie)) saveToken(tok);
+    return tok;
+  }
+  function wsUrl() {
+    const base = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
+    const tok = storedToken();
+    return tok ? base + '?token=' + encodeURIComponent(tok) : base;
+  }
+  const elStatus = document.getElementById('status');
+  const elStatusText = document.getElementById('statusText');
+  const elFill = document.getElementById('progressFill');
+  const elThumb = document.getElementById('progressThumb');
+  const elCur = document.getElementById('curTime');
+  const elTot = document.getElementById('totTime');
+  const elTrack = document.getElementById('progressTrack');
+  const elMute = document.getElementById('btnMute');
+  const elVol = document.getElementById('volume');
+  const elVolVal = document.getElementById('volumeValue');
+  const iconVolHigh = document.getElementById('iconVolHigh');
+  const iconVolMute = document.getElementById('iconVolMute');
+
+  const audioChip = document.getElementById('audioChip');
+  const audioChipLabel = document.getElementById('audioChipLabel');
+  const subChip = document.getElementById('subChip');
+  const subChipLabel = document.getElementById('subChipLabel');
+  const sheet = document.getElementById('sheet');
+  const sheetBackdrop = document.getElementById('sheetBackdrop');
+  const sheetTitle = document.getElementById('sheetTitle');
+  const sheetList = document.getElementById('sheetList');
+
+  let ws = null;
+  let connected = false;
+  let lastState = {
+    paused: true, time: 0, duration: 0, volume: 100, mute: false,
+    audio_tracks: [], sub_tracks: [],
+    audio_disabled: false, sub_disabled: false,
+  };
+  let scrubbing = false;
+  let activeSheet = null;
+  let approved = false;
+  let denied = false;
+
+  const gate = document.getElementById('gate');
+  const gateTitle = document.getElementById('gateTitle');
+  const gateSub = document.getElementById('gateSub');
+  const gateRetry = document.getElementById('gateRetry');
+
+  const I18N = {
+    eng: {
+      'status.connecting': 'Connecting…', 'status.connected': 'Connected',
+      'status.reconnecting': 'Disconnected · retrying…', 'status.wsError': 'WS error',
+      'status.connError': 'Connection error',
+      'search.placeholder': 'Search movies, series…', 'search.go': 'Search',
+      'audio': 'Audio', 'subtitles': 'Subtitles',
+      'audioNone': 'None', 'audioDefault': 'Default', 'audioUnavailable': 'Unavailable',
+      'subDisabled': 'Off', 'subDefault': 'Default', 'subUnavailable': 'Unavailable',
+      'sheetDisable': 'Turn off', 'sheetNone': 'None', 'noTracks': 'No tracks available.',
+      'gateConnecting': 'Connecting…', 'gateWaitingTitle': 'Waiting for approval',
+      'gateWaitingSub': 'Approve this device on SIIISHUB to use the remote.',
+      'gateDeniedTitle': 'Access denied', 'gateDeniedSub': 'The request was denied on the app.',
+      'gateRetry': 'Retry',
+      'ariaHome': 'Home', 'ariaUp': 'Up', 'ariaBack': 'Back', 'ariaLeft': 'Left',
+      'ariaOk': 'OK / Select', 'ariaRight': 'Right', 'ariaDown': 'Down', 'ariaMute': 'Mute',
+    },
+    ita: {
+      'status.connecting': 'Connessione…', 'status.connected': 'Connesso',
+      'status.reconnecting': 'Disconnesso · riprovo…', 'status.wsError': 'Errore WS',
+      'status.connError': 'Errore connessione',
+      'search.placeholder': 'Cerca film, serie…', 'search.go': 'Cerca',
+      'audio': 'Audio', 'subtitles': 'Sottotitoli',
+      'audioNone': 'Nessuna', 'audioDefault': 'Predefinita', 'audioUnavailable': 'Non disponibile',
+      'subDisabled': 'Disattivati', 'subDefault': 'Predefiniti', 'subUnavailable': 'Non disponibili',
+      'sheetDisable': 'Disattiva', 'sheetNone': 'Nessuna', 'noTracks': 'Nessuna traccia disponibile.',
+      'gateConnecting': 'Connessione…', 'gateWaitingTitle': 'In attesa di approvazione',
+      'gateWaitingSub': 'Approva questo dispositivo su SIIISHUB per usare il telecomando.',
+      'gateDeniedTitle': 'Accesso rifiutato', 'gateDeniedSub': 'La richiesta è stata rifiutata sull\'app.',
+      'gateRetry': 'Riprova',
+      'ariaHome': 'Home', 'ariaUp': 'Su', 'ariaBack': 'Indietro', 'ariaLeft': 'Sinistra',
+      'ariaOk': 'OK / Seleziona', 'ariaRight': 'Destra', 'ariaDown': 'Giù', 'ariaMute': 'Muto',
+    },
+    spa: {
+      'status.connecting': 'Conectando…',
+      'status.connected': 'Conectado',
+      'status.reconnecting': 'Desconectado · reintentando…',
+      'status.wsError': 'Error de WS',
+      'status.connError': 'Error de conexión',
+      'search.placeholder': 'Buscar películas, series…',
+      'search.go': 'Buscar',
+      'audio': 'Audio',
+      'subtitles': 'Subtítulos',
+      'audioNone': 'Ninguno',
+      'audioDefault': 'Predeterminado',
+      'audioUnavailable': 'No disponible',
+      'subDisabled': 'Desactivados',
+      'subDefault': 'Predeterminados',
+      'subUnavailable': 'No disponibles',
+      'sheetDisable': 'Desactivar',
+      'sheetNone': 'Ninguno',
+      'noTracks': 'No hay pistas disponibles.',
+      'gateConnecting': 'Conectando…',
+      'gateWaitingTitle': 'Esperando aprobación',
+      'gateWaitingSub': 'Aprueba este dispositivo en SIIISHUB para usar el control.',
+      'gateDeniedTitle': 'Acceso denegado',
+      'gateDeniedSub': 'La solicitud fue denegada en la app.',
+      'gateRetry': 'Reintentar',
+      'ariaHome': 'Inicio',
+      'ariaUp': 'Arriba',
+      'ariaBack': 'Atrás',
+      'ariaLeft': 'Izquierda',
+      'ariaOk': 'OK / Seleccionar',
+      'ariaRight': 'Derecha',
+      'ariaDown': 'Abajo',
+      'ariaMute': 'Silenciar',
+    },
+    fra: {
+      'status.connecting': 'Connexion…',
+      'status.connected': 'Connecté',
+      'status.reconnecting': 'Déconnecté · nouvelle tentative…',
+      'status.wsError': 'Erreur WS',
+      'status.connError': 'Erreur de connexion',
+      'search.placeholder': 'Rechercher films, séries…',
+      'search.go': 'Rechercher',
+      'audio': 'Audio',
+      'subtitles': 'Sous-titres',
+      'audioNone': 'Aucune',
+      'audioDefault': 'Par défaut',
+      'audioUnavailable': 'Indisponible',
+      'subDisabled': 'Désactivés',
+      'subDefault': 'Par défaut',
+      'subUnavailable': 'Indisponibles',
+      'sheetDisable': 'Désactiver',
+      'sheetNone': 'Aucun',
+      'noTracks': 'Aucune piste disponible.',
+      'gateConnecting': 'Connexion…',
+      'gateWaitingTitle': 'En attente d\'approbation',
+      'gateWaitingSub': 'Approuvez cet appareil sur SIIISHUB pour utiliser la télécommande.',
+      'gateDeniedTitle': 'Accès refusé',
+      'gateDeniedSub': 'La demande a été refusée dans l\'application.',
+      'gateRetry': 'Réessayer',
+      'ariaHome': 'Accueil',
+      'ariaUp': 'Haut',
+      'ariaBack': 'Retour',
+      'ariaLeft': 'Gauche',
+      'ariaOk': 'OK / Sélectionner',
+      'ariaRight': 'Droite',
+      'ariaDown': 'Bas',
+      'ariaMute': 'Couper le son',
+    },
+    por: {
+      'status.connecting': 'Conectando…',
+      'status.connected': 'Conectado',
+      'status.reconnecting': 'Desconectado · tentando novamente…',
+      'status.wsError': 'Erro de WS',
+      'status.connError': 'Erro de conexão',
+      'search.placeholder': 'Buscar filmes, séries…',
+      'search.go': 'Buscar',
+      'audio': 'Áudio',
+      'subtitles': 'Legendas',
+      'audioNone': 'Nenhum',
+      'audioDefault': 'Padrão',
+      'audioUnavailable': 'Indisponível',
+      'subDisabled': 'Desativadas',
+      'subDefault': 'Padrão',
+      'subUnavailable': 'Indisponíveis',
+      'sheetDisable': 'Desativar',
+      'sheetNone': 'Nenhuma',
+      'noTracks': 'Nenhuma faixa disponível.',
+      'gateConnecting': 'Conectando…',
+      'gateWaitingTitle': 'Aguardando aprovação',
+      'gateWaitingSub': 'Aprove este dispositivo no SIIISHUB para usar o controle.',
+      'gateDeniedTitle': 'Acesso negado',
+      'gateDeniedSub': 'A solicitação foi negada no aplicativo.',
+      'gateRetry': 'Tentar novamente',
+      'ariaHome': 'Início',
+      'ariaUp': 'Cima',
+      'ariaBack': 'Voltar',
+      'ariaLeft': 'Esquerda',
+      'ariaOk': 'OK / Selecionar',
+      'ariaRight': 'Direita',
+      'ariaDown': 'Baixo',
+      'ariaMute': 'Silenciar',
+    },
+    deu: {
+      'status.connecting': 'Verbinden…',
+      'status.connected': 'Verbunden',
+      'status.reconnecting': 'Getrennt · neuer Versuch…',
+      'status.wsError': 'WS-Fehler',
+      'status.connError': 'Verbindungsfehler',
+      'search.placeholder': 'Filme, Serien suchen…',
+      'search.go': 'Suchen',
+      'audio': 'Audio',
+      'subtitles': 'Untertitel',
+      'audioNone': 'Keine',
+      'audioDefault': 'Standard',
+      'audioUnavailable': 'Nicht verfügbar',
+      'subDisabled': 'Aus',
+      'subDefault': 'Standard',
+      'subUnavailable': 'Nicht verfügbar',
+      'sheetDisable': 'Ausschalten',
+      'sheetNone': 'Keine',
+      'noTracks': 'Keine Spuren verfügbar.',
+      'gateConnecting': 'Verbinden…',
+      'gateWaitingTitle': 'Warten auf Freigabe',
+      'gateWaitingSub': 'Genehmige dieses Gerät in SIIISHUB, um die Fernbedienung zu nutzen.',
+      'gateDeniedTitle': 'Zugriff verweigert',
+      'gateDeniedSub': 'Die Anfrage wurde in der App abgelehnt.',
+      'gateRetry': 'Erneut versuchen',
+      'ariaHome': 'Startseite',
+      'ariaUp': 'Hoch',
+      'ariaBack': 'Zurück',
+      'ariaLeft': 'Links',
+      'ariaOk': 'OK / Auswählen',
+      'ariaRight': 'Rechts',
+      'ariaDown': 'Runter',
+      'ariaMute': 'Stumm',
+    },
+    nld: {
+      'status.connecting': 'Verbinden…',
+      'status.connected': 'Verbonden',
+      'status.reconnecting': 'Verbinding verbroken · opnieuw proberen…',
+      'status.wsError': 'WS-fout',
+      'status.connError': 'Verbindingsfout',
+      'search.placeholder': 'Films, series zoeken…',
+      'search.go': 'Zoeken',
+      'audio': 'Audio',
+      'subtitles': 'Ondertiteling',
+      'audioNone': 'Geen',
+      'audioDefault': 'Standaard',
+      'audioUnavailable': 'Niet beschikbaar',
+      'subDisabled': 'Uit',
+      'subDefault': 'Standaard',
+      'subUnavailable': 'Niet beschikbaar',
+      'sheetDisable': 'Uitschakelen',
+      'sheetNone': 'Geen',
+      'noTracks': 'Geen tracks beschikbaar.',
+      'gateConnecting': 'Verbinden…',
+      'gateWaitingTitle': 'Wachten op goedkeuring',
+      'gateWaitingSub': 'Keur dit apparaat goed op SIIISHUB om de afstandsbediening te gebruiken.',
+      'gateDeniedTitle': 'Toegang geweigerd',
+      'gateDeniedSub': 'Het verzoek is geweigerd in de app.',
+      'gateRetry': 'Opnieuw proberen',
+      'ariaHome': 'Start',
+      'ariaUp': 'Omhoog',
+      'ariaBack': 'Terug',
+      'ariaLeft': 'Links',
+      'ariaOk': 'OK / Selecteren',
+      'ariaRight': 'Rechts',
+      'ariaDown': 'Omlaag',
+      'ariaMute': 'Dempen',
+    },
+    ron: {
+      'status.connecting': 'Se conectează…',
+      'status.connected': 'Conectat',
+      'status.reconnecting': 'Deconectat · se reîncearcă…',
+      'status.wsError': 'Eroare WS',
+      'status.connError': 'Eroare de conexiune',
+      'search.placeholder': 'Caută filme, seriale…',
+      'search.go': 'Caută',
+      'audio': 'Audio',
+      'subtitles': 'Subtitrări',
+      'audioNone': 'Niciuna',
+      'audioDefault': 'Implicit',
+      'audioUnavailable': 'Indisponibil',
+      'subDisabled': 'Oprit',
+      'subDefault': 'Implicit',
+      'subUnavailable': 'Indisponibil',
+      'sheetDisable': 'Dezactivează',
+      'sheetNone': 'Niciuna',
+      'noTracks': 'Nicio pistă disponibilă.',
+      'gateConnecting': 'Se conectează…',
+      'gateWaitingTitle': 'Se așteaptă aprobarea',
+      'gateWaitingSub': 'Aprobă acest dispozitiv în SIIISHUB pentru a folosi telecomanda.',
+      'gateDeniedTitle': 'Acces refuzat',
+      'gateDeniedSub': 'Solicitarea a fost refuzată în aplicație.',
+      'gateRetry': 'Reîncearcă',
+      'ariaHome': 'Acasă',
+      'ariaUp': 'Sus',
+      'ariaBack': 'Înapoi',
+      'ariaLeft': 'Stânga',
+      'ariaOk': 'OK / Selectează',
+      'ariaRight': 'Dreapta',
+      'ariaDown': 'Jos',
+      'ariaMute': 'Mut',
+    },
+    swe: {
+      'status.connecting': 'Ansluter…',
+      'status.connected': 'Ansluten',
+      'status.reconnecting': 'Frånkopplad · försöker igen…',
+      'status.wsError': 'WS-fel',
+      'status.connError': 'Anslutningsfel',
+      'search.placeholder': 'Sök filmer, serier…',
+      'search.go': 'Sök',
+      'audio': 'Ljud',
+      'subtitles': 'Undertexter',
+      'audioNone': 'Inget',
+      'audioDefault': 'Standard',
+      'audioUnavailable': 'Otillgängligt',
+      'subDisabled': 'Av',
+      'subDefault': 'Standard',
+      'subUnavailable': 'Otillgängligt',
+      'sheetDisable': 'Stäng av',
+      'sheetNone': 'Inget',
+      'noTracks': 'Inga spår tillgängliga.',
+      'gateConnecting': 'Ansluter…',
+      'gateWaitingTitle': 'Väntar på godkännande',
+      'gateWaitingSub': 'Godkänn den här enheten på SIIISHUB för att använda fjärrkontrollen.',
+      'gateDeniedTitle': 'Åtkomst nekad',
+      'gateDeniedSub': 'Begäran nekades i appen.',
+      'gateRetry': 'Försök igen',
+      'ariaHome': 'Hem',
+      'ariaUp': 'Upp',
+      'ariaBack': 'Tillbaka',
+      'ariaLeft': 'Vänster',
+      'ariaOk': 'OK / Välj',
+      'ariaRight': 'Höger',
+      'ariaDown': 'Ner',
+      'ariaMute': 'Tysta',
+    },
+    dan: {
+      'status.connecting': 'Opretter forbindelse…',
+      'status.connected': 'Forbundet',
+      'status.reconnecting': 'Afbrudt · prøver igen…',
+      'status.wsError': 'WS-fejl',
+      'status.connError': 'Forbindelsesfejl',
+      'search.placeholder': 'Søg efter film, serier…',
+      'search.go': 'Søg',
+      'audio': 'Lyd',
+      'subtitles': 'Undertekster',
+      'audioNone': 'Ingen',
+      'audioDefault': 'Standard',
+      'audioUnavailable': 'Utilgængelig',
+      'subDisabled': 'Fra',
+      'subDefault': 'Standard',
+      'subUnavailable': 'Utilgængelig',
+      'sheetDisable': 'Slå fra',
+      'sheetNone': 'Ingen',
+      'noTracks': 'Ingen spor tilgængelige.',
+      'gateConnecting': 'Opretter forbindelse…',
+      'gateWaitingTitle': 'Venter på godkendelse',
+      'gateWaitingSub': 'Godkend denne enhed på SIIISHUB for at bruge fjernbetjeningen.',
+      'gateDeniedTitle': 'Adgang nægtet',
+      'gateDeniedSub': 'Anmodningen blev nægtet i appen.',
+      'gateRetry': 'Prøv igen',
+      'ariaHome': 'Hjem',
+      'ariaUp': 'Op',
+      'ariaBack': 'Tilbage',
+      'ariaLeft': 'Venstre',
+      'ariaOk': 'OK / Vælg',
+      'ariaRight': 'Højre',
+      'ariaDown': 'Ned',
+      'ariaMute': 'Lyd fra',
+    },
+    nor: {
+      'status.connecting': 'Kobler til…',
+      'status.connected': 'Tilkoblet',
+      'status.reconnecting': 'Frakoblet · prøver igjen…',
+      'status.wsError': 'WS-feil',
+      'status.connError': 'Tilkoblingsfeil',
+      'search.placeholder': 'Søk etter filmer, serier…',
+      'search.go': 'Søk',
+      'audio': 'Lyd',
+      'subtitles': 'Undertekster',
+      'audioNone': 'Ingen',
+      'audioDefault': 'Standard',
+      'audioUnavailable': 'Utilgjengelig',
+      'subDisabled': 'Av',
+      'subDefault': 'Standard',
+      'subUnavailable': 'Utilgjengelig',
+      'sheetDisable': 'Slå av',
+      'sheetNone': 'Ingen',
+      'noTracks': 'Ingen spor tilgjengelige.',
+      'gateConnecting': 'Kobler til…',
+      'gateWaitingTitle': 'Venter på godkjenning',
+      'gateWaitingSub': 'Godkjenn denne enheten på SIIISHUB for å bruke fjernkontrollen.',
+      'gateDeniedTitle': 'Tilgang nektet',
+      'gateDeniedSub': 'Forespørselen ble nektet i appen.',
+      'gateRetry': 'Prøv igjen',
+      'ariaHome': 'Hjem',
+      'ariaUp': 'Opp',
+      'ariaBack': 'Tilbake',
+      'ariaLeft': 'Venstre',
+      'ariaOk': 'OK / Velg',
+      'ariaRight': 'Høyre',
+      'ariaDown': 'Ned',
+      'ariaMute': 'Demp',
+    },
+    pol: {
+      'status.connecting': 'Łączenie…',
+      'status.connected': 'Połączono',
+      'status.reconnecting': 'Rozłączono · ponawianie…',
+      'status.wsError': 'Błąd WS',
+      'status.connError': 'Błąd połączenia',
+      'search.placeholder': 'Szukaj filmów, seriali…',
+      'search.go': 'Szukaj',
+      'audio': 'Dźwięk',
+      'subtitles': 'Napisy',
+      'audioNone': 'Brak',
+      'audioDefault': 'Domyślny',
+      'audioUnavailable': 'Niedostępny',
+      'subDisabled': 'Wył.',
+      'subDefault': 'Domyślne',
+      'subUnavailable': 'Niedostępne',
+      'sheetDisable': 'Wyłącz',
+      'sheetNone': 'Brak',
+      'noTracks': 'Brak dostępnych ścieżek.',
+      'gateConnecting': 'Łączenie…',
+      'gateWaitingTitle': 'Oczekiwanie na zatwierdzenie',
+      'gateWaitingSub': 'Zatwierdź to urządzenie w SIIISHUB, aby używać pilota.',
+      'gateDeniedTitle': 'Odmowa dostępu',
+      'gateDeniedSub': 'Żądanie zostało odrzucone w aplikacji.',
+      'gateRetry': 'Ponów',
+      'ariaHome': 'Ekran główny',
+      'ariaUp': 'Góra',
+      'ariaBack': 'Wstecz',
+      'ariaLeft': 'Lewo',
+      'ariaOk': 'OK / Wybierz',
+      'ariaRight': 'Prawo',
+      'ariaDown': 'Dół',
+      'ariaMute': 'Wycisz',
+    },
+    ces: {
+      'status.connecting': 'Připojování…',
+      'status.connected': 'Připojeno',
+      'status.reconnecting': 'Odpojeno · opakování…',
+      'status.wsError': 'Chyba WS',
+      'status.connError': 'Chyba připojení',
+      'search.placeholder': 'Hledat filmy, seriály…',
+      'search.go': 'Hledat',
+      'audio': 'Zvuk',
+      'subtitles': 'Titulky',
+      'audioNone': 'Žádný',
+      'audioDefault': 'Výchozí',
+      'audioUnavailable': 'Nedostupné',
+      'subDisabled': 'Vyp.',
+      'subDefault': 'Výchozí',
+      'subUnavailable': 'Nedostupné',
+      'sheetDisable': 'Vypnout',
+      'sheetNone': 'Žádné',
+      'noTracks': 'Žádné dostupné stopy.',
+      'gateConnecting': 'Připojování…',
+      'gateWaitingTitle': 'Čekání na schválení',
+      'gateWaitingSub': 'Schvalte toto zařízení v SIIISHUB pro použití ovladače.',
+      'gateDeniedTitle': 'Přístup odepřen',
+      'gateDeniedSub': 'Žádost byla v aplikaci zamítnuta.',
+      'gateRetry': 'Zkusit znovu',
+      'ariaHome': 'Domů',
+      'ariaUp': 'Nahoru',
+      'ariaBack': 'Zpět',
+      'ariaLeft': 'Vlevo',
+      'ariaOk': 'OK / Vybrat',
+      'ariaRight': 'Vpravo',
+      'ariaDown': 'Dolů',
+      'ariaMute': 'Ztlumit',
+    },
+    hun: {
+      'status.connecting': 'Csatlakozás…',
+      'status.connected': 'Csatlakozva',
+      'status.reconnecting': 'Szétkapcsolva · újrapróbálkozás…',
+      'status.wsError': 'WS-hiba',
+      'status.connError': 'Kapcsolódási hiba',
+      'search.placeholder': 'Filmek, sorozatok keresése…',
+      'search.go': 'Keresés',
+      'audio': 'Hang',
+      'subtitles': 'Felirat',
+      'audioNone': 'Nincs',
+      'audioDefault': 'Alapértelmezett',
+      'audioUnavailable': 'Nem érhető el',
+      'subDisabled': 'Ki',
+      'subDefault': 'Alapértelmezett',
+      'subUnavailable': 'Nem érhető el',
+      'sheetDisable': 'Kikapcsolás',
+      'sheetNone': 'Nincs',
+      'noTracks': 'Nincs elérhető sáv.',
+      'gateConnecting': 'Csatlakozás…',
+      'gateWaitingTitle': 'Várakozás jóváhagyásra',
+      'gateWaitingSub': 'Hagyd jóvá ezt az eszközt a SIIISHUB-on a távirányító használatához.',
+      'gateDeniedTitle': 'Hozzáférés megtagadva',
+      'gateDeniedSub': 'A kérést elutasították az alkalmazásban.',
+      'gateRetry': 'Újra',
+      'ariaHome': 'Főképernyő',
+      'ariaUp': 'Fel',
+      'ariaBack': 'Vissza',
+      'ariaLeft': 'Balra',
+      'ariaOk': 'OK / Kiválasztás',
+      'ariaRight': 'Jobbra',
+      'ariaDown': 'Le',
+      'ariaMute': 'Némítás',
+    },
+    rus: {
+      'status.connecting': 'Подключение…',
+      'status.connected': 'Подключено',
+      'status.reconnecting': 'Нет связи · повтор…',
+      'status.wsError': 'Ошибка WS',
+      'status.connError': 'Ошибка подключения',
+      'search.placeholder': 'Поиск фильмов, сериалов…',
+      'search.go': 'Найти',
+      'audio': 'Звук',
+      'subtitles': 'Субтитры',
+      'audioNone': 'Нет',
+      'audioDefault': 'По умолчанию',
+      'audioUnavailable': 'Недоступно',
+      'subDisabled': 'Выкл.',
+      'subDefault': 'По умолчанию',
+      'subUnavailable': 'Недоступно',
+      'sheetDisable': 'Выключить',
+      'sheetNone': 'Нет',
+      'noTracks': 'Нет доступных дорожек.',
+      'gateConnecting': 'Подключение…',
+      'gateWaitingTitle': 'Ожидание подтверждения',
+      'gateWaitingSub': 'Подтвердите это устройство в SIIISHUB, чтобы использовать пульт.',
+      'gateDeniedTitle': 'Доступ запрещён',
+      'gateDeniedSub': 'Запрос был отклонён в приложении.',
+      'gateRetry': 'Повторить',
+      'ariaHome': 'Домой',
+      'ariaUp': 'Вверх',
+      'ariaBack': 'Назад',
+      'ariaLeft': 'Влево',
+      'ariaOk': 'OK / Выбрать',
+      'ariaRight': 'Вправо',
+      'ariaDown': 'Вниз',
+      'ariaMute': 'Без звука',
+    },
+    ukr: {
+      'status.connecting': 'Підключення…',
+      'status.connected': 'Підключено',
+      'status.reconnecting': 'Немає зв\'язку · повтор…',
+      'status.wsError': 'Помилка WS',
+      'status.connError': 'Помилка підключення',
+      'search.placeholder': 'Пошук фільмів, серіалів…',
+      'search.go': 'Знайти',
+      'audio': 'Звук',
+      'subtitles': 'Субтитри',
+      'audioNone': 'Немає',
+      'audioDefault': 'За замовчуванням',
+      'audioUnavailable': 'Недоступно',
+      'subDisabled': 'Вимк.',
+      'subDefault': 'За замовчуванням',
+      'subUnavailable': 'Недоступно',
+      'sheetDisable': 'Вимкнути',
+      'sheetNone': 'Немає',
+      'noTracks': 'Немає доступних доріжок.',
+      'gateConnecting': 'Підключення…',
+      'gateWaitingTitle': 'Очікування підтвердження',
+      'gateWaitingSub': 'Підтвердьте цей пристрій у SIIISHUB, щоб використовувати пульт.',
+      'gateDeniedTitle': 'Доступ заборонено',
+      'gateDeniedSub': 'Запит було відхилено в застосунку.',
+      'gateRetry': 'Повторити',
+      'ariaHome': 'Додому',
+      'ariaUp': 'Вгору',
+      'ariaBack': 'Назад',
+      'ariaLeft': 'Вліво',
+      'ariaOk': 'OK / Вибрати',
+      'ariaRight': 'Вправо',
+      'ariaDown': 'Вниз',
+      'ariaMute': 'Без звуку',
+    },
+    ell: {
+      'status.connecting': 'Σύνδεση…',
+      'status.connected': 'Συνδέθηκε',
+      'status.reconnecting': 'Αποσυνδέθηκε · επανάληψη…',
+      'status.wsError': 'Σφάλμα WS',
+      'status.connError': 'Σφάλμα σύνδεσης',
+      'search.placeholder': 'Αναζήτηση ταινιών, σειρών…',
+      'search.go': 'Αναζήτηση',
+      'audio': 'Ήχος',
+      'subtitles': 'Υπότιτλοι',
+      'audioNone': 'Κανένα',
+      'audioDefault': 'Προεπιλογή',
+      'audioUnavailable': 'Μη διαθέσιμο',
+      'subDisabled': 'Ανενεργό',
+      'subDefault': 'Προεπιλογή',
+      'subUnavailable': 'Μη διαθέσιμο',
+      'sheetDisable': 'Απενεργοποίηση',
+      'sheetNone': 'Κανένα',
+      'noTracks': 'Δεν υπάρχουν διαθέσιμα κομμάτια.',
+      'gateConnecting': 'Σύνδεση…',
+      'gateWaitingTitle': 'Αναμονή έγκρισης',
+      'gateWaitingSub': 'Εγκρίνετε αυτή τη συσκευή στο SIIISHUB για να χρησιμοποιήσετε το τηλεχειριστήριο.',
+      'gateDeniedTitle': 'Άρνηση πρόσβασης',
+      'gateDeniedSub': 'Το αίτημα απορρίφθηκε στην εφαρμογή.',
+      'gateRetry': 'Επανάληψη',
+      'ariaHome': 'Αρχική',
+      'ariaUp': 'Πάνω',
+      'ariaBack': 'Πίσω',
+      'ariaLeft': 'Αριστερά',
+      'ariaOk': 'OK / Επιλογή',
+      'ariaRight': 'Δεξιά',
+      'ariaDown': 'Κάτω',
+      'ariaMute': 'Σίγαση',
+    },
+    fin: {
+      'status.connecting': 'Yhdistetään…',
+      'status.connected': 'Yhdistetty',
+      'status.reconnecting': 'Yhteys katkesi · yritetään uudelleen…',
+      'status.wsError': 'WS-virhe',
+      'status.connError': 'Yhteysvirhe',
+      'search.placeholder': 'Hae elokuvia, sarjoja…',
+      'search.go': 'Hae',
+      'audio': 'Ääni',
+      'subtitles': 'Tekstitys',
+      'audioNone': 'Ei mitään',
+      'audioDefault': 'Oletus',
+      'audioUnavailable': 'Ei saatavilla',
+      'subDisabled': 'Pois',
+      'subDefault': 'Oletus',
+      'subUnavailable': 'Ei saatavilla',
+      'sheetDisable': 'Poista käytöstä',
+      'sheetNone': 'Ei mitään',
+      'noTracks': 'Ei raitoja saatavilla.',
+      'gateConnecting': 'Yhdistetään…',
+      'gateWaitingTitle': 'Odotetaan hyväksyntää',
+      'gateWaitingSub': 'Hyväksy tämä laite SIIISHUB-sovelluksessa käyttääksesi kaukosäädintä.',
+      'gateDeniedTitle': 'Pääsy estetty',
+      'gateDeniedSub': 'Pyyntö hylättiin sovelluksessa.',
+      'gateRetry': 'Yritä uudelleen',
+      'ariaHome': 'Koti',
+      'ariaUp': 'Ylös',
+      'ariaBack': 'Takaisin',
+      'ariaLeft': 'Vasemmalle',
+      'ariaOk': 'OK / Valitse',
+      'ariaRight': 'Oikealle',
+      'ariaDown': 'Alas',
+      'ariaMute': 'Mykistä',
+    },
+    tur: {
+      'status.connecting': 'Bağlanıyor…',
+      'status.connected': 'Bağlandı',
+      'status.reconnecting': 'Bağlantı kesildi · yeniden deneniyor…',
+      'status.wsError': 'WS hatası',
+      'status.connError': 'Bağlantı hatası',
+      'search.placeholder': 'Film, dizi ara…',
+      'search.go': 'Ara',
+      'audio': 'Ses',
+      'subtitles': 'Altyazılar',
+      'audioNone': 'Yok',
+      'audioDefault': 'Varsayılan',
+      'audioUnavailable': 'Kullanılamıyor',
+      'subDisabled': 'Kapalı',
+      'subDefault': 'Varsayılan',
+      'subUnavailable': 'Kullanılamıyor',
+      'sheetDisable': 'Kapat',
+      'sheetNone': 'Yok',
+      'noTracks': 'Kullanılabilir parça yok.',
+      'gateConnecting': 'Bağlanıyor…',
+      'gateWaitingTitle': 'Onay bekleniyor',
+      'gateWaitingSub': 'Uzaktan kumandayı kullanmak için bu cihazı SIIISHUB üzerinde onaylayın.',
+      'gateDeniedTitle': 'Erişim reddedildi',
+      'gateDeniedSub': 'İstek uygulamada reddedildi.',
+      'gateRetry': 'Yeniden dene',
+      'ariaHome': 'Ana sayfa',
+      'ariaUp': 'Yukarı',
+      'ariaBack': 'Geri',
+      'ariaLeft': 'Sol',
+      'ariaOk': 'OK / Seç',
+      'ariaRight': 'Sağ',
+      'ariaDown': 'Aşağı',
+      'ariaMute': 'Sessize al',
+    },
+    hin: {
+      'status.connecting': 'कनेक्ट हो रहा है…',
+      'status.connected': 'कनेक्ट हो गया',
+      'status.reconnecting': 'डिस्कनेक्ट · पुनः प्रयास हो रहा है…',
+      'status.wsError': 'WS त्रुटि',
+      'status.connError': 'कनेक्शन त्रुटि',
+      'search.placeholder': 'फ़िल्में, सीरीज़ खोजें…',
+      'search.go': 'खोजें',
+      'audio': 'Audio',
+      'subtitles': 'सबटाइटल',
+      'audioNone': 'कोई नहीं',
+      'audioDefault': 'डिफ़ॉल्ट',
+      'audioUnavailable': 'अनुपलब्ध',
+      'subDisabled': 'बंद',
+      'subDefault': 'डिफ़ॉल्ट',
+      'subUnavailable': 'अनुपलब्ध',
+      'sheetDisable': 'बंद करें',
+      'sheetNone': 'कोई नहीं',
+      'noTracks': 'कोई ट्रैक उपलब्ध नहीं है।',
+      'gateConnecting': 'कनेक्ट हो रहा है…',
+      'gateWaitingTitle': 'अनुमोदन की प्रतीक्षा है',
+      'gateWaitingSub': 'रिमोट का उपयोग करने के लिए इस डिवाइस को SIIISHUB पर स्वीकृत करें।',
+      'gateDeniedTitle': 'पहुँच अस्वीकृत',
+      'gateDeniedSub': 'ऐप पर अनुरोध अस्वीकार कर दिया गया।',
+      'gateRetry': 'पुनः प्रयास करें',
+      'ariaHome': 'होम',
+      'ariaUp': 'ऊपर',
+      'ariaBack': 'वापस',
+      'ariaLeft': 'बाएँ',
+      'ariaOk': 'OK / चुनें',
+      'ariaRight': 'दाएँ',
+      'ariaDown': 'नीचे',
+      'ariaMute': 'म्यूट',
+    },
+    zho: {
+      'status.connecting': '连接中…',
+      'status.connected': '已连接',
+      'status.reconnecting': '已断开 · 重试中…',
+      'status.wsError': 'WS 错误',
+      'status.connError': '连接错误',
+      'search.placeholder': '搜索电影、剧集…',
+      'search.go': '搜索',
+      'audio': '音频',
+      'subtitles': '字幕',
+      'audioNone': '无',
+      'audioDefault': '默认',
+      'audioUnavailable': '不可用',
+      'subDisabled': '关闭',
+      'subDefault': '默认',
+      'subUnavailable': '不可用',
+      'sheetDisable': '关闭',
+      'sheetNone': '无',
+      'noTracks': '没有可用的轨道。',
+      'gateConnecting': '连接中…',
+      'gateWaitingTitle': '等待批准',
+      'gateWaitingSub': '在 SIIISHUB 上批准此设备以使用遥控。',
+      'gateDeniedTitle': '访问被拒绝',
+      'gateDeniedSub': '请求已在应用中被拒绝。',
+      'gateRetry': '重试',
+      'ariaHome': '主页',
+      'ariaUp': '上',
+      'ariaBack': '返回',
+      'ariaLeft': '左',
+      'ariaOk': 'OK / 选择',
+      'ariaRight': '右',
+      'ariaDown': '下',
+      'ariaMute': '静音',
+    },
+    jpn: {
+      'status.connecting': '接続中…',
+      'status.connected': '接続済み',
+      'status.reconnecting': '切断 · 再試行中…',
+      'status.wsError': 'WS エラー',
+      'status.connError': '接続エラー',
+      'search.placeholder': '映画、シリーズを検索…',
+      'search.go': '検索',
+      'audio': '音声',
+      'subtitles': '字幕',
+      'audioNone': 'なし',
+      'audioDefault': 'デフォルト',
+      'audioUnavailable': '利用不可',
+      'subDisabled': 'オフ',
+      'subDefault': 'デフォルト',
+      'subUnavailable': '利用不可',
+      'sheetDisable': 'オフにする',
+      'sheetNone': 'なし',
+      'noTracks': '利用可能なトラックがありません。',
+      'gateConnecting': '接続中…',
+      'gateWaitingTitle': '承認待ち',
+      'gateWaitingSub': 'リモコンを使用するには SIIISHUB でこのデバイスを承認してください。',
+      'gateDeniedTitle': 'アクセス拒否',
+      'gateDeniedSub': 'アプリでリクエストが拒否されました。',
+      'gateRetry': '再試行',
+      'ariaHome': 'ホーム',
+      'ariaUp': '上',
+      'ariaBack': '戻る',
+      'ariaLeft': '左',
+      'ariaOk': 'OK / 選択',
+      'ariaRight': '右',
+      'ariaDown': '下',
+      'ariaMute': 'ミュート',
+    },
+    kor: {
+      'status.connecting': '연결 중…',
+      'status.connected': '연결됨',
+      'status.reconnecting': '연결 끊김 · 재시도 중…',
+      'status.wsError': 'WS 오류',
+      'status.connError': '연결 오류',
+      'search.placeholder': '영화, 시리즈 검색…',
+      'search.go': '검색',
+      'audio': '오디오',
+      'subtitles': '자막',
+      'audioNone': '없음',
+      'audioDefault': '기본값',
+      'audioUnavailable': '사용 불가',
+      'subDisabled': '끄기',
+      'subDefault': '기본값',
+      'subUnavailable': '사용 불가',
+      'sheetDisable': '끄기',
+      'sheetNone': '없음',
+      'noTracks': '사용 가능한 트랙이 없습니다.',
+      'gateConnecting': '연결 중…',
+      'gateWaitingTitle': '승인 대기 중',
+      'gateWaitingSub': '리모컨을 사용하려면 SIIISHUB에서 이 기기를 승인하세요.',
+      'gateDeniedTitle': '액세스 거부됨',
+      'gateDeniedSub': '앱에서 요청이 거부되었습니다.',
+      'gateRetry': '재시도',
+      'ariaHome': '홈',
+      'ariaUp': '위',
+      'ariaBack': '뒤로',
+      'ariaLeft': '왼쪽',
+      'ariaOk': 'OK / 선택',
+      'ariaRight': '오른쪽',
+      'ariaDown': '아래',
+      'ariaMute': '음소거',
+    },
+  };
+
+  const LANG_FROM_BROWSER = {
+    it: 'ita', en: 'eng', es: 'spa', fr: 'fra', de: 'deu', pt: 'por', nl: 'nld', pl: 'pol',
+    cs: 'ces', hu: 'hun', ro: 'ron', tr: 'tur', sv: 'swe', da: 'dan', nb: 'nor', no: 'nor',
+    fi: 'fin', el: 'ell', ru: 'rus', uk: 'ukr', zh: 'zho', ja: 'jpn', ko: 'kor', hi: 'hin',
+  };
+  let LANG = 'eng';
+  function tr(key) {
+    const d = I18N[LANG] || I18N.eng;
+    if (d && d[key] != null) return d[key];
+    return I18N.eng[key] != null ? I18N.eng[key] : key;
+  }
+  function setLang(code) {
+    LANG = I18N[code] ? code : 'eng';
+    applyI18n();
+  }
+  function initialLang() {
+    const b = (navigator.language || 'en').slice(0, 2).toLowerCase();
+    return LANG_FROM_BROWSER[b] || 'eng';
+  }
+
+  let statusKind = '';
+  let statusKey = 'status.connecting';
+  let gateState = 'connecting';
+
+  function applyI18n() {
+    const si = document.getElementById('remoteSearch');
+    if (si) si.placeholder = tr('search.placeholder');
+    const sg = document.getElementById('remoteSearchGo');
+    if (sg) sg.textContent = tr('search.go');
+    const ae = audioChip.querySelector('.track-chip-eyebrow');
+    if (ae) ae.textContent = tr('audio');
+    const se = subChip.querySelector('.track-chip-eyebrow');
+    if (se) se.textContent = tr('subtitles');
+    const ariaMap = { home: 'ariaHome', up: 'ariaUp', back: 'ariaBack', left: 'ariaLeft', ok: 'ariaOk', right: 'ariaRight', down: 'ariaDown' };
+    document.querySelectorAll('[data-nav]').forEach(b => {
+      const k = ariaMap[b.dataset.nav];
+      if (k) b.setAttribute('aria-label', tr(k));
+    });
+    elMute.setAttribute('aria-label', tr('ariaMute'));
+    setStatus(statusKind, statusKey);
+    if (!gate.hidden) showGate(gateState);
+    renderTrackChips();
+    if (activeSheet) {
+      sheetTitle.textContent = tr(activeSheet === 'audio' ? 'audio' : 'subtitles');
+      renderSheetList(activeSheet);
+    }
+  }
+
+  function showGate(stateName) {
+    gateState = stateName;
+    gate.hidden = false;
+    gate.classList.toggle('is-denied', stateName === 'denied');
+    gateRetry.hidden = stateName !== 'denied';
+    gateRetry.textContent = tr('gateRetry');
+    if (stateName === 'waiting') {
+      gateTitle.textContent = tr('gateWaitingTitle');
+      gateSub.textContent = tr('gateWaitingSub');
+    } else if (stateName === 'denied') {
+      gateTitle.textContent = tr('gateDeniedTitle');
+      gateSub.textContent = tr('gateDeniedSub');
+    } else {
+      gateTitle.textContent = tr('gateConnecting');
+      gateSub.textContent = '';
+    }
+  }
+  function hideGate() {
+    gate.hidden = true;
+  }
+  gateRetry.addEventListener('click', () => { denied = false; showGate('connecting'); connect(); });
+
+  function fmtTime(sec) {
+    if (!Number.isFinite(sec) || sec < 0) return '0:00';
+    const s = Math.floor(sec);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    if (h) return h + ':' + String(m).padStart(2, '0') + ':' + ss;
+    return m + ':' + ss;
+  }
+
+  function setStatus(kind, key) {
+    statusKind = kind;
+    statusKey = key;
+    elStatus.classList.remove('is-connected', 'is-error');
+    if (kind === 'ok') elStatus.classList.add('is-connected');
+    if (kind === 'err') elStatus.classList.add('is-error');
+    elStatusText.textContent = tr(key);
+  }
+
+  function applyState(s) {
+    lastState = Object.assign(lastState, s);
+    const hasMedia = (lastState.duration || 0) > 0;
+    const pct = hasMedia ? Math.max(0, Math.min(100, (lastState.time / lastState.duration) * 100)) : 0;
+    if (!scrubbing) {
+      elFill.style.width = pct + '%';
+      elThumb.style.left = pct + '%';
+    }
+    elCur.textContent = fmtTime(lastState.time);
+    elTot.textContent = fmtTime(lastState.duration);
+    if (Number.isFinite(lastState.volume)) {
+      const v = Math.round(lastState.volume);
+      if (Number(elVol.value) !== v) elVol.value = String(v);
+      elVolVal.textContent = String(v);
+    }
+    const muted = !!lastState.mute || (lastState.volume || 0) <= 0;
+    iconVolHigh.style.display = muted ? 'none' : '';
+    iconVolMute.style.display = muted ? '' : 'none';
+    renderTrackChips();
+    if (activeSheet) renderSheetList(activeSheet);
+  }
+
+  function renderTrackChips() {
+    const audio = Array.isArray(lastState.audio_tracks) ? lastState.audio_tracks : [];
+    const sub = Array.isArray(lastState.sub_tracks) ? lastState.sub_tracks : [];
+    audioChip.disabled = audio.length === 0;
+    subChip.disabled = sub.length === 0;
+    const activeA = audio.find(t => t.active);
+    audioChipLabel.textContent = lastState.audio_disabled
+      ? tr('audioNone')
+      : (activeA ? activeA.label : (audio.length ? tr('audioDefault') : tr('audioUnavailable')));
+    const activeS = sub.find(t => t.active);
+    subChipLabel.textContent = lastState.sub_disabled
+      ? tr('subDisabled')
+      : (activeS ? activeS.label : (sub.length ? tr('subDefault') : tr('subUnavailable')));
+  }
+
+  function openSheet(kind) {
+    activeSheet = kind;
+    sheetTitle.textContent = tr(kind === 'audio' ? 'audio' : 'subtitles');
+    renderSheetList(kind);
+    sheet.classList.add('is-open');
+    sheetBackdrop.classList.add('is-open');
+  }
+  function closeSheet() {
+    activeSheet = null;
+    sheet.classList.remove('is-open');
+    sheetBackdrop.classList.remove('is-open');
+  }
+
+  function renderSheetList(kind) {
+    const tracks = kind === 'audio'
+      ? (Array.isArray(lastState.audio_tracks) ? lastState.audio_tracks : [])
+      : (Array.isArray(lastState.sub_tracks) ? lastState.sub_tracks : []);
+    const propKind = kind === 'audio' ? 'aid' : 'sid';
+    const disabled = kind === 'audio' ? lastState.audio_disabled : lastState.sub_disabled;
+    const checkSvg = '<svg class="sheet-option-check" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12 5 5L20 7"/></svg>';
+    const noLabel = kind === 'sub' ? tr('sheetDisable') : tr('sheetNone');
+    let html = '<button class="sheet-option' + (disabled ? ' is-active' : '') + '" data-track-id="no" data-track-kind="' + propKind + '">'
+      + '<span class="sheet-option-label">' + noLabel + '</span>'
+      + checkSvg + '</button>';
+    if (!tracks.length) {
+      html += '<p class="sheet-empty">' + escapeHtml(tr('noTracks')) + '</p>';
+    } else {
+      for (const t of tracks) {
+        html += '<button class="sheet-option' + (t.active && !disabled ? ' is-active' : '') + '" data-track-id="' + t.id + '" data-track-kind="' + propKind + '">'
+          + '<span class="sheet-option-label">' + escapeHtml(t.label) + '</span>'
+          + checkSvg + '</button>';
+      }
+    }
+    sheetList.innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  audioChip.addEventListener('click', () => openSheet('audio'));
+  subChip.addEventListener('click', () => openSheet('sub'));
+  sheetBackdrop.addEventListener('click', closeSheet);
+  sheetList.addEventListener('click', (ev) => {
+    const btn = ev.target.closest('[data-track-kind]');
+    if (!btn) return;
+    const kind = btn.getAttribute('data-track-kind');
+    const id = btn.getAttribute('data-track-id');
+    send({ name: 'track', kind, id });
+    closeSheet();
+  });
+
+  function send(cmd) {
+    if (!ws || ws.readyState !== 1) return;
+    try { ws.send(JSON.stringify(cmd)); } catch (e) {}
+  }
+
+  let reconnectTimer = 0;
+  function scheduleReconnect(delay) {
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(() => { reconnectTimer = 0; connect(); }, delay);
+  }
+
+  function connect() {
+    if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = 0; }
+    if (ws) {
+      ws.onopen = ws.onmessage = ws.onclose = ws.onerror = null;
+      try { ws.close(); } catch (e) {}
+    }
+    setStatus('', 'status.connecting');
+    let sock;
+    try {
+      sock = new WebSocket(wsUrl());
+    } catch (e) {
+      setStatus('err', 'status.wsError');
+      scheduleReconnect(2000);
+      return;
+    }
+    ws = sock;
+    sock.onopen = () => {
+      if (ws !== sock) return;
+      connected = true;
+      setStatus('ok', 'status.connected');
+    };
+    sock.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'state') applyState(msg);
+        else if (msg.type === 'hello') { if (msg.lang) setLang(msg.lang); approved = true; hideGate(); send({ name: 'request_state' }); }
+        else if (msg.type === 'pending') { if (msg.lang) setLang(msg.lang); approved = false; showGate('waiting'); }
+        else if (msg.type === 'paired') { if (msg.token) saveToken(msg.token); }
+        else if (msg.type === 'unpaired') { clearToken(); }
+        else if (msg.type === 'denied') { approved = false; denied = true; clearToken(); if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = 0; } showGate('denied'); }
+      } catch (e) {}
+    };
+    sock.onclose = () => {
+      if (ws !== sock) return;
+      connected = false;
+      if (denied) return;
+      setStatus('err', 'status.reconnecting');
+      scheduleReconnect(1500);
+    };
+    sock.onerror = () => {
+      if (ws !== sock) return;
+      setStatus('err', 'status.connError');
+    };
+  }
+
+  setLang(initialLang());
+  connect();
+
+  elMute.addEventListener('click', () => send({ name: 'mute_toggle' }));
+
+  function navSend(dir) {
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+    send({ name: 'nav', value: dir });
+  }
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    const dir = btn.dataset.nav;
+    const repeatable = dir === 'up' || dir === 'down' || dir === 'left' || dir === 'right';
+    if (!repeatable) {
+      btn.addEventListener('click', () => navSend(dir));
+      return;
+    }
+    let holdTimer = 0;
+    let repeatTimer = 0;
+    function stopRepeat() {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = 0; }
+      if (repeatTimer) { clearInterval(repeatTimer); repeatTimer = 0; }
+    }
+    btn.addEventListener('pointerdown', ev => {
+      ev.preventDefault();
+      navSend(dir);
+      holdTimer = setTimeout(() => {
+        repeatTimer = setInterval(() => navSend(dir), 130);
+      }, 430);
+    });
+    btn.addEventListener('pointerup', stopRepeat);
+    btn.addEventListener('pointercancel', stopRepeat);
+    btn.addEventListener('pointerleave', stopRepeat);
+  });
+
+  const remoteSearch = document.getElementById('remoteSearch');
+  const remoteSearchGo = document.getElementById('remoteSearchGo');
+  function submitSearch() {
+    send({ name: 'search', value: remoteSearch.value.trim() });
+    remoteSearch.blur();
+  }
+  remoteSearchGo.addEventListener('click', submitSearch);
+  remoteSearch.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') { ev.preventDefault(); submitSearch(); }
+  });
+
+  let volTimer = 0;
+  elVol.addEventListener('input', () => {
+    const v = Number(elVol.value);
+    elVolVal.textContent = String(v);
+    clearTimeout(volTimer);
+    volTimer = setTimeout(() => send({ name: 'volume', value: v }), 50);
+  });
+
+  function fractionFromPointer(ev) {
+    const r = elTrack.getBoundingClientRect();
+    if (r.width <= 0) return 0;
+    const x = (ev.touches ? ev.touches[0].clientX : ev.clientX) - r.left;
+    return Math.max(0, Math.min(1, x / r.width));
+  }
+  function updateScrubVisual(f) {
+    elFill.style.width = (f * 100) + '%';
+    elThumb.style.left = (f * 100) + '%';
+    if (lastState.duration > 0) {
+      elCur.textContent = fmtTime(f * lastState.duration);
+    }
+  }
+  function commitSeek(f) {
+    if (lastState.duration > 0) {
+      send({ name: 'seek', value: f * lastState.duration });
+    }
+  }
+  elTrack.addEventListener('pointerdown', ev => {
+    ev.preventDefault();
+    scrubbing = true;
+    elTrack.setPointerCapture(ev.pointerId);
+    updateScrubVisual(fractionFromPointer(ev));
+  });
+  elTrack.addEventListener('pointermove', ev => {
+    if (!scrubbing) return;
+    updateScrubVisual(fractionFromPointer(ev));
+  });
+  elTrack.addEventListener('pointerup', ev => {
+    if (!scrubbing) return;
+    const f = fractionFromPointer(ev);
+    scrubbing = false;
+    try { elTrack.releasePointerCapture(ev.pointerId); } catch (e) {}
+    commitSeek(f);
+  });
+  elTrack.addEventListener('pointercancel', () => { scrubbing = false; });
+
+  document.addEventListener('visibilitychange', () => {
+    if (!denied && document.visibilityState === 'visible' && (!ws || ws.readyState !== 1)) {
+      connect();
+    }
+  });
+})();
+</script>
+</body>
+</html>

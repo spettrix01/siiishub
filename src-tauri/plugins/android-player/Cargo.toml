@@ -1,0 +1,17 @@
+[package]
+name = "siiishub-android-player"
+version = "0.1.0"
+edition = "2021"
+description = "Embedded libmpv player and system integration for the Android build of SIIISHUB"
+authors = ["siiis"]
+license = "GPL-3.0-or-later"
+# Required by tauri-plugin's build helper: the value must match the name.
+links = "siiishub-android-player"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[build-dependencies]
+tauri-plugin = { version = "2", features = ["build"] }
