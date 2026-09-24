@@ -6,11 +6,13 @@
 //!
 //! One ffmpeg at a time per session. Its fragmented MP4 (the video copied or
 //! transcoded, the audio in AAC) comes out on stdout and is cut here into the
-//! playlist's segments. ffmpeg starts every output timeline at zero, so each
-//! fragment's decode time (`tfdt`) gets the film time where the job started:
-//! the target itself when transcoding, the keyframe before it when the video
-//! is copied (reported by a one-packet side output of the same job, which
-//! seeks the same way). Every text subtitle inside the file comes out of the
+//! playlist's segments. ffmpeg's MP4 starts every track at zero, so each
+//! fragment's decode time (`tfdt`) gets the film time where its track started
+//! in the job. A copied video starts at the keyframe before the target,
+//! reported by a one-packet side output of the same job, which seeks the same
+//! way; a transcoded one at the target itself. The audio starts about there
+//! too, and another one-packet side output, encoded the same way, says
+//! exactly where. Every text subtitle inside the file comes out of the
 //! same job as WebVTT with the film's times (`-copyts`) and is merged per
 //! track for the page, so switching subtitles restarts nothing.
 //!
@@ -540,6 +542,8 @@ pub async fn subtitles(
 async fn run_job(session: Arc<Session>, job: u64, from: usize) {
     let start = from as f64 * SEGMENT;
     let crc = session.dir.join(format!("job{job}.crc"));
+    let audio_map = media::audio_map(&session.probe, session.audio);
+    let audio_crc = audio_map.as_ref().map(|_| session.dir.join(format!("job{job}.audio.crc")));
     let sub_files: Vec<PathBuf> = (0..session.subs.len())
         .map(|i| session.dir.join(format!("job{job}.sub{i}.vtt")))
         .collect();
@@ -565,6 +569,14 @@ async fn run_job(session: Arc<Session>, job: u64, from: usize) {
             args.push(arg.to_string());
         }
         args.push(crc.to_string_lossy().into_owned());
+    }
+    if let (Some(map), Some(path)) = (&audio_map, &audio_crc) {
+        args.extend(["-map".to_string(), map.clone()]);
+        args.extend(media::audio_codec_args());
+        for arg in ["-frames:a", "1", "-flush_packets", "1", "-f", "framecrc"] {
+            args.push(arg.to_string());
+        }
+        args.push(path.to_string_lossy().into_owned());
     }
     for (i, index) in session.subs.iter().enumerate() {
         args.extend(media::subtitle_output_args(*index, &sub_files[i]));
@@ -604,7 +616,8 @@ async fn run_job(session: Arc<Session>, job: u64, from: usize) {
     }
     let subtitles = tokio::spawn(follow_subtitles(session.clone(), job, sub_files));
 
-    let reached_end = cut_segments(&session, job, from, start, &crc, stdout).await;
+    let side = SideOutputs { video: crc, audio: audio_crc };
+    let reached_end = cut_segments(&session, job, from, start, &side, stdout).await;
     drop(child);
     // The subtitle files are complete now: one more read, then stop.
     tokio::time::sleep(Duration::from_millis(1200)).await;
@@ -631,6 +644,19 @@ struct Track {
     video: bool,
 }
 
+/// The job's one-packet framecrc outputs: the copied video's, the audio's.
+struct SideOutputs {
+    video: PathBuf,
+    audio: Option<PathBuf>,
+}
+
+/// The film times where the job's video and audio tracks start.
+#[derive(Clone, Copy)]
+struct Origins {
+    video: f64,
+    audio: f64,
+}
+
 /// Reads ffmpeg's fragmented MP4 and writes the init segment and the media
 /// segments, fragment by fragment. Returns whether it reached the end of the
 /// film; replaced by another job, it just returns.
@@ -639,13 +665,13 @@ async fn cut_segments<R: AsyncRead + Unpin>(
     job: u64,
     from: usize,
     start: f64,
-    crc: &FsPath,
+    side: &SideOutputs,
     stdout: R,
 ) -> bool {
     let mut reader = BufReader::with_capacity(1 << 20, stdout);
     let mut init = Vec::new();
     let mut tracks: HashMap<u32, Track> = HashMap::new();
-    let mut origin: Option<f64> = None;
+    let mut origins: Option<Origins> = None;
     let mut current = from;
     let mut buffer: Vec<u8> = Vec::new();
     let mut moof: Option<Vec<u8>> = None;
@@ -692,15 +718,26 @@ async fn cut_segments<R: AsyncRead + Unpin>(
                     produced = true;
                     publish_init(session, job, &init).await;
                 }
-                let origin = match origin {
-                    Some(origin) => origin,
+                let origins = match origins {
+                    Some(origins) => origins,
                     None => {
-                        let found = if session.transcode { start } else { read_origin(crc, start).await };
-                        origin = Some(found);
+                        let video = if session.transcode {
+                            // Its first frame shows at the target; B-frames
+                            // decode it earlier.
+                            start - first_composition_offset(&fragment, &tracks).unwrap_or(0.0)
+                        } else {
+                            read_origin(&side.video, start).await
+                        };
+                        let audio = match &side.audio {
+                            Some(path) => read_origin(path, start).await,
+                            None => video,
+                        };
+                        let found = Origins { video, audio };
+                        origins = Some(found);
                         found
                     }
                 };
-                let Some(time) = shift_fragment(&mut fragment, &tracks, origin) else {
+                let Some(time) = shift_fragment(&mut fragment, &tracks, origins) else {
                     continue;
                 };
                 // A fragment of a later segment closes the current one; one
@@ -802,8 +839,8 @@ async fn write_atomic(path: &FsPath, bytes: &[u8]) -> std::io::Result<()> {
     tokio::fs::rename(&tmp, path).await
 }
 
-/// The film time of the first packet of a copied video: the keyframe the
-/// seek landed on, as the job's framecrc side output reports it.
+/// The film time of the first packet of one of the job's framecrc side
+/// outputs: the keyframe a copied video starts at, or the audio's first.
 async fn read_origin(crc: &FsPath, fallback: f64) -> f64 {
     for _ in 0..50 {
         if let Ok(text) = tokio::fs::read_to_string(crc).await {
@@ -930,29 +967,56 @@ fn parse_tracks(moov: &[u8]) -> HashMap<u32, Track> {
     tracks
 }
 
-/// Moves every track's decode time in a `moof` by `origin` seconds (the film
-/// time the job's zero stands for). Returns the fragment's start in film
-/// time: its video's, else its first track's.
-fn shift_fragment(moof: &mut [u8], tracks: &HashMap<u32, Track>, origin: f64) -> Option<f64> {
-    let mut video_time = None;
-    let mut any_time = None;
-    let trafs: Vec<(usize, usize)> = children(moof, 8, moof.len())
+/// The `traf` boxes of a `moof`, with the track each is for.
+fn trafs<'a>(moof: &[u8], tracks: &'a HashMap<u32, Track>) -> Vec<(&'a Track, Vec<([u8; 4], usize, usize)>)> {
+    children(moof, 8, moof.len())
         .into_iter()
         .filter(|(kind, _, _)| kind == b"traf")
-        .map(|(_, body, end)| (body, end))
-        .collect();
-    for (body, end) in trafs {
-        let parts = children(moof, body, end);
-        let track_id = parts
-            .iter()
-            .find(|(kind, _, _)| kind == b"tfhd")
-            .and_then(|(_, body, _)| read_u32(moof, body + 4));
-        let Some(track) = track_id.and_then(|id| tracks.get(&id)) else {
-            continue;
-        };
+        .filter_map(|(_, body, end)| {
+            let parts = children(moof, body, end);
+            let track_id = parts
+                .iter()
+                .find(|(kind, _, _)| kind == b"tfhd")
+                .and_then(|(_, body, _)| read_u32(moof, body + 4))?;
+            Some((tracks.get(&track_id)?, parts))
+        })
+        .collect()
+}
+
+/// How long after its decode time the fragment's first video frame shows, in
+/// seconds: the composition offset of the first sample of its `trun`.
+fn first_composition_offset(moof: &[u8], tracks: &HashMap<u32, Track>) -> Option<f64> {
+    let (track, parts) = trafs(moof, tracks).into_iter().find(|(track, _)| track.video)?;
+    let &(_, trun, _) = parts.iter().find(|(kind, _, _)| kind == b"trun")?;
+    let version = *moof.get(trun)?;
+    let flags = read_u32(moof, trun)? & 0x00ff_ffff;
+    if flags & 0x800 == 0 {
+        return Some(0.0);
+    }
+    // sample_count, then the optional data offset and first sample flags,
+    // then the first sample's duration, size and flags when present.
+    let mut at = trun + 8;
+    for bit in [0x1, 0x4, 0x100, 0x200, 0x400] {
+        if flags & bit != 0 {
+            at += 4;
+        }
+    }
+    let raw = read_u32(moof, at)?;
+    let offset = if version == 1 { raw as i32 as f64 } else { raw as f64 };
+    Some(offset / track.timescale as f64)
+}
+
+/// Moves each track's decode time in a `moof` to the film's timeline, by the
+/// film time where that track starts in the job. Returns the fragment's start
+/// in film time: its video's, else its first track's.
+fn shift_fragment(moof: &mut [u8], tracks: &HashMap<u32, Track>, origins: Origins) -> Option<f64> {
+    let mut video_time = None;
+    let mut any_time = None;
+    for (track, parts) in trafs(moof, tracks) {
         let Some(&(_, tfdt, _)) = parts.iter().find(|(kind, _, _)| kind == b"tfdt") else {
             continue;
         };
+        let origin = if track.video { origins.video } else { origins.audio };
         let shift = (origin * track.timescale as f64).round().max(0.0) as u64;
         let seconds = if moof.get(tfdt) == Some(&1) {
             let field = moof.get_mut(tfdt + 4..tfdt + 12)?;

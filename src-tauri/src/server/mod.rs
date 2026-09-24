@@ -8,6 +8,7 @@ mod auth;
 mod events;
 mod hls;
 mod media;
+mod relay;
 mod remote;
 mod transcode;
 mod web;
@@ -126,6 +127,15 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
     }
 
     let app = AppState::open(config.data_dir.clone(), config.download_dir.clone()).await?;
+    let streams = reqwest::Client::builder()
+        .user_agent("siiishub/0.1")
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .no_gzip()
+        .build()
+        .context("building the streaming HTTP client")?;
+    let relay = relay::Relay::start(streams.clone())
+        .await
+        .context("starting the relay on 127.0.0.1")?;
     let server = Server {
         app: Arc::new(app),
         events: events::Events::new(),
@@ -137,15 +147,10 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
             app_dir: config.app_dir.clone(),
             web_dir: config.web_dir.clone(),
         }),
-        media: Arc::new(media::Media::default()),
+        media: Arc::new(media::Media::new(relay)),
         hls: Arc::new(hls::Hls::default()),
         gpu: Arc::new(transcode::Gpu::new(config.hwaccel, config.hwaccel_device.clone())),
-        streams: reqwest::Client::builder()
-            .user_agent("siiishub/0.1")
-            .connect_timeout(std::time::Duration::from_secs(15))
-            .no_gzip()
-            .build()
-            .context("building the streaming HTTP client")?,
+        streams,
     };
 
     hls::start_sweeper(server.clone());

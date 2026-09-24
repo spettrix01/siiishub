@@ -1,7 +1,7 @@
 //! Media for the browser's player. What the backend resolves (the torrent
 //! session's stream on 127.0.0.1, debrid links, files on disk) only the
 //! server can reach, so the page gets `/media/<id>` in its place and the
-//! server streams it:
+//! server streams it, a remote file over several connections (`relay.rs`):
 //! - `/media/<id>`: as it is, with byte ranges, when the browser can play it;
 //! - `/media/<id>/remux.mp4`: through ffmpeg as fragmented MP4, the video
 //!   copied or turned into H.264 (`transcode.rs`) and the audio into stereo
@@ -17,6 +17,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
+use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use axum::body::{Body, Bytes};
@@ -34,6 +35,7 @@ use tower_http::services::ServeFile;
 
 use crate::ffprobe::{self, ProbeInfo};
 
+use super::relay::{self, Relay, Upstream};
 use super::transcode::Transcoder;
 use super::Server;
 
@@ -43,25 +45,19 @@ const SUBTITLE_MAX_BYTES: usize = 10 * 1024 * 1024;
 
 #[derive(Clone)]
 pub(super) enum Source {
+    /// On this machine: the torrent session's stream.
     Url(String),
+    /// Anywhere else, read over several connections (`relay.rs`).
+    Relayed(Arc<Upstream>),
     File(PathBuf),
 }
 
 impl Source {
-    fn parse(url: &str) -> Option<Self> {
-        if url.starts_with("file:") {
-            url::Url::parse(url).ok()?.to_file_path().ok().map(Source::File)
-        } else if url.starts_with("http://") || url.starts_with("https://") {
-            Some(Source::Url(url.to_string()))
-        } else {
-            None
-        }
-    }
-
     /// What ffprobe and ffmpeg open.
     pub(super) fn input(&self) -> String {
         match self {
             Source::Url(url) => url.clone(),
+            Source::Relayed(upstream) => upstream.local_url().to_string(),
             Source::File(path) => path.to_string_lossy().into_owned(),
         }
     }
@@ -73,16 +69,40 @@ struct Entry {
     used: Instant,
 }
 
-#[derive(Default)]
 pub struct Media {
     entries: Mutex<HashMap<String, Entry>>,
+    relay: Arc<Relay>,
 }
 
 impl Media {
+    pub fn new(relay: Arc<Relay>) -> Self {
+        Self { entries: Mutex::default(), relay }
+    }
+
+    fn source(&self, url: &str) -> Option<Source> {
+        if url.starts_with("file:") {
+            return url::Url::parse(url).ok()?.to_file_path().ok().map(Source::File);
+        }
+        let parsed = url::Url::parse(url).ok()?;
+        if !matches!(parsed.scheme(), "http" | "https") {
+            return None;
+        }
+        let local = match parsed.host()? {
+            url::Host::Domain(name) => name.eq_ignore_ascii_case("localhost"),
+            url::Host::Ipv4(ip) => ip.is_loopback(),
+            url::Host::Ipv6(ip) => ip.is_loopback(),
+        };
+        Some(if local {
+            Source::Url(url.to_string())
+        } else {
+            Source::Relayed(self.relay.upstream(url))
+        })
+    }
+
     /// Registers a resolved stream and returns the address the page plays it
     /// at. Anything but a stream (never, in practice) is returned as it is.
     pub fn publish(&self, url: &str, probe: Option<ProbeInfo>) -> String {
-        let Some(source) = Source::parse(url) else {
+        let Some(source) = self.source(url) else {
             return url.to_string();
         };
         let id = super::random_hex(16);
@@ -145,7 +165,8 @@ pub async fn direct(State(server): State<Server>, Path(id): Path<String>, req: R
             Ok(response) => response.map(Body::new).into_response(),
             Err(never) => match never {},
         },
-        Source::Url(url) => proxy(&server.streams, &url, req.headers().get(header::RANGE)).await,
+        Source::Url(url) => relay::proxy(&server.streams, &url, req.headers().get(header::RANGE)).await,
+        Source::Relayed(upstream) => upstream.serve(req.headers().get(header::RANGE)).await,
     };
     // Browsers turn `video/x-matroska` down, not the files: Matroska is the
     // container of WebM.
@@ -155,38 +176,6 @@ pub async fn direct(State(server): State<Server>, Path(id): Path<String>, req: R
             .insert(header::CONTENT_TYPE, HeaderValue::from_static("video/webm"));
     }
     response
-}
-
-async fn proxy(client: &reqwest::Client, url: &str, range: Option<&HeaderValue>) -> Response {
-    let mut upstream = client.get(url);
-    if let Some(range) = range {
-        upstream = upstream.header(header::RANGE, range.clone());
-    }
-    let reply = match upstream.send().await {
-        Ok(reply) => reply,
-        // Without the URL: debrid links open the file to whoever has them.
-        Err(e) => {
-            tracing::warn!("[media] upstream request failed: {}", e.without_url());
-            return StatusCode::BAD_GATEWAY.into_response();
-        }
-    };
-    let mut response = Response::builder().status(reply.status());
-    for name in [
-        header::CONTENT_TYPE,
-        header::CONTENT_LENGTH,
-        header::CONTENT_RANGE,
-        header::ACCEPT_RANGES,
-        header::LAST_MODIFIED,
-        header::ETAG,
-    ] {
-        if let Some(value) = reply.headers().get(&name) {
-            response = response.header(name, value.clone());
-        }
-    }
-    response
-        .header(header::CACHE_CONTROL, "no-store")
-        .body(Body::from_stream(reply.bytes_stream()))
-        .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
 }
 
 #[derive(Deserialize)]
@@ -347,7 +336,7 @@ pub(super) fn strings(items: &[&str]) -> Vec<String> {
 /// GPU when the transcode runs there.
 pub(super) fn input_args(source: &Source, start: f64, transcode: Option<&Transcoder>) -> Vec<String> {
     let mut args = strings(&["-hide_banner", "-nostdin", "-nostats", "-loglevel", "error", "-y"]);
-    if matches!(source, Source::Url(_)) {
+    if matches!(source, Source::Url(_) | Source::Relayed(_)) {
         // The torrent session answers slowly while pieces arrive; debrid CDNs
         // drop long connections now and then.
         args.extend(strings(&[
@@ -361,6 +350,12 @@ pub(super) fn input_args(source: &Source, start: f64, transcode: Option<&Transco
         args.extend(transcoder.input_args());
     }
     if start > 0.0 {
+        if transcode.is_none() {
+            // A copied video starts at the keyframe before `start`: the audio
+            // starts there too instead of at `start` itself, so that the
+            // tracks of the output (all starting at zero) stay together.
+            args.push("-noaccurate_seek".to_string());
+        }
         args.extend(["-ss".to_string(), format!("{start:.3}")]);
     }
     args.extend(["-i".to_string(), source.input()]);
@@ -379,9 +374,8 @@ pub(super) fn codec_args(
     keyframes_every: Option<f64>,
 ) -> Vec<String> {
     let mut args = strings(&["-map", "0:v:0"]);
-    if !probe.audios.is_empty() {
-        let track = audio.min(probe.audios.len() as u32 - 1);
-        args.extend(["-map".to_string(), format!("0:a:{track}")]);
+    if let Some(map) = audio_map(probe, audio) {
+        args.extend(["-map".to_string(), map]);
     }
     let video = probe.video.as_ref();
     if let Some(transcoder) = transcode {
@@ -393,9 +387,21 @@ pub(super) fn codec_args(
             args.extend(strings(&["-tag:v", "hvc1"]));
         }
     }
-    args.extend(strings(&["-c:a", "aac", "-ac", "2", "-b:a", "192k"]));
+    args.extend(audio_codec_args());
     args.extend(strings(&["-sn", "-dn", "-map_metadata", "-1", "-map_chapters", "-1", "-max_muxing_queue_size", "4096"]));
     args
+}
+
+/// The `-map` of audio track `audio` (the last one if there are fewer), or
+/// None for a file without audio.
+pub(super) fn audio_map(probe: &ProbeInfo, audio: u32) -> Option<String> {
+    let last = probe.audios.len().checked_sub(1)? as u32;
+    Some(format!("0:a:{}", audio.min(last)))
+}
+
+/// The output's audio: stereo AAC.
+pub(super) fn audio_codec_args() -> Vec<String> {
+    strings(&["-c:a", "aac", "-ac", "2", "-b:a", "192k"])
 }
 
 /// An output of the text subtitle `index` as WebVTT, flushed cue by cue for

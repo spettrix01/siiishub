@@ -511,9 +511,13 @@ async function startHls(at) {
     hls = new Hls({
       startPosition: at,
       enableWorker: false,
-      maxBufferLength: 60,
+      // Half a minute ahead at least, more while under 100 MB: the browser
+      // holds about 150 MB of a video, a minute of 4K, and the server keeps
+      // minutes more ready.
+      maxBufferLength: 30,
       maxMaxBufferLength: 120,
-      backBufferLength: 90,
+      maxBufferSize: 100 * 1000 * 1000,
+      backBufferLength: 30,
       // A segment may wait for ffmpeg to start over there.
       fragLoadPolicy: {
         default: {

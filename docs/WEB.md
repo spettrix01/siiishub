@@ -27,11 +27,16 @@ does:
 The HLS playlist covers the whole film in 6-second segments, made on demand
 from the one the player asks for. Seeking is the player's own: into what was
 already made it takes a fraction of a second, elsewhere FFmpeg starts over
-there (2-3 seconds from a debrid link). Up to 3 minutes are made ahead of
-the player and 12 minutes are kept on disk (in the system's temporary
-folder), the farthest from the player going first. hls.js plays it, loaded
-from jsdelivr; Safari plays HLS by itself; without either, a single stream
-restarted at every seek takes over.
+there (2-3 seconds from a nearby debrid server, up to about 10 from one far
+away). Up to 3 minutes are made ahead of the player and 12 minutes are kept
+on disk (in the system's temporary folder), the farthest from the player
+going first. hls.js plays it, loaded from jsdelivr; Safari plays HLS by
+itself; without either, a single stream restarted at every seek takes over.
+
+The server reads a remote file over 4 connections at once, in chunks of up
+to 4 MB fetched ahead of FFmpeg: one connection to a debrid server far away
+can bring less than a 4K film plays (25 Mbit/s and more), a few bring
+several times that.
 
 A change of audio track opens a new HLS session from the same second (about
 2 seconds). Speed, volume up to 200% and the resume position work as in the
@@ -217,12 +222,19 @@ the CPU by itself.
   session URLs on 127.0.0.1, debrid links, files on disk) only the server
   reaches, so the page gets `/media/<id>` instead, served as it is with byte
   ranges (or, as the fallback, through FFmpeg as one fragmented MP4).
+- `src-tauri/src/server/relay.rs`: remote files read over several connections.
+  Every byte range asked of one, by the browser or by FFmpeg (which opens it
+  on a relay of its own on 127.0.0.1), comes in chunks fetched 4 at a time
+  and passed on in order, from the address the addon's link redirects to.
 - `src-tauri/src/server/hls.rs`: the HLS sessions. One FFmpeg job at a time
   per session writes fragmented MP4 to its stdout, which is cut into the
-  playlist's segments. FFmpeg starts every output at time zero, so the
-  fragments' decode times (`tfdt`) are moved to the film's time where the job
-  started: the target when transcoding, the keyframe before it when copying,
-  as a one-packet `framecrc` side output of the same job reports it.
+  playlist's segments. FFmpeg's MP4 starts every track at time zero, so the
+  fragments' decode times (`tfdt`) are moved to the film's time where each
+  track started in the job. A copied video starts at the keyframe before the
+  target, and the audio about there too (`-noaccurate_seek`); a transcoded
+  one at the target. One-packet `framecrc` side outputs of the same job
+  report the exact times: the copied video's first packet, and the audio's
+  first, encoded the same way.
   Transcoded keyframes are forced on the 6-second grid of the film. The init
   segment comes from the first job that makes a fragment, so a GPU that
   fails before that leaves nothing of its own in the session.
