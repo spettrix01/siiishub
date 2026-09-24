@@ -51,12 +51,15 @@ over the video.
 ## Phone remote
 
 As in the app: Settings → Remote shows the address and the QR code of the
-phone page, `/remote/` on this server. The phone signs in with the same
-password, then the screen asks to approve it (and can remember it, so it is
-not asked again). The phone drives playback (pause, seek, volume, tracks),
-moves around the interface with its arrows and searches; every open page of
-the interface gets its commands. Full screen cannot be switched from the
-phone: browsers allow it only after a click on the page.
+phone page, `/remote/` on this server, which the phone opens in its browser
+or in the SIIISHUB app for Android (Settings → Remote, as for a PC). From
+the home network it needs no password, as the app's on a PC: the screen
+asks to approve the phone (and can remember it, so it is not asked again).
+From a public address, or through a reverse proxy, the phone signs in with
+the password first. The phone drives playback (pause, seek, volume,
+tracks), moves around the interface with its arrows and searches; every
+open page of the interface gets its commands. Full screen cannot be
+switched from the phone: browsers allow it only after a click on the page.
 
 ## Docker
 

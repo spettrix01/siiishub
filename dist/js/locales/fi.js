@@ -411,7 +411,7 @@ export const FI = {
   "trending.cardAria": "{title} — suosituimpien sijoitus {rank}",
   "player.zoomFill": "Zoomattu täyttämään",
   "player.zoomFit": "Sovita näyttöön",
-  "settings.remoteClient.desc": "Käytä tätä puhelinta SIIISHUBin kaukosäätimenä Windowsissa tai Linuxissa. Avaa tietokoneella Asetukset → Etäohjaus: puhelimen on oltava samassa verkossa.",
+  "settings.remoteClient.desc": "Käytä tätä puhelinta SIIISHUBin kaukosäätimenä Windowsissa tai Linuxissa tai sen palvelinversiossa selaimessa. Avaa ohjattavalla näytöllä Asetukset → Etäohjaus: puhelimen on oltava samassa verkossa.",
   "settings.remoteClient.scan": "Skannaa QR-koodi",
   "settings.remoteClient.scanHint": "Kohdista kamera QR-koodiin, jonka tietokone näyttää kohdassa Asetukset → Etäohjaus.",
   "settings.remoteClient.scanUnavailable": "Tämä laite ei pysty lukemaan QR-koodeja: kirjoita tietokoneen näyttämä osoite.",

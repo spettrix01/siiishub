@@ -411,7 +411,7 @@ export const DA = {
   "trending.cardAria": "{title} — trendposition {rank}",
   "player.zoomFill": "Zoomet til fuld skærm",
   "player.zoomFit": "Tilpas til skærmen",
-  "settings.remoteClient.desc": "Brug denne telefon som fjernbetjening til SIIISHUB på Windows eller Linux. Åbn Indstillinger → Fjernbetjening på pc'en: telefonen skal være på det samme netværk.",
+  "settings.remoteClient.desc": "Brug denne telefon som fjernbetjening til SIIISHUB på Windows eller Linux eller til serverversionen i en browser. Åbn Indstillinger → Fjernbetjening på den skærm, du vil styre: telefonen skal være på det samme netværk.",
   "settings.remoteClient.scan": "Scan QR-koden",
   "settings.remoteClient.scanHint": "Ret kameraet mod QR-koden, som pc'en viser under Indstillinger → Fjernbetjening.",
   "settings.remoteClient.scanUnavailable": "Denne enhed kan ikke læse QR-koder: indtast adressen, der vises på pc'en.",

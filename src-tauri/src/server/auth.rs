@@ -3,10 +3,11 @@
 //! restarting the server or the container does not log anyone out.
 
 use std::collections::HashMap;
+use std::net::{IpAddr, SocketAddr};
 use std::path::PathBuf;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
-use axum::extract::{Request, State};
+use axum::extract::{ConnectInfo, Request, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Redirect, Response};
@@ -161,6 +162,37 @@ fn is_public(path: &str) -> bool {
         || (path.starts_with("/img/icon-") && path.ends_with(".png") && !path.contains(".."))
 }
 
+/// A phone on the home network opens the remote's page as it opens the one of
+/// the app on a PC: the screen approves it, no password (the Android app's
+/// frame could not keep the session's cookie anyway). What a proxy forwards,
+/// or what comes from a public address, signs in first.
+fn home_network(req: &Request) -> bool {
+    let headers = req.headers();
+    let forwarded = ["forwarded", "x-forwarded-for", "x-real-ip", "cf-connecting-ip"]
+        .iter()
+        .any(|name| headers.contains_key(*name));
+    !forwarded
+        && req
+            .extensions()
+            .get::<ConnectInfo<SocketAddr>>()
+            .is_some_and(|ConnectInfo(addr)| is_private(addr.ip()))
+}
+
+fn is_private(ip: IpAddr) -> bool {
+    match ip {
+        IpAddr::V4(v4) => {
+            let [a, b, ..] = v4.octets();
+            // With the carrier-grade NAT range, where Tailscale's addresses are.
+            v4.is_private() || v4.is_loopback() || v4.is_link_local() || (a == 100 && (b & 0xc0) == 64)
+        }
+        IpAddr::V6(v6) => match v6.to_ipv4_mapped() {
+            Some(v4) => is_private(IpAddr::V4(v4)),
+            // Loopback, unique local, link-local.
+            None => v6.is_loopback() || (v6.segments()[0] & 0xfe00) == 0xfc00 || (v6.segments()[0] & 0xffc0) == 0xfe80,
+        },
+    }
+}
+
 /// Every request but the login page needs a session; the API answers 401
 /// without one, pages send the browser to the login.
 pub async fn guard(State(server): State<Server>, req: Request, next: Next) -> Response {
@@ -170,7 +202,8 @@ pub async fn guard(State(server): State<Server>, req: Request, next: Next) -> Re
     if (path.starts_with("/api/") || socket || !reads) && !same_origin(req.headers()) {
         return (StatusCode::FORBIDDEN, "cross-origin request").into_response();
     }
-    if !server.auth.enabled() || is_public(&path) {
+    let remote = matches!(path.as_str(), "/remote" | "/remote/" | "/remote/ws");
+    if !server.auth.enabled() || is_public(&path) || (remote && home_network(&req)) {
         return next.run(req).await;
     }
     let signed_in = session_cookie(req.headers()).is_some_and(|token| server.auth.is_valid(token));

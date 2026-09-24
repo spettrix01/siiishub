@@ -411,7 +411,7 @@ export const NL = {
   "trending.cardAria": "{title} — trendpositie {rank}",
   "player.zoomFill": "Ingezoomd om te vullen",
   "player.zoomFit": "Aanpassen aan scherm",
-  "settings.remoteClient.desc": "Gebruik deze telefoon als afstandsbediening van SIIISHUB op Windows of Linux. Open op de pc Instellingen → Afstandsbediening: de telefoon moet in hetzelfde netwerk zitten.",
+  "settings.remoteClient.desc": "Gebruik deze telefoon als afstandsbediening van SIIISHUB op Windows of Linux, of van de serverversie in een browser. Open op het scherm dat je wilt bedienen Instellingen → Afstandsbediening: de telefoon moet in hetzelfde netwerk zitten.",
   "settings.remoteClient.scan": "QR-code scannen",
   "settings.remoteClient.scanHint": "Richt de camera op de QR-code die de pc toont onder Instellingen → Afstandsbediening.",
   "settings.remoteClient.scanUnavailable": "Dit apparaat kan geen QR-codes lezen: typ het adres dat op de pc wordt getoond.",

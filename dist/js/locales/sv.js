@@ -411,7 +411,7 @@ export const SV = {
   "trending.cardAria": "{title} — trendposition {rank}",
   "player.zoomFill": "Zoomad för att fylla",
   "player.zoomFit": "Anpassa till skärmen",
-  "settings.remoteClient.desc": "Använd den här telefonen som fjärrkontroll för SIIISHUB på Windows eller Linux. Öppna Inställningar → Fjärrkontroll på datorn: telefonen måste vara på samma nätverk.",
+  "settings.remoteClient.desc": "Använd den här telefonen som fjärrkontroll för SIIISHUB på Windows eller Linux, eller för serverversionen i en webbläsare. Öppna Inställningar → Fjärrkontroll på skärmen du vill styra: telefonen måste vara på samma nätverk.",
   "settings.remoteClient.scan": "Skanna QR-koden",
   "settings.remoteClient.scanHint": "Rikta kameran mot QR-koden som datorn visar under Inställningar → Fjärrkontroll.",
   "settings.remoteClient.scanUnavailable": "Den här enheten kan inte läsa QR-koder: skriv adressen som visas på datorn.",

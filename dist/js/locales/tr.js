@@ -411,7 +411,7 @@ export const TR = {
   "trending.cardAria": "{title} — gündem sırası {rank}",
   "player.zoomFill": "Ekranı dolduracak şekilde yakınlaştırıldı",
   "player.zoomFit": "Ekrana sığdır",
-  "settings.remoteClient.desc": "Bu telefonu Windows veya Linux'taki SIIISHUB için uzaktan kumanda olarak kullan. Bilgisayarda Ayarlar → Uzaktan kumanda bölümünü aç: telefon aynı ağda olmalı.",
+  "settings.remoteClient.desc": "Bu telefonu Windows veya Linux’taki SIIISHUB ya da tarayıcıdaki sunucu sürümü için uzaktan kumanda olarak kullan. Kontrol etmek istediğin ekranda Ayarlar → Uzaktan kumanda bölümünü aç: telefon aynı ağda olmalı.",
   "settings.remoteClient.scan": "QR kodunu tara",
   "settings.remoteClient.scanHint": "Kamerayı bilgisayarın Ayarlar → Uzaktan kumanda bölümünde gösterdiği QR koduna tut.",
   "settings.remoteClient.scanUnavailable": "Bu cihaz QR kodu okuyamıyor: bilgisayarda gösterilen adresi yaz.",

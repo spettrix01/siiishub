@@ -411,7 +411,7 @@ export const ES = {
   "trending.cardAria": "{title} — posición {rank} en tendencia",
   "player.zoomFill": "Ampliado para llenar",
   "player.zoomFit": "Ajustar a la pantalla",
-  "settings.remoteClient.desc": "Usa este móvil como mando a distancia de SIIISHUB en Windows o Linux. En el PC abre Ajustes → Mando a distancia: el móvil debe estar en la misma red.",
+  "settings.remoteClient.desc": "Usa este móvil como mando a distancia de SIIISHUB en Windows o Linux, o de su versión de servidor en el navegador. En la pantalla que quieras controlar abre Ajustes → Mando a distancia: el móvil debe estar en la misma red.",
   "settings.remoteClient.scan": "Escanear el código QR",
   "settings.remoteClient.scanHint": "Enfoca el código QR que el PC muestra en Ajustes → Mando a distancia.",
   "settings.remoteClient.scanUnavailable": "Este dispositivo no puede leer códigos QR: escribe la dirección que se muestra en el PC.",

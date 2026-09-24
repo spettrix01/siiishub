@@ -411,7 +411,7 @@ export const DE = {
   "trending.cardAria": "{title} — Trend-Position {rank}",
   "player.zoomFill": "Bildschirmfüllend",
   "player.zoomFit": "An Bildschirm anpassen",
-  "settings.remoteClient.desc": "Nutze dieses Handy als Fernbedienung für SIIISHUB unter Windows oder Linux. Öffne auf dem PC Einstellungen → Fernsteuerung: Das Handy muss im selben Netzwerk sein.",
+  "settings.remoteClient.desc": "Nutze dieses Handy als Fernbedienung für SIIISHUB unter Windows oder Linux oder für die Serverversion im Browser. Öffne auf dem Bildschirm, den du steuern willst, Einstellungen → Fernsteuerung: Das Handy muss im selben Netzwerk sein.",
   "settings.remoteClient.scan": "QR-Code scannen",
   "settings.remoteClient.scanHint": "Richte die Kamera auf den QR-Code, den der PC unter Einstellungen → Fernsteuerung anzeigt.",
   "settings.remoteClient.scanUnavailable": "Dieses Gerät kann keine QR-Codes lesen: Gib die auf dem PC angezeigte Adresse ein.",

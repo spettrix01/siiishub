@@ -1,10 +1,11 @@
-// Android: the phone as the remote control of SIIISHUB on a PC. The QR code
-// in the PC's settings (Remote) holds the address of the phone page the PC
-// serves (remote.rs, remote_page.html). The app opens that page full screen
-// in a frame, so approval, pairing and every command work as in the phone's
-// browser and always match the version running on the PC. The overlay first
-// shows the camera to frame the code, then the page; android-back.js closes
-// it on Back.
+// Android: the phone as the remote control of SIIISHUB on a PC, or of the
+// server version in a browser. The QR code in the settings of the screen
+// (Remote) holds the address of the phone page it serves (remote.rs,
+// remote_page.html): the PC's on a port of its own, the server's at
+// /remote/. The app opens that page full screen in a frame, so approval,
+// pairing and every command work as in the phone's browser and always match
+// the version running there. The overlay first shows the camera to frame the
+// code, then the page; android-back.js closes it on Back.
 import { $ } from './dom.js';
 import { t } from './i18n.js';
 
@@ -18,19 +19,25 @@ const scanVideo = $('#remoteScanVideo');
 const scanHint = $('#remoteScanHint');
 const frameSlot = $('#remoteFrameSlot');
 
-/** `{ host, url }` for an address typed or scanned (`ip`, `ip:port` or the
- *  `http://ip:port/` of the QR code), null when it cannot be a SIIISHUB PC. */
+/** `{ host, url }` for an address typed or scanned: `ip`, `ip:port` or the
+ *  `http://ip:port/` of a PC's QR code, or the `http(s)://server/remote/` of
+ *  the server version's; null when it cannot be a SIIISHUB remote. */
 export function parseRemoteAddress(raw) {
   let s = String(raw || '').trim();
   if (!s) return null;
   if (!/^[a-z][a-z\d+.-]*:\/\//i.test(s)) s = `http://${s}`;
   let u;
   try { u = new URL(s); } catch { return null; }
-  if (u.protocol !== 'http:' || u.username || u.password) return null;
-  if (u.pathname !== '/' || u.search || u.hash) return null;
+  if (!/^https?:$/.test(u.protocol) || u.username || u.password || u.search || u.hash) return null;
   // Chromium percent-encodes what it cannot put in a host instead of
   // rejecting it: only a name, an IPv4 or a bracketed IPv6 address.
   if (!/^[a-z\d.-]+$/i.test(u.hostname) && !/^\[[\da-f:.]+\]$/i.test(u.hostname)) return null;
+  // The server version: the page at /remote/ of its own port (or its
+  // HTTPS proxy's).
+  if (/^\/remote\/?$/.test(u.pathname)) {
+    return { host: u.host, url: `${u.protocol}//${u.host}/remote/` };
+  }
+  if (u.protocol !== 'http:' || u.pathname !== '/') return null;
   const host = `${u.hostname}:${u.port || DEFAULT_PORT}`;
   return { host, url: `http://${host}/` };
 }

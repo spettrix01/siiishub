@@ -411,7 +411,7 @@ export const PT = {
   "trending.cardAria": "{title} — posição {rank} nas tendências",
   "player.zoomFill": "Zoom para preencher",
   "player.zoomFit": "Ajustar à tela",
-  "settings.remoteClient.desc": "Usa este telemóvel como controlo remoto do SIIISHUB no Windows ou Linux. No PC abre Definições → Controlo remoto: o telemóvel tem de estar na mesma rede.",
+  "settings.remoteClient.desc": "Usa este telemóvel como controlo remoto do SIIISHUB no Windows ou Linux, ou da sua versão de servidor no navegador. No ecrã que queres controlar abre Definições → Controlo remoto: o telemóvel tem de estar na mesma rede.",
   "settings.remoteClient.scan": "Digitalizar o código QR",
   "settings.remoteClient.scanHint": "Aponta a câmara para o código QR que o PC mostra em Definições → Controlo remoto.",
   "settings.remoteClient.scanUnavailable": "Este dispositivo não consegue ler códigos QR: escreve o endereço mostrado no PC.",

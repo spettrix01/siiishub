@@ -411,7 +411,7 @@ export const KO = {
   "trending.cardAria": "{title} — 인기 순위 {rank}위",
   "player.zoomFill": "화면을 채우도록 확대",
   "player.zoomFit": "화면에 맞춤",
-  "settings.remoteClient.desc": "이 휴대폰을 Windows 또는 Linux의 SIIISHUB 리모컨으로 사용하세요. PC에서 설정 → 원격을 여세요. 휴대폰이 같은 네트워크에 연결되어 있어야 합니다.",
+  "settings.remoteClient.desc": "이 휴대폰을 Windows 또는 Linux의 SIIISHUB나 브라우저에서 쓰는 서버 버전의 리모컨으로 사용하세요. 제어할 화면에서 설정 → 원격을 여세요. 휴대폰이 같은 네트워크에 연결되어 있어야 합니다.",
   "settings.remoteClient.scan": "QR 코드 스캔",
   "settings.remoteClient.scanHint": "PC의 설정 → 원격에 표시된 QR 코드를 비추세요.",
   "settings.remoteClient.scanUnavailable": "이 기기는 QR 코드를 읽을 수 없습니다. PC에 표시된 주소를 입력하세요.",

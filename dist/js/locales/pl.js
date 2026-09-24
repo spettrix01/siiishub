@@ -411,7 +411,7 @@ export const PL = {
   "trending.cardAria": "{title} — pozycja {rank} w trendach",
   "player.zoomFill": "Powiększono do wypełnienia",
   "player.zoomFit": "Dopasuj do ekranu",
-  "settings.remoteClient.desc": "Używaj tego telefonu jako pilota SIIISHUB w systemie Windows lub Linux. Na komputerze otwórz Ustawienia → Pilot: telefon musi być w tej samej sieci.",
+  "settings.remoteClient.desc": "Używaj tego telefonu jako pilota SIIISHUB w systemie Windows lub Linux albo jego wersji serwerowej w przeglądarce. Na ekranie, którym chcesz sterować, otwórz Ustawienia → Pilot: telefon musi być w tej samej sieci.",
   "settings.remoteClient.scan": "Zeskanuj kod QR",
   "settings.remoteClient.scanHint": "Skieruj aparat na kod QR, który komputer wyświetla w Ustawienia → Pilot.",
   "settings.remoteClient.scanUnavailable": "To urządzenie nie potrafi odczytywać kodów QR: wpisz adres wyświetlany na komputerze.",

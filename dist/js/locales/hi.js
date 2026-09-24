@@ -411,7 +411,7 @@ export const HI = {
   "trending.cardAria": "{title} — ट्रेंडिंग स्थान {rank}",
   "player.zoomFill": "स्क्रीन भरने के लिए ज़ूम",
   "player.zoomFit": "स्क्रीन पर फ़िट करें",
-  "settings.remoteClient.desc": "इस फ़ोन को Windows या Linux पर SIIISHUB के रिमोट की तरह इस्तेमाल करें। PC पर सेटिंग्स → रिमोट खोलें: फ़ोन उसी नेटवर्क पर होना चाहिए।",
+  "settings.remoteClient.desc": "इस फ़ोन को Windows या Linux पर SIIISHUB के रिमोट की तरह, या ब्राउज़र में उसके सर्वर संस्करण के लिए इस्तेमाल करें। जिस स्क्रीन को नियंत्रित करना है उस पर सेटिंग्स → रिमोट खोलें: फ़ोन उसी नेटवर्क पर होना चाहिए।",
   "settings.remoteClient.scan": "QR कोड स्कैन करें",
   "settings.remoteClient.scanHint": "PC पर सेटिंग्स → रिमोट में दिख रहे QR कोड पर कैमरा रखें।",
   "settings.remoteClient.scanUnavailable": "यह डिवाइस QR कोड नहीं पढ़ सकता: PC पर दिख रहा पता टाइप करें।",

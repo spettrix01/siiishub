@@ -411,7 +411,7 @@ export const ZH = {
   "trending.cardAria": "{title} — 热门排名第 {rank}",
   "player.zoomFill": "缩放以填满屏幕",
   "player.zoomFit": "适应屏幕",
-  "settings.remoteClient.desc": "将此手机用作 Windows 或 Linux 上 SIIISHUB 的遥控器。在电脑上打开“设置 → 遥控”：手机必须连接到同一网络。",
+  "settings.remoteClient.desc": "将此手机用作 Windows 或 Linux 上 SIIISHUB 或其浏览器服务器版的遥控器。在要控制的屏幕上打开“设置 → 遥控”：手机必须连接到同一网络。",
   "settings.remoteClient.scan": "扫描二维码",
   "settings.remoteClient.scanHint": "对准电脑在“设置 → 遥控”中显示的二维码。",
   "settings.remoteClient.scanUnavailable": "此设备无法读取二维码：请输入电脑上显示的地址。",

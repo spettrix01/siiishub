@@ -411,7 +411,7 @@ export const RU = {
   "trending.cardAria": "{title} — позиция в трендах {rank}",
   "player.zoomFill": "Масштаб на весь экран",
   "player.zoomFit": "По размеру экрана",
-  "settings.remoteClient.desc": "Используйте этот телефон как пульт для SIIISHUB на Windows или Linux. На компьютере откройте Настройки → Пульт: телефон должен быть в той же сети.",
+  "settings.remoteClient.desc": "Используйте этот телефон как пульт для SIIISHUB на Windows или Linux либо для его серверной версии в браузере. На экране, которым хотите управлять, откройте Настройки → Пульт: телефон должен быть в той же сети.",
   "settings.remoteClient.scan": "Сканировать QR-код",
   "settings.remoteClient.scanHint": "Наведите камеру на QR-код, который компьютер показывает в разделе Настройки → Пульт.",
   "settings.remoteClient.scanUnavailable": "Это устройство не может считывать QR-коды: введите адрес, показанный на компьютере.",

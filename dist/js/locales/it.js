@@ -411,7 +411,7 @@ export const IT = {
   "trending.cardAria": "{title} — posizione {rank} in tendenza",
   "player.zoomFill": "Zoom a schermo intero",
   "player.zoomFit": "Adatta allo schermo",
-  "settings.remoteClient.desc": "Usa il telefono come telecomando di SIIISHUB su Windows o Linux. Sul PC apri Impostazioni → Telecomando: il telefono deve essere connesso alla stessa rete.",
+  "settings.remoteClient.desc": "Usa il telefono come telecomando di SIIISHUB su Windows o Linux, o della sua versione server nel browser. Sullo schermo da controllare apri Impostazioni → Telecomando: il telefono deve essere connesso alla stessa rete.",
   "settings.remoteClient.scan": "Inquadra il QR code",
   "settings.remoteClient.scanHint": "Inquadra il QR code che il PC mostra in Impostazioni → Telecomando.",
   "settings.remoteClient.scanUnavailable": "Questo dispositivo non può leggere i QR code: inserisci l'indirizzo mostrato sul PC.",

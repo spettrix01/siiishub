@@ -411,7 +411,7 @@ export const JA = {
   "trending.cardAria": "{title} — トレンド順位{rank}位",
   "player.zoomFill": "画面いっぱいにズーム",
   "player.zoomFit": "画面に合わせる",
-  "settings.remoteClient.desc": "このスマホを Windows または Linux の SIIISHUB のリモコンとして使います。PC で「設定 → リモート」を開いてください。スマホは同じネットワークに接続している必要があります。",
+  "settings.remoteClient.desc": "このスマホを Windows または Linux の SIIISHUB、またはブラウザーで使うサーバー版のリモコンとして使います。操作したい画面で「設定 → リモート」を開いてください。スマホは同じネットワークに接続している必要があります。",
   "settings.remoteClient.scan": "QRコードをスキャン",
   "settings.remoteClient.scanHint": "PC の「設定 → リモート」に表示されている QRコードを映してください。",
   "settings.remoteClient.scanUnavailable": "このデバイスでは QRコードを読み取れません。PC に表示されているアドレスを入力してください。",

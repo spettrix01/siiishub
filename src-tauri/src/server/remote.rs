@@ -1,7 +1,9 @@
 //! The phone as a remote control, on the server's own port: the page at
-//! `/remote/` and its WebSocket at `/remote/ws`, behind the login like the
-//! rest (crate::remote does the pairing and the commands). The screen that
-//! approves a phone is any page of the interface: they all get the events.
+//! `/remote/` and its WebSocket at `/remote/ws` (crate::remote does the
+//! pairing and the commands). From the home network they need no password,
+//! as the app's on a PC; from elsewhere the phone signs in first (auth.rs).
+//! The screen that approves a phone is any page of the interface: they all
+//! get the events.
 
 use std::collections::HashMap;
 use std::net::SocketAddr;

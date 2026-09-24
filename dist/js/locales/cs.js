@@ -411,7 +411,7 @@ export const CS = {
   "trending.cardAria": "{title} — pozice v trendech {rank}",
   "player.zoomFill": "Přiblíženo na celou obrazovku",
   "player.zoomFit": "Přizpůsobit obrazovce",
-  "settings.remoteClient.desc": "Používej tento telefon jako dálkové ovládání SIIISHUB ve Windows nebo Linuxu. Na počítači otevři Nastavení → Dálkové ovládání: telefon musí být ve stejné síti.",
+  "settings.remoteClient.desc": "Používej tento telefon jako dálkové ovládání SIIISHUB ve Windows nebo Linuxu, nebo jeho serverové verze v prohlížeči. Na obrazovce, kterou chceš ovládat, otevři Nastavení → Dálkové ovládání: telefon musí být ve stejné síti.",
   "settings.remoteClient.scan": "Naskenovat QR kód",
   "settings.remoteClient.scanHint": "Zamiř na QR kód, který počítač zobrazuje v Nastavení → Dálkové ovládání.",
   "settings.remoteClient.scanUnavailable": "Toto zařízení neumí číst QR kódy: zadej adresu zobrazenou na počítači.",

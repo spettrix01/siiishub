@@ -411,7 +411,7 @@ export const EN = {
   "trending.cardAria": "{title} — trending position {rank}",
   "player.zoomFill": "Zoomed to fill",
   "player.zoomFit": "Fit to screen",
-  "settings.remoteClient.desc": "Use this phone as the remote of SIIISHUB on Windows or Linux. On the PC open Settings → Remote: the phone must be on the same network.",
+  "settings.remoteClient.desc": "Use this phone as the remote of SIIISHUB on Windows or Linux, or of its server version in a browser. On the screen to control open Settings → Remote: the phone must be on the same network.",
   "settings.remoteClient.scan": "Scan the QR code",
   "settings.remoteClient.scanHint": "Frame the QR code shown on the PC in Settings → Remote.",
   "settings.remoteClient.scanUnavailable": "This device cannot read QR codes: type the address shown on the PC.",

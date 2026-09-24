@@ -411,7 +411,7 @@ export const FR = {
   "trending.cardAria": "{title} — position {rank} en tendance",
   "player.zoomFill": "Zoom plein écran",
   "player.zoomFit": "Adapter à l’écran",
-  "settings.remoteClient.desc": "Utilisez ce téléphone comme télécommande de SIIISHUB sous Windows ou Linux. Sur le PC, ouvrez Paramètres → Télécommande : le téléphone doit être sur le même réseau.",
+  "settings.remoteClient.desc": "Utilisez ce téléphone comme télécommande de SIIISHUB sous Windows ou Linux, ou de sa version serveur dans un navigateur. Sur l’écran à contrôler, ouvrez Paramètres → Télécommande : le téléphone doit être sur le même réseau.",
   "settings.remoteClient.scan": "Scanner le QR code",
   "settings.remoteClient.scanHint": "Cadrez le QR code affiché par le PC dans Paramètres → Télécommande.",
   "settings.remoteClient.scanUnavailable": "Cet appareil ne peut pas lire les QR codes : saisissez l’adresse affichée sur le PC.",

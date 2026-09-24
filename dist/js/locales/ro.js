@@ -411,7 +411,7 @@ export const RO = {
   "trending.cardAria": "{title} — poziția {rank} în tendințe",
   "player.zoomFill": "Zoom pe tot ecranul",
   "player.zoomFit": "Potrivire la ecran",
-  "settings.remoteClient.desc": "Folosește acest telefon ca telecomandă pentru SIIISHUB pe Windows sau Linux. Pe PC deschide Setări → Telecomandă: telefonul trebuie să fie în aceeași rețea.",
+  "settings.remoteClient.desc": "Folosește acest telefon ca telecomandă pentru SIIISHUB pe Windows sau Linux ori pentru versiunea sa de server din browser. Pe ecranul pe care vrei să-l controlezi deschide Setări → Telecomandă: telefonul trebuie să fie în aceeași rețea.",
   "settings.remoteClient.scan": "Scanează codul QR",
   "settings.remoteClient.scanHint": "Îndreaptă camera spre codul QR afișat de PC în Setări → Telecomandă.",
   "settings.remoteClient.scanUnavailable": "Acest dispozitiv nu poate citi coduri QR: introdu adresa afișată pe PC.",

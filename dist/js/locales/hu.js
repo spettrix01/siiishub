@@ -411,7 +411,7 @@ export const HU = {
   "trending.cardAria": "{title} — felkapott pozíció {rank}",
   "player.zoomFill": "Nagyítás a képernyő kitöltéséhez",
   "player.zoomFit": "Igazítás a képernyőhöz",
-  "settings.remoteClient.desc": "Használd ezt a telefont a SIIISHUB távirányítójaként Windowson vagy Linuxon. A számítógépen nyisd meg a Beállítások → Távvezérlés részt: a telefonnak ugyanazon a hálózaton kell lennie.",
+  "settings.remoteClient.desc": "Használd ezt a telefont a SIIISHUB távirányítójaként Windowson vagy Linuxon, vagy a böngészőben futó szerververzióhoz. A vezérelni kívánt képernyőn nyisd meg a Beállítások → Távvezérlés részt: a telefonnak ugyanazon a hálózaton kell lennie.",
   "settings.remoteClient.scan": "QR-kód beolvasása",
   "settings.remoteClient.scanHint": "Irányítsd a kamerát a számítógép Beállítások → Távvezérlés részében látható QR-kódra.",
   "settings.remoteClient.scanUnavailable": "Ez az eszköz nem tud QR-kódot olvasni: írd be a számítógépen látható címet.",
