@@ -11,6 +11,8 @@ default-run = "SIIISHUB"
 name = "siiishub_desktop_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+# The Tauri bundler packs a binary only when its required features are listed
+# explicitly, so tauri.conf.json lists `app` in build.features.
 [[bin]]
 name = "SIIISHUB"
 path = "src/main.rs"
@@ -18,9 +20,11 @@ required-features = ["app"]
 
 # The browser interface served over HTTP, for Docker (docs/WEB.md):
 #   cargo build --release --no-default-features --features server
+# Not in src/bin: the Tauri bundler would put every file there in the app
+# packages.
 [[bin]]
 name = "siiishub-server"
-path = "src/bin/siiishub-server.rs"
+path = "src/server_main.rs"
 required-features = ["server"]
 
 [build-dependencies]
