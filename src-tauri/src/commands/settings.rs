@@ -16,13 +16,12 @@ pub async fn settings_get(state: State<'_, Arc<AppState>>) -> CmdResult<PublicSe
 
 #[tauri::command]
 pub async fn settings_save(
-    app: AppHandle,
     state: State<'_, Arc<AppState>>,
     patch: SettingsPatch,
 ) -> CmdResult<PublicSettings> {
     let (settings, port_changed) = crate::ops::settings::save(&state, patch).await?;
     if let Some(port) = port_changed {
-        remote::reconfigure(&app, state.inner().clone(), true, port).await;
+        remote::reconfigure(state.inner().clone(), true, port).await;
     }
     Ok(settings)
 }

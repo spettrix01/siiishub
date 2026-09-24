@@ -44,6 +44,20 @@ UTF-8 or Windows-1252, ASS through FFmpeg), and the text ones inside the file
 so switching between them is immediate. Bitmap subtitles (PGS, DVD) are not
 shown.
 
+Dolby Vision without an HDR10 base (profile 5) only Safari shows right:
+elsewhere its colours come out green and purple, and the player says so
+over the video.
+
+## Phone remote
+
+As in the app: Settings → Remote shows the address and the QR code of the
+phone page, `/remote/` on this server. The phone signs in with the same
+password, then the screen asks to approve it (and can remember it, so it is
+not asked again). The phone drives playback (pause, seek, volume, tracks),
+moves around the interface with its arrows and searches; every open page of
+the interface gets its commands. Full screen cannot be switched from the
+phone: browsers allow it only after a click on the page.
+
 ## Docker
 
 ```sh
@@ -180,6 +194,10 @@ the CPU by itself.
   (`media://progress`, ...) go to the pages over a WebSocket (`/api/events`).
   The same crate builds the app (feature `app`, default) or the server
   (feature `server`), which leaves out Tauri, libmpv and GTK.
+- `src-tauri/src/remote.rs`: the phone remote (the phone page, approvals,
+  pairings), the app's and the server's: the app serves it on a port of its
+  own, the server at `/remote/` (`server/remote.rs`) with its events going to
+  the pages over `/api/events`.
 - `web/bridge.js` stands in for `window.__TAURI__` in the browser; the server
   injects it into the app's `index.html`, with `web/web.css` and `web/web.js`
   (the theme for the login page). The interface itself is the app's:

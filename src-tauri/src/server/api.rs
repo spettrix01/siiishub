@@ -209,6 +209,58 @@ async fn dispatch(server: &Server, command: &str, args: Value) -> Result<Value, 
             reply(ops::downloads::parse_torrent_file(&bytes)?)
         }
 
+        // The phone remote (server/remote.rs).
+        "remote_info" => {
+            #[derive(Deserialize)]
+            struct A {
+                /// The address the page is at (web/bridge.js adds it).
+                #[serde(default)]
+                origin: Option<String>,
+            }
+            let A { origin } = parse(args)?;
+            reply(super::remote::info(server, origin.as_deref()))
+        }
+        "remote_push_state" => {
+            #[derive(Deserialize)]
+            struct A {
+                payload: Value,
+            }
+            let A { payload } = parse(args)?;
+            super::remote::push_state(server, payload);
+            reply(())
+        }
+        "remote_set_approval" => {
+            #[derive(Deserialize)]
+            struct A {
+                id: u64,
+                approved: bool,
+            }
+            let Wrapped::<A> { args } = parse(args)?;
+            server.app.remote.set_approval(args.id, args.approved);
+            reply(())
+        }
+        "remote_remember_device" => {
+            #[derive(Deserialize)]
+            struct A {
+                id: u64,
+            }
+            let Wrapped::<A> { args } = parse(args)?;
+            server.app.remote.remember_device(args.id);
+            reply(())
+        }
+        "remote_forget_device" => {
+            #[derive(Deserialize)]
+            struct A {
+                #[serde(default)]
+                id: Option<u64>,
+                #[serde(default)]
+                key: Option<String>,
+            }
+            let Wrapped::<A> { args } = parse(args)?;
+            server.app.remote.forget_device(args.id, args.key.as_deref());
+            reply(())
+        }
+
         _ => Err(format!("unknown command: {command}")),
     }
 }

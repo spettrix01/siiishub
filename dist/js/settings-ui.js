@@ -8,7 +8,7 @@ import { streamPickerHtml, setupStreamPicker } from './picker.js';
 import { langPickerHtml, setupLangPicker, buildLangItems, localizedLangName } from './lang-picker.js';
 import { t, locMsg, setLang, APP_LANGUAGES, onLangChange } from './i18n.js';
 import { setTheme, currentTheme } from './theme.js';
-import { IS_ANDROID, IS_PHONE, IS_TV, IS_WEB } from './platform.js';
+import { IS_ANDROID, IS_PHONE, IS_TV } from './platform.js';
 import { parseRemoteAddress, canScanQr, scanRemoteQr, connectRemote } from './remote-client.js';
 
 const settingsModal = $('#settingsModal');
@@ -23,9 +23,6 @@ function settingsPanes() {
     { value: 'download', label: t('settings.pane.download') },
     { value: 'remote', label: t('settings.pane.remote') },
   ];
-  // In the browser the torrents run on the server, whose tracker list
-  // counts, and there is nothing to control or be controlled by.
-  if (IS_WEB) return panes.filter(p => p.value !== 'remote');
   // Android keeps the torrent tracker list at its defaults. Instead of being
   // controlled, the phone is the remote of a PC (its own Remote section);
   // the TV is driven with its own remote and has no Remote section at all.
@@ -131,9 +128,7 @@ export function openSettings(pane = 'language') {
   setupAppLanguageSection();
   setupPlayerLangsSection();
   setupAppearanceSection();
-  if (IS_WEB) {
-    // No Remote section in the browser.
-  } else if (IS_PHONE) setupRemoteClientSection();
+  if (IS_PHONE) setupRemoteClientSection();
   else if (!IS_ANDROID) setupRemoteSection();
   setupDebridSection();
   resetHint('#tmdbHint');

@@ -5,6 +5,8 @@ html.is-web .winctl,
 html.is-web .dl-row-btn--folder { display: none !important; }
 /* The download folder is shown, but there is no file manager to open it in. */
 html.is-web #openDownloadDir { pointer-events: none; }
+/* The phone remote is at /remote/ of the server's own port. */
+html.is-web .field:has(#remotePortInput) { display: none; }
 
 /* The desktop interface in every browser, tablets and phones included (the
    Android flags are the app's, js/platform.js). Narrower than a desktop

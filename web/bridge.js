@@ -4,8 +4,8 @@
 //
 // - core.invoke(command, args): POST /api/invoke/<command>, which runs the
 //   same backend code as the app's Tauri command; a failure rejects with the
-//   error string, as Tauri does. Commands about the window, the remote
-//   control or the desktop are answered here.
+//   error string, as Tauri does. Commands about the window or the desktop
+//   are answered here.
 // - event.listen(name, handler): backend events arrive over one WebSocket
 //   (/api/events), reconnecting when it drops.
 // - window.getCurrentWindow(): no window to move or close in a browser; full
@@ -68,11 +68,6 @@
   // Things of the app on a PC or a phone that have no meaning here.
   const NOT_IN_BROWSER = JSON.stringify({ code: 'error.web.notInBrowser' });
   const pageCommands = {
-    remote_info: () => ({ running: false, port: 0, interfaces: [], clients: 0, devices: [] }),
-    remote_push_state: () => null,
-    remote_set_approval: () => null,
-    remote_remember_device: () => null,
-    remote_forget_device: () => null,
     player_mode: () => null,
     window_set_fullscreen: (args) => setFullscreen(!!args.fullscreen),
     open_url: (args) => { openUrl(args.url); return null; },
@@ -97,6 +92,9 @@
     if (!player && (command === 'media_resolve' || command === 'download_play')) {
       throw JSON.stringify({ code: 'error.web.noPlayer' });
     }
+    // The phone remote's address is this page's: the server cannot know how
+    // it is reached from outside a container.
+    if (command === 'remote_info') args = { ...args, origin: location.origin };
     let res;
     try {
       res = await fetch(`/api/invoke/${encodeURIComponent(command)}`, {

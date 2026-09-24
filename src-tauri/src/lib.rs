@@ -19,7 +19,6 @@ pub mod ops;
 #[cfg(feature = "app")]
 mod power;
 mod realdebrid;
-#[cfg(feature = "app")]
 mod remote;
 #[cfg(all(windows, feature = "real-mpv"))]
 mod render;
@@ -102,8 +101,12 @@ pub fn run() {
                 let port = if cfg.remote_port == 0 { 9871 } else { cfg.remote_port };
                 drop(cfg);
                 let app_handle = app.handle().clone();
+                state_for_remote.remote.set_emitter(Arc::new(move |name: &str, payload| {
+                    use tauri::Emitter;
+                    let _ = app_handle.emit(name, payload);
+                }));
                 tauri::async_runtime::spawn(async move {
-                    if let Err(e) = remote::start(app_handle, state_for_remote, port).await {
+                    if let Err(e) = remote::start(state_for_remote, port).await {
                         tracing::warn!("[remote] boot start failed: {e}");
                     }
                 });

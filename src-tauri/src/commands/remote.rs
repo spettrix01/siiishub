@@ -1,12 +1,10 @@
 use std::sync::Arc;
 
-use qrcode::render::svg;
-use qrcode::QrCode;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tauri::{AppHandle, State};
+use tauri::State;
 
-use crate::remote::{local_ipv4_interfaces, DeviceView};
+use crate::remote::{local_ipv4_interfaces, make_qr_svg, DeviceView};
 use crate::state::AppState;
 
 use super::shared::CmdResult;
@@ -28,18 +26,6 @@ pub struct RemoteInfo {
     pub interfaces: Vec<RemoteIface>,
     pub clients: u32,
     pub devices: Vec<DeviceView>,
-}
-
-fn make_qr_svg(url: &str) -> Option<String> {
-    let code = QrCode::new(url.as_bytes()).ok()?;
-    Some(
-        code.render::<svg::Color>()
-            .min_dimensions(200, 200)
-            .quiet_zone(false)
-            .dark_color(svg::Color("#1a0f04"))
-            .light_color(svg::Color("#ffffff"))
-            .build(),
-    )
 }
 
 #[tauri::command]
@@ -102,11 +88,10 @@ pub struct ApprovalArgs {
 
 #[tauri::command]
 pub async fn remote_set_approval(
-    app: AppHandle,
     state: State<'_, Arc<AppState>>,
     args: ApprovalArgs,
 ) -> CmdResult<()> {
-    state.remote.set_approval(&app, args.id, args.approved);
+    state.remote.set_approval(args.id, args.approved);
     Ok(())
 }
 
@@ -118,11 +103,10 @@ pub struct RememberArgs {
 /// Pairs a connected, approved device so it can reconnect without asking.
 #[tauri::command]
 pub async fn remote_remember_device(
-    app: AppHandle,
     state: State<'_, Arc<AppState>>,
     args: RememberArgs,
 ) -> CmdResult<()> {
-    state.remote.remember_device(&app, args.id);
+    state.remote.remember_device(args.id);
     Ok(())
 }
 
@@ -140,12 +124,9 @@ pub struct ForgetArgs {
 /// next time it connects.
 #[tauri::command]
 pub async fn remote_forget_device(
-    app: AppHandle,
     state: State<'_, Arc<AppState>>,
     args: ForgetArgs,
 ) -> CmdResult<()> {
-    state
-        .remote
-        .forget_device(&app, args.id, args.key.as_deref());
+    state.remote.forget_device(args.id, args.key.as_deref());
     Ok(())
 }

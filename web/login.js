@@ -58,7 +58,10 @@ form.addEventListener('submit', async (e) => {
       body: JSON.stringify({ password: input.value }),
     });
     if (res.ok) {
-      location.replace('/');
+      // Back where the server sent the browser from (the phone remote's
+      // page), never to another site.
+      const next = new URLSearchParams(location.search).get('next') || '';
+      location.replace(/^\/(?![/\\])/.test(next) ? next : '/');
       return;
     }
     const body = await res.json().catch(() => ({}));

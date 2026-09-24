@@ -166,7 +166,8 @@ fn is_public(path: &str) -> bool {
 pub async fn guard(State(server): State<Server>, req: Request, next: Next) -> Response {
     let path = req.uri().path().to_owned();
     let reads = matches!(*req.method(), axum::http::Method::GET | axum::http::Method::HEAD);
-    if (path.starts_with("/api/") || !reads) && !same_origin(req.headers()) {
+    let socket = path == "/remote/ws";
+    if (path.starts_with("/api/") || socket || !reads) && !same_origin(req.headers()) {
         return (StatusCode::FORBIDDEN, "cross-origin request").into_response();
     }
     if !server.auth.enabled() || is_public(&path) {
@@ -181,6 +182,10 @@ pub async fn guard(State(server): State<Server>, req: Request, next: Next) -> Re
     }
     if path == "/" || path.ends_with(".html") {
         return Redirect::to("/login").into_response();
+    }
+    // The phone remote's page: back to it once signed in.
+    if path == "/remote" || path == "/remote/" {
+        return Redirect::to("/login?next=/remote/").into_response();
     }
     StatusCode::UNAUTHORIZED.into_response()
 }

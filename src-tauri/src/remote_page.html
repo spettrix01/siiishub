@@ -608,7 +608,12 @@
     return tok;
   }
   function wsUrl() {
-    const base = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws';
+    // Next to the page: /ws from the app, /remote/ws from the web server.
+    const url = new URL('ws', location.href);
+    url.protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    url.search = '';
+    url.hash = '';
+    const base = url.href;
     const tok = storedToken();
     return tok ? base + '?token=' + encodeURIComponent(tok) : base;
   }

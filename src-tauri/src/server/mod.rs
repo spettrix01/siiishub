@@ -8,6 +8,7 @@ mod auth;
 mod events;
 mod hls;
 mod media;
+mod remote;
 mod transcode;
 mod web;
 
@@ -149,6 +150,13 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
 
     hls::start_sweeper(server.clone());
     server.gpu.start();
+    // The phone remote's events (approvals, commands) go to the pages.
+    let events = server.events.clone();
+    server
+        .app
+        .remote
+        .set_emitter(Arc::new(move |name: &str, payload| events.emit(name, payload)));
+    server.app.remote.mount();
 
     let router = Router::new()
         .route("/", get(web::index))
@@ -171,6 +179,9 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .route("/hls/{sid}/segments/{k}", get(hls::segment))
         .route("/hls/{sid}/subtitles/{n}", get(hls::subtitles))
         .route("/v/{version}/{*path}", get(web::versioned))
+        .route("/remote", get(remote::page_slash))
+        .route("/remote/", get(remote::page))
+        .route("/remote/ws", get(remote::socket))
         .nest_service("/web", ServeDir::new(&config.web_dir))
         .fallback_service(ServeDir::new(&config.app_dir))
         // A .torrent file reaches `torrent_parse_file` as a JSON array.
@@ -188,7 +199,8 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         config.data_dir.display(),
         config.download_dir.display()
     );
-    axum::serve(listener, router)
+    // The peer's address, for the phone remote's list of devices.
+    axum::serve(listener, router.into_make_service_with_connect_info::<SocketAddr>())
         .with_graceful_shutdown(shutdown_signal())
         .await?;
     Ok(())

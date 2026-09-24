@@ -1,19 +1,31 @@
+//! The phone as a remote control: a page for its browser and a WebSocket
+//! whose commands the interface carries out (`remote://cmd`), approved on
+//! the screen first (`remote://pending`) unless the phone was remembered.
+//! The app serves them on a port of their own (`start`); the web server at
+//! `/remote/` of its own port (server/mod.rs). Either hands the events to
+//! its interface through the emitter it sets.
+
 use std::collections::{HashMap, HashSet};
 use std::net::{IpAddr, SocketAddr};
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
+#[cfg(feature = "app")]
 use axum::extract::{ConnectInfo, Query, State as AxState};
+#[cfg(feature = "app")]
 use axum::http::HeaderMap;
-use axum::response::{Html, Response};
+use axum::response::{Html, IntoResponse, Response};
+#[cfg(feature = "app")]
 use axum::routing::get;
+#[cfg(feature = "app")]
 use axum::Router;
 use futures::{SinkExt, StreamExt};
 use parking_lot::Mutex;
+use qrcode::render::svg;
+use qrcode::QrCode;
 use sha2::{Digest, Sha256};
-use tauri::{AppHandle, Emitter};
 use tokio::sync::{broadcast, mpsc, watch};
 use tokio::task::JoinHandle;
 
@@ -21,6 +33,10 @@ use crate::settings::{RemoteDevice, Settings, SettingsStore};
 use crate::state::AppState;
 
 const PHONE_PAGE: &str = include_str!("remote_page.html");
+
+/// Hands an event to the interface: Tauri's in the app, the pages'
+/// WebSocket in the web server.
+pub type Emit = Arc<dyn Fn(&str, serde_json::Value) + Send + Sync>;
 
 #[derive(Debug, serde::Serialize, serde::Deserialize, Clone)]
 struct RemoteCmd {
@@ -40,10 +56,10 @@ enum Approval {
     Denied,
 }
 
+#[cfg(feature = "app")]
 #[derive(Clone)]
 struct AxumCtx {
     state: Arc<AppState>,
-    app: AppHandle,
 }
 
 /// A live WebSocket client.
@@ -96,6 +112,9 @@ struct Inner {
     direct: Mutex<HashMap<u64, mpsc::UnboundedSender<String>>>,
     next_id: AtomicU64,
     shutdown: Mutex<Option<watch::Sender<bool>>>,
+    emit: Mutex<Option<Emit>>,
+    /// Served by the web server's own listener, not one of its own.
+    mounted: AtomicBool,
 }
 
 impl RemoteController {
@@ -111,12 +130,32 @@ impl RemoteController {
                 direct: Mutex::new(HashMap::new()),
                 next_id: AtomicU64::new(1),
                 shutdown: Mutex::new(None),
+                emit: Mutex::new(None),
+                mounted: AtomicBool::new(false),
             }),
         }
     }
 
+    /// Where the events for the interface go.
+    pub fn set_emitter(&self, emit: Emit) {
+        *self.inner.emit.lock() = Some(emit);
+    }
+
+    /// The web server serves the phone page and its WebSocket itself.
+    #[cfg_attr(not(feature = "server"), allow(dead_code))]
+    pub fn mount(&self) {
+        self.inner.mounted.store(true, Ordering::Relaxed);
+    }
+
+    fn emit(&self, name: &str, payload: impl serde::Serialize) {
+        let emit = self.inner.emit.lock().clone();
+        if let (Some(emit), Ok(payload)) = (emit, serde_json::to_value(payload)) {
+            emit(name, payload);
+        }
+    }
+
     pub fn is_running(&self) -> bool {
-        self.inner.handle.lock().is_some()
+        self.inner.handle.lock().is_some() || self.inner.mounted.load(Ordering::Relaxed)
     }
 
     pub fn client_count(&self) -> u32 {
@@ -160,8 +199,8 @@ impl RemoteController {
         out
     }
 
-    fn emit_clients(&self, app: &AppHandle) {
-        let _ = app.emit("remote://client-count", self.devices());
+    fn emit_clients(&self) {
+        self.emit("remote://client-count", self.devices());
     }
 
     pub fn broadcast_state(&self, payload: String) {
@@ -176,7 +215,7 @@ impl RemoteController {
 
     /// An approval only covers the current connection: a device that is not
     /// remembered is asked again every time it connects.
-    pub fn set_approval(&self, app: &AppHandle, id: u64, approved: bool) {
+    pub fn set_approval(&self, id: u64, approved: bool) {
         if approved {
             if let Some(c) = self.inner.clients.lock().iter_mut().find(|c| c.id == id) {
                 c.approved = true;
@@ -190,13 +229,13 @@ impl RemoteController {
                 Approval::Denied
             });
         }
-        self.emit_clients(app);
+        self.emit_clients();
     }
 
     /// Pairs an approved, connected client on the user's request: a fresh
     /// token is stored in the settings and handed to the phone, which will
     /// present it on every later connection to skip the approval prompt.
-    pub fn remember_device(&self, app: &AppHandle, id: u64) {
+    pub fn remember_device(&self, id: u64) {
         let token = new_token();
         let entry = {
             let mut clients = self.inner.clients.lock();
@@ -219,14 +258,14 @@ impl RemoteController {
         };
         store_device(&self.inner.settings, entry);
         self.send_direct(id, serde_json::json!({ "type": "paired", "token": token }));
-        self.emit_clients(app);
+        self.emit_clients();
     }
 
     /// Drops a stored pairing, addressed either by the live connection (`id`)
     /// or by the stored entry (`key`, for devices currently offline). A phone
     /// still connected keeps working for now but is told to drop its token, so
     /// it will have to be approved again next time.
-    pub fn forget_device(&self, app: &AppHandle, id: Option<u64>, key: Option<&str>) {
+    pub fn forget_device(&self, id: Option<u64>, key: Option<&str>) {
         let mut token: Option<String> = None;
         if let Some(id) = id {
             if let Some(c) = self.inner.clients.lock().iter().find(|c| c.id == id) {
@@ -269,8 +308,21 @@ impl RemoteController {
             self.send_direct(cid, serde_json::json!({ "type": "unpaired" }));
         }
         tracing::info!("[remote] pairing forgotten ({})", token_key(&token));
-        self.emit_clients(app);
+        self.emit_clients();
     }
+}
+
+/// The QR code of the phone page's address, as SVG.
+pub fn make_qr_svg(url: &str) -> Option<String> {
+    let code = QrCode::new(url.as_bytes()).ok()?;
+    Some(
+        code.render::<svg::Color>()
+            .min_dimensions(200, 200)
+            .quiet_zone(false)
+            .dark_color(svg::Color("#1a0f04"))
+            .light_color(svg::Color("#ffffff"))
+            .build(),
+    )
 }
 
 fn new_token() -> String {
@@ -316,13 +368,14 @@ fn touch_device(settings: &SettingsStore, token: &str, ip: &str) {
 /// Settings writes are async and the callers hold no locks: fire and forget.
 fn persist_settings(settings: &SettingsStore, next: Settings) {
     let store = settings.clone();
-    tauri::async_runtime::spawn(async move {
+    crate::util::spawn(async move {
         if let Err(e) = store.write(next).await {
             tracing::warn!("[remote] saving remembered devices failed: {e:#}");
         }
     });
 }
 
+#[cfg(feature = "app")]
 fn is_likely_virtual_name(name: &str) -> bool {
     let l = name.to_lowercase();
     l.contains("virtual")
@@ -340,6 +393,7 @@ fn is_likely_virtual_name(name: &str) -> bool {
         || l.contains("tailscale")
 }
 
+#[cfg(feature = "app")]
 fn is_likely_virtual_ip(addr: &std::net::Ipv4Addr) -> bool {
     let o = addr.octets();
     if o[0] == 172 && (16..=31).contains(&o[1]) {
@@ -357,6 +411,7 @@ fn is_likely_virtual_ip(addr: &std::net::Ipv4Addr) -> bool {
 /// Every usable IPv4 interface as (name, ip, is_virtual), physical ones first.
 /// Virtual adapters (VPN, hypervisor bridges) are included so their addresses
 /// can be listed too — e.g. reaching the remote over Tailscale.
+#[cfg(feature = "app")]
 pub fn local_ipv4_interfaces() -> Vec<(String, String, bool)> {
     let mut real: Vec<(String, String, bool)> = Vec::new();
     let mut maybe_virtual: Vec<(String, String, bool)> = Vec::new();
@@ -398,7 +453,7 @@ fn now_millis() -> u64 {
         .unwrap_or(0)
 }
 
-fn client_ip(addr: SocketAddr) -> String {
+pub fn client_ip(addr: SocketAddr) -> String {
     match addr.ip() {
         IpAddr::V4(v4) => v4.to_string(),
         IpAddr::V6(v6) => v6
@@ -432,15 +487,17 @@ fn device_label(ua: &str) -> String {
     .to_string()
 }
 
-pub async fn reconfigure(app: &AppHandle, state: Arc<AppState>, enabled: bool, port: u16) {
+#[cfg(feature = "app")]
+pub async fn reconfigure(state: Arc<AppState>, enabled: bool, port: u16) {
     stop(&state.remote).await;
     if enabled {
-        if let Err(e) = start(app.clone(), state.clone(), port).await {
+        if let Err(e) = start(state.clone(), port).await {
             tracing::warn!("[remote] failed to start server on port {port}: {e:#}");
         }
     }
 }
 
+#[cfg(feature = "app")]
 async fn stop(controller: &RemoteController) {
     if let Some(tx) = controller.inner.shutdown.lock().take() {
         let _ = tx.send(true);
@@ -456,8 +513,10 @@ async fn stop(controller: &RemoteController) {
     controller.inner.direct.lock().clear();
 }
 
-pub async fn start(app: AppHandle, state: Arc<AppState>, port: u16) -> Result<(), String> {
-    let ctx = AxumCtx { state: state.clone(), app };
+/// The app's own listener for the phone page and its WebSocket.
+#[cfg(feature = "app")]
+pub async fn start(state: Arc<AppState>, port: u16) -> Result<(), String> {
+    let ctx = AxumCtx { state: state.clone() };
     let router: Router = Router::new()
         .route("/", get(index_handler))
         .route("/ws", get(ws_upgrade_handler))
@@ -484,16 +543,20 @@ pub async fn start(app: AppHandle, state: Arc<AppState>, port: u16) -> Result<()
     Ok(())
 }
 
-/// The phone page is served with `no-store` so a reopened tab always runs the
-/// current version (an old page would not know how to keep its pairing token).
-async fn index_handler(
-    AxState(ctx): AxState<AxumCtx>,
-) -> ([(axum::http::HeaderName, &'static str); 1], Html<String>) {
+#[cfg(feature = "app")]
+async fn index_handler(AxState(ctx): AxState<AxumCtx>) -> Response {
+    phone_page(&ctx.state)
+}
+
+/// The phone page, in the interface's theme. Served with `no-store` so a
+/// reopened tab always runs the current version (an old page would not know
+/// how to keep its pairing token).
+pub fn phone_page(state: &AppState) -> Response {
     let mut attrs = String::new();
-    if ctx.state.userdata.get("siiishub-theme").as_deref() == Some("light") {
+    if state.userdata.get("siiishub-theme").as_deref() == Some("light") {
         attrs.push_str(" data-theme=\"light\"");
     }
-    match ctx.state.userdata.get("siiishub-accent").as_deref() {
+    match state.userdata.get("siiishub-accent").as_deref() {
         Some("purple") => attrs.push_str(" data-accent=\"purple\""),
         Some("teal") => attrs.push_str(" data-accent=\"teal\""),
         _ => {}
@@ -503,9 +566,10 @@ async fn index_handler(
     } else {
         PHONE_PAGE.replacen("<html lang=\"it\">", &format!("<html lang=\"it\"{attrs}>"), 1)
     };
-    ([(axum::http::header::CACHE_CONTROL, "no-store")], Html(page))
+    ([(axum::http::header::CACHE_CONTROL, "no-store")], Html(page)).into_response()
 }
 
+#[cfg(feature = "app")]
 async fn ws_upgrade_handler(
     ws: WebSocketUpgrade,
     AxState(ctx): AxState<AxumCtx>,
@@ -513,17 +577,24 @@ async fn ws_upgrade_handler(
     headers: HeaderMap,
     Query(query): Query<HashMap<String, String>>,
 ) -> Response {
-    let ip = client_ip(addr);
     let ua = headers
         .get(axum::http::header::USER_AGENT)
         .and_then(|v| v.to_str().ok())
-        .unwrap_or("")
-        .to_string();
-    let token = query
-        .get("token")
-        .map(|t| t.trim().to_string())
-        .filter(|t| !t.is_empty());
-    ws.on_upgrade(move |socket| ws_session(socket, ctx, ip, ua, token))
+        .unwrap_or("");
+    upgrade(ws, ctx.state, client_ip(addr), ua, query.get("token").map(String::as_str))
+}
+
+/// A phone's WebSocket: `token` is the pairing it presents, if any.
+pub fn upgrade(
+    ws: WebSocketUpgrade,
+    state: Arc<AppState>,
+    ip: String,
+    user_agent: &str,
+    token: Option<&str>,
+) -> Response {
+    let ua = user_agent.to_string();
+    let token = token.map(|t| t.trim().to_string()).filter(|t| !t.is_empty());
+    ws.on_upgrade(move |socket| ws_session(socket, state, ip, ua, token))
 }
 
 fn hello_msg(lang: &str) -> String {
@@ -536,7 +607,7 @@ fn pending_msg(lang: &str) -> String {
 
 async fn ws_session(
     socket: WebSocket,
-    ctx: AxumCtx,
+    state: Arc<AppState>,
     ip: String,
     ua: String,
     token: Option<String>,
@@ -547,7 +618,7 @@ async fn ws_session(
     // Only a client presenting a valid pairing token (remembered by the user)
     // skips the approval prompt; everyone else is asked on every connection.
     let remembered_token = token.filter(|t| {
-        ctx.state
+        state
             .settings
             .read()
             .remote_devices
@@ -555,7 +626,7 @@ async fn ws_session(
             .any(|d| &d.token == t)
     });
     if let Some(t) = &remembered_token {
-        touch_device(&ctx.state.settings, t, &ip);
+        touch_device(&state.settings, t, &ip);
     }
     let pre_approved = remembered_token.is_some();
     let (atx, arx) = watch::channel(if pre_approved {
@@ -564,9 +635,9 @@ async fn ws_session(
         Approval::Pending
     });
 
-    let client_id = ctx.state.remote.inner.next_id.fetch_add(1, Ordering::Relaxed);
+    let client_id = state.remote.inner.next_id.fetch_add(1, Ordering::Relaxed);
     {
-        let mut clients = ctx.state.remote.inner.clients.lock();
+        let mut clients = state.remote.inner.clients.lock();
         clients.push(ClientInfo {
             id: client_id,
             token: remembered_token.clone(),
@@ -577,14 +648,14 @@ async fn ws_session(
             remembered: remembered_token.is_some(),
         });
     }
-    ctx.state
+    state
         .remote
         .inner
         .approvals
         .lock()
         .insert(client_id, atx);
     let (direct_tx, mut direct_rx) = mpsc::unbounded_channel::<String>();
-    ctx.state
+    state
         .remote
         .inner
         .direct
@@ -594,11 +665,11 @@ async fn ws_session(
     tracing::info!(
         "[remote] client connected ({device} {ip}) — {} (total {})",
         if pre_approved { "remembered" } else { "pending" },
-        ctx.state.remote.client_count()
+        state.remote.client_count()
     );
-    ctx.state.remote.emit_clients(&ctx.app);
+    state.remote.emit_clients();
     if !pre_approved {
-        let _ = ctx.app.emit(
+        state.remote.emit(
             "remote://pending",
             PendingDevice {
                 id: client_id,
@@ -608,10 +679,9 @@ async fn ws_session(
         );
     }
 
-    let lang = ctx.state.settings.read().language;
-    let mut rx = ctx.state.remote.inner.state_tx.subscribe();
-    let mut shutdown_rx = ctx
-        .state
+    let lang = state.settings.read().language;
+    let mut rx = state.remote.inner.state_tx.subscribe();
+    let mut shutdown_rx = state
         .remote
         .inner
         .shutdown
@@ -619,14 +689,14 @@ async fn ws_session(
         .as_ref()
         .map(|tx| tx.subscribe());
 
-    let app_for_recv = ctx.app.clone();
+    let state_for_recv = state.clone();
     let arx_recv = arx.clone();
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
                 Message::Text(t) if *arx_recv.borrow() == Approval::Approved => {
                     if let Ok(cmd) = serde_json::from_str::<RemoteCmd>(&t) {
-                        let _ = app_for_recv.emit("remote://cmd", cmd);
+                        state_for_recv.remote.emit("remote://cmd", cmd);
                     }
                 }
                 Message::Close(_) => break,
@@ -720,19 +790,19 @@ async fn ws_session(
     recv_task.abort();
     send_task.abort();
 
-    ctx.state
+    state
         .remote
         .inner
         .clients
         .lock()
         .retain(|c| c.id != client_id);
-    ctx.state.remote.inner.approvals.lock().remove(&client_id);
-    ctx.state.remote.inner.direct.lock().remove(&client_id);
+    state.remote.inner.approvals.lock().remove(&client_id);
+    state.remote.inner.direct.lock().remove(&client_id);
     tracing::info!(
         "[remote] client disconnected (total {})",
-        ctx.state.remote.client_count()
+        state.remote.client_count()
     );
-    ctx.state.remote.emit_clients(&ctx.app);
+    state.remote.emit_clients();
 }
 
 async fn await_shutdown(rx: &mut Option<watch::Receiver<bool>>) {

@@ -10,7 +10,6 @@ use tokio_util::sync::CancellationToken;
 use crate::download::DownloadManager;
 #[cfg(feature = "app")]
 use crate::mpv::Mpv;
-#[cfg(feature = "app")]
 use crate::remote::RemoteController;
 use crate::settings::{PublicSettings, SettingsStore};
 use crate::torrent::TorrentManager;
@@ -28,7 +27,6 @@ pub struct AppState {
     pub download_dir: PathBuf,
     #[cfg(feature = "app")]
     pub main_hwnd: Mutex<Option<isize>>,
-    #[cfg(feature = "app")]
     pub remote: RemoteController,
     resolve_cancels: Mutex<HashMap<String, CancellationToken>>,
 }
@@ -84,7 +82,6 @@ impl AppState {
         let downloads_persist = data_dir.join("downloads.json");
         let downloads = DownloadManager::new(downloads_persist, download_dir.clone());
 
-        #[cfg(feature = "app")]
         let remote = RemoteController::new(settings.clone());
 
         Ok(Self {
@@ -99,7 +96,6 @@ impl AppState {
             download_dir,
             #[cfg(feature = "app")]
             main_hwnd: Mutex::new(None),
-            #[cfg(feature = "app")]
             remote,
             resolve_cancels: Mutex::new(HashMap::new()),
         })
