@@ -311,8 +311,17 @@ function toVideoCue(c) {
   return new VTTCue(Math.max(0, c.start + shift), end, c.text);
 }
 
-function renderCues() {
+// Chromium keeps the box of a cue on screen for good when the video loads
+// another source while the cue shows: the cue stops being active, its box
+// stays, and no later change of cues takes it away. So the cues leave the
+// track before every change of source, and renderCues() brings them back
+// after.
+function clearCues() {
   for (const cue of [...(subtitleTrack.cues || [])]) subtitleTrack.removeCue(cue);
+}
+
+function renderCues() {
+  clearCues();
   const sub = typeof sid === 'number' ? subs.get(sid) : null;
   for (const c of sub?.cues || []) {
     const cue = toVideoCue(c);
@@ -430,10 +439,23 @@ function randomToken() {
   return [...bytes].map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
+// hls.js lets go of the video, which empties it: see clearCues().
 function destroyHls() {
   if (hls) {
+    clearCues();
     hls.destroy();
     hls = null;
+  }
+}
+
+// The video plays `url`, or nothing; see clearCues().
+function setSource(url) {
+  clearCues();
+  if (url) {
+    video.src = url;
+  } else {
+    video.removeAttribute('src');
+    video.load();
   }
 }
 
@@ -457,7 +479,8 @@ function startProgressive(at) {
     q.set('sub', String(sub.index));
     q.set('subfile', token);
   }
-  video.src = `${media.url}/remux.mp4?${q}`;
+  setSource(`${media.url}/remux.mp4?${q}`);
+  renderCues();
   followSubtitle(token);
 }
 
@@ -503,9 +526,11 @@ async function startHls(at) {
     });
     hls.on(Hls.Events.ERROR, (_event, data) => onHlsError(Hls, data));
     hls.loadSource(created.playlist);
+    // The video may still hold a stream as it is, or a progressive one.
+    clearCues();
     hls.attachMedia(video);
   } else if (CAN.nativeHls) {
-    video.src = created.playlist;
+    setSource(created.playlist);
     if (at > 0) video.addEventListener('loadedmetadata', () => { video.currentTime = at; }, { once: true });
   } else {
     media.transport = 'progressive';
@@ -523,7 +548,10 @@ function onHlsError(Hls, data) {
   console.warn('[player] hls.js', data.type, data.details);
   if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !mediaRecovered && hls) {
     mediaRecovered = true;
+    // It attaches the video again, emptying it: see clearCues().
+    clearCues();
     hls.recoverMediaError();
+    renderCues();
     return;
   }
   if (fallBack()) return;
@@ -535,7 +563,7 @@ function startStream(at) {
   opening = false;
   if (media.transport === 'direct') {
     offset = 0;
-    video.src = media.url;
+    setSource(media.url);
     if (at > 0) video.currentTime = at;
     video.playbackRate = speed;
     renderCues();
@@ -546,7 +574,6 @@ function startStream(at) {
     destroyHls();
     startProgressive(at);
     video.playbackRate = speed;
-    renderCues();
     video.play().catch(() => {});
   }
 }
@@ -679,8 +706,7 @@ function stop() {
   closeSession();
   media = null;
   video.pause();
-  video.removeAttribute('src');
-  video.load();
+  setSource(null);
   subs.clear();
   sid = 'no';
   renderCues();
@@ -711,6 +737,12 @@ function applyVolume() {
 }
 
 // ---------- Video element events ----------
+// Should a cue be caught on screen by a change of source all the same (see
+// clearCues), hiding the track for a moment takes its box away.
+video.addEventListener('emptied', () => {
+  subtitleTrack.mode = 'hidden';
+  subtitleTrack.mode = 'showing';
+});
 video.addEventListener('playing', () => {
   if (restarting) {
     restarting = false;
