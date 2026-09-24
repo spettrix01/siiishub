@@ -1,4 +1,5 @@
 import { $, $$, CHECK_SVG, FORM_TAGS } from './dom.js';
+import { IS_ANDROID } from './platform.js';
 import { state } from './state.js';
 import { t, onLangChange } from './i18n.js';
 import { clearGrid, loadMore } from './grid.js';
@@ -130,6 +131,22 @@ if (tauriWin) {
   winCloseBtn?.addEventListener('click', () => tauriWin.close().catch(() => {}));
 } else {
   winMinBtn?.parentElement?.setAttribute('hidden', '');
+}
+
+// Desktop: the details page opens right below the topbar and the player keeps
+// the window controls in its top band: publish their size (bottom-nav.js
+// publishes --topbar-h on Android for the settings page).
+if (!IS_ANDROID) {
+  const topbar = $('.topbar');
+  const winctl = $('.winctl');
+  const publishSizes = () => {
+    document.documentElement.style.setProperty('--topbar-h', `${topbar.getBoundingClientRect().height}px`);
+    document.documentElement.style.setProperty('--winctl-w', `${winctl.getBoundingClientRect().width}px`);
+  };
+  publishSizes();
+  const sizeObserver = new ResizeObserver(publishSizes);
+  sizeObserver.observe(topbar);
+  sizeObserver.observe(winctl);
 }
 
 const searchInput = $('#search');

@@ -1,4 +1,4 @@
-import { IS_ANDROID } from './platform.js';
+import { IS_ANDROID, IS_PHONE } from './platform.js';
 import { $, escapeHTML, DOTS_HTML, CHECK_SVG, COPY_SVG, copyToClipboard, openExternal } from './dom.js';
 import { state, tmdbType, TMDB_IMG } from './state.js';
 import { tmdb, fetchStreams, fetchTvSeason, rdPlay, onMediaProgress, downloadStart, downloadPlay, downloadFiles, downloadList, destroyTorrentSession } from './api.js';
@@ -8,6 +8,7 @@ import { openPlayerWithUrl, openPlayerLoading, attachToOpenPlayer, pushPlayerLog
 import { closeModal } from './modal.js';
 import { openSettings } from './settings-ui.js';
 import { isFavorite, toggleFavorite } from './favorites.js';
+import { saveWatchedStream, getWatchedStream, lastEpisode } from './resume.js';
 import { t, locMsg, tmdbLang } from './i18n.js';
 
 const detailsModal = $('#detailsModal');
@@ -34,6 +35,13 @@ async function streamDownloadId(s) {
   return [...new Uint8Array(bytes).slice(0, 20)]
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
+}
+
+// A stream across sessions: the torrent and its file (a season pack holds
+// every episode), or a hash of the URL, which may carry the debrid key.
+async function streamWatchKey(s) {
+  const id = await streamDownloadId(s);
+  return id ? `${id}:${s.fileIdx ?? ''}` : null;
 }
 
 const QUALITY_TIERS = [
@@ -528,7 +536,7 @@ function renderDetails(item, detail, type) {
     </div>` : '';
 
   const desktopHtml = `
-    ${backdrop ? `<div class="dossier-hero"><img src="${escapeHTML(backdrop)}" alt="" loading="eager">${IS_ANDROID ? `<h2 class="dossier-hero-title">${escapeHTML(title)}</h2>` : ''}</div>` : ''}
+    ${backdrop ? `<div class="dossier-hero"><img src="${escapeHTML(backdrop)}" alt="" loading="eager">${IS_PHONE ? `<h2 class="dossier-hero-title">${escapeHTML(title)}</h2>` : ''}</div>` : ''}
     <div class="dossier-content${backdrop ? '' : ' no-hero'}">
       <div class="dossier-head">
         <div class="dossier-poster">
@@ -584,7 +592,7 @@ function renderDetails(item, detail, type) {
       ${state.detail?.downloadMode ? '' : renderStreamsShell(detail, type)}
     </div>
   `;
-  body.innerHTML = IS_ANDROID
+  body.innerHTML = IS_PHONE
     ? mobileDetailsHtml({ item, detail, type, isTV, title, backdrop, director, writers, creators })
     : desktopHtml;
 
@@ -732,9 +740,15 @@ async function bindStreamsSection(detail, type) {
       : t('details.seasonN', { n: s.season_number }),
   }));
 
+  // A series opens on the episode watched last (played, or in Continue watching).
+  const last = lastEpisode(tvId);
+  const startSeason = last && seasonItems.some(i => i.value === last.season)
+    ? last.season
+    : seasonItems[0]?.value;
+
   const seasonPicker = setupStreamPicker(seasonRoot, {
     items: seasonItems,
-    value: seasonItems[0]?.value,
+    value: startSeason,
     popup: IS_ANDROID,
     onChange: v => loadSeason(Number(v)),
   });
@@ -765,7 +779,10 @@ async function bindStreamsSection(detail, type) {
         return;
       }
       epPicker.setItems(items);
-      epPicker.setValue(items[0].value, false);
+      const startEpisode = last && seasonNumber === last.season && items.some(i => i.value === last.episode)
+        ? last.episode
+        : items[0].value;
+      epPicker.setValue(startEpisode, false);
       triggerEpisode();
     } catch (e) {
       epPicker.setItems([{ value: '', label: t('details.errorShort') }]);
@@ -840,6 +857,12 @@ async function loadStreams(root, type, id) {
       console.warn('downloaded-state hydration failed', err);
     }
 
+    // The stream this movie or episode was last played from.
+    const lastKey = getWatchedStream(buildPlayCtx(type, id));
+    const keys = lastKey ? await Promise.all(enriched.map(e => streamWatchKey(e.s))) : [];
+    if (myGen !== state.detailGen) return;
+    enriched.forEach((e, i) => { e.s._watched = !!lastKey && keys[i] === lastKey; });
+
     const addonCounts = new Map();
     const resCounts = new Map();
     for (const { s, meta } of enriched) {
@@ -868,6 +891,8 @@ async function loadStreams(root, type, id) {
       if (sortBy === 'seeders') {
         items.sort((a, b) => seedersNum(b.e.meta.seeders) - seedersNum(a.e.meta.seeders));
       }
+      // The stream last played from leads the list.
+      items.sort((a, b) => Number(!!b.e.s._watched) - Number(!!a.e.s._watched));
       listEl.innerHTML = items.map(({ e, i }) => streamItemHtml(e.s, e.meta, i)).join('');
     };
 
@@ -976,7 +1001,11 @@ async function loadStreams(root, type, id) {
         const entry = enriched[Number(playBtn.dataset.rdPlay)];
         if (entry) {
           const ctx = buildPlayCtx(type, id, entry.s._addon);
-          startRdPlayback(entry.s, entry.meta, playBtn, ctx);
+          startRdPlayback(entry.s, entry.meta, playBtn, ctx).then(played => {
+            if (!played || myGen !== state.detailGen) return;
+            for (const x of enriched) x.s._watched = x === entry;
+            renderList();
+          });
         }
         return;
       }
@@ -1060,12 +1089,16 @@ function streamItemHtml(s, meta, idx) {
   const rdBadge = rd
     ? `<span class="stream-rd stream-rd--${rd.state}" title="${escapeHTML(rd.state === 'cached' ? t('details.rd.cached') : rd.state === 'download' ? t('details.rd.download') : t('details.rd.plain'))}">${escapeHTML(rd.label)}</span>`
     : '';
+  const watchedBadge = s._watched
+    ? `<span class="stream-watched">${escapeHTML(t('details.stream.lastWatched'))}</span>`
+    : '';
 
   return `
-    <li class="stream">
+    <li class="stream${s._watched ? ' is-watched' : ''}">
       <div class="stream-info">
         <div class="stream-meta">
           <span class="stream-q ${escapeHTML(q.cls || '')}">${escapeHTML(q.label)}</span>
+          ${watchedBadge}
           ${rdBadge}
           ${stats ? `<div class="stream-stats">${stats}</div>` : ''}
         </div>
@@ -1152,6 +1185,8 @@ async function runPlayback(stream, meta, ctx) {
       torrent: torrentMeta,
       ctx,
     });
+    streamWatchKey(stream).then(key => saveWatchedStream(ctx, key)).catch(() => {});
+    return true;
   } catch (e) {
     if (e?.name === 'AbortError' || ctl.signal.aborted) return;
     const msg = locMsg((e && e.message) || (typeof e === 'string' ? e : String(e)));
@@ -1178,7 +1213,7 @@ async function startRdPlayback(stream, meta, btn, ctx) {
   const onClosed = () => reset();
   window.addEventListener('siiis:player-closed', onClosed, { once: true });
   try {
-    await runPlayback(stream, meta, ctx);
+    return await runPlayback(stream, meta, ctx);
   } finally {
     window.removeEventListener('siiis:player-closed', onClosed);
     reset();

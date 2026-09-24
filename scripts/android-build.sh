@@ -97,6 +97,11 @@ fi
 # libmpv needs Android 8.0 (26).
 sed -i -E 's/minSdk = 2[0-5]$/minSdk = 26/' gen/android/app/build.gradle.kts
 
+# Cleartext HTTP: the phone can be the remote of SIIISHUB on a PC, whose
+# remote page and WebSocket are plain HTTP on the local network (remote.rs).
+# The template allows cleartext traffic in debug builds only.
+sed -i 's/manifestPlaceholders\["usesCleartextTraffic"\] = "false"/manifestPlaceholders["usesCleartextTraffic"] = "true"/' gen/android/app/build.gradle.kts
+
 # R8: the wry ProGuard template does not keep WryActivity.getId(), which the
 # tao JNI glue calls at startup (NoSuchMethodError, then abort). Minification
 # saves almost nothing here (the size is native code), so it stays off; the

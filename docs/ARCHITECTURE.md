@@ -88,17 +88,50 @@ does not expose mpv nodes.
 
 ## The Android interface
 
-The same `dist/` runs on the phone. `js/platform.js` adds the `is-android`
-class to `<html>`, and Android-only behaviour depends on that class and on the
-`IS_ANDROID` flag:
+The same `dist/` runs on phones and on Android TV. `js/platform.js` adds the
+`is-android` class to `<html>`, plus `is-phone` or `is-tv` (a TV has no
+touchscreen: `navigator.maxTouchPoints` is 0). What phones and TVs share
+depends on `is-android` and `IS_ANDROID`, the phone layout on `is-phone` and
+`IS_PHONE`:
 
-- `bottom-nav.js`: bottom navigation, with the settings shown as a page.
+- `bottom-nav.js`: bottom navigation on phones, with the settings shown as a
+  page.
 - `picker.js` in popup mode, `android-inputs.js` for text fields edited in a
   centred popup, `android-genres.js` for the genre popup.
 - `android-back.js`: the Back button closes popups and overlays first, through
   history entries.
 - `android-player.js`: landscape player, settings popup, pinch to fill the
   screen (`panscan`) and tap to show or hide the controls.
+- `remote-client.js`: Settings → Remote makes the phone the remote of
+  SIIISHUB on a PC. It frames the QR code of the PC with the camera
+  (`getUserMedia` and `BarcodeDetector`; without them the address is typed),
+  then shows the phone page served by the PC (`remote_page.html`) full screen
+  in a frame, so approval and pairing work as in the phone's browser. For it
+  the release APK allows cleartext HTTP (`android-build.sh`), the Android CSP
+  allows `http:` frames and connections (`tauri.android.conf.json`) and the
+  plugin declares the camera, not required.
+
+### Android TV
+
+The TV keeps the big-screen layout of the desktop, without window controls and
+with margins inside the TV safe area, and is driven with its remote
+(`tv-nav.js`):
+
+- The D-pad moves the selection with `spatial-nav.js`, the navigation of the
+  phone remote, and OK activates it. Back is the system Back button
+  (`android-back.js`).
+- A details page opens with its first action selected, the settings with
+  their current section. Closing the player gives the selection back to the
+  stream that was playing.
+- In the player, with nothing selected, left and right seek by 10 s and OK
+  plays or pauses; up and down show the controls and select the time bar. The
+  media keys play, pause and seek by 30 s.
+- There is no Remote section: the TV neither runs the remote server nor
+  controls a PC.
+- `MpvPlugin.kt` leaves the orientation to the TV, which a 1080p screen of
+  540 dp would otherwise lock like a phone. The manifest carries the 320×180
+  launcher banner, and `android-build.sh` adds the `LEANBACK_LAUNCHER`
+  category.
 
 Android WebView details worth knowing:
 
@@ -131,6 +164,5 @@ Android WebView details worth knowing:
   service yet.
 - `ffprobe` does not exist on Android, so tracks are not analysed before
   playback. mpv still lists them in the player.
-- The Android TV launcher shows the regular icon, since there is no TV banner.
 - Leaving the Android app with Back can end the process with a native crash
   instead of a clean exit. The app starts normally the next time.

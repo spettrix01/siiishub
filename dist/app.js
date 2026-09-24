@@ -17,6 +17,7 @@ import './js/bottom-nav.js';
 import './js/android-genres.js';
 import './js/android-inputs.js';
 import './js/android-player.js';
+import './js/tv-nav.js';
 import { startDownloadBadgePolling } from './js/library.js';
 
 function syncScrollbarVar() {

@@ -1026,6 +1026,8 @@ function detachPlayer({ keepTorrent = false, sendStop = false } = {}) {
     playerTorrent = null;
     stopTorrentStatsPolling();
   }
+  // The phone remote clears its time bar and play button right away.
+  pushRemoteStateNow();
 }
 
 async function attachStream(playlistUrl, opts = {}) {
@@ -1136,6 +1138,7 @@ export function closePlayer() {
     windowSetFullscreen(false).catch(() => {});
     mpvState.fullscreen = false;
     playerFrame.classList.remove('is-fs');
+    syncHeaderDrag();
   }
 
   if (detailsWasVisible && detailsModal) {
@@ -1272,6 +1275,13 @@ function togglePlay() {
 function toggleMute() {
   mpvCommand(['cycle', 'mute']).catch(() => {});
 }
+// Desktop: dragging the header band moves the window like the topbar (double
+// click maximizes), except in fullscreen.
+function syncHeaderDrag() {
+  if (IS_ANDROID) return;
+  playerTopEl.dataset.tauriDragRegion = mpvState.fullscreen ? 'false' : 'deep';
+}
+syncHeaderDrag();
 async function toggleFullscreen() {
   try {
     const next = !mpvState.fullscreen;
@@ -1286,6 +1296,7 @@ async function toggleFullscreen() {
     await windowSetFullscreen(next);
     mpvState.fullscreen = next;
     playerFrame.classList.toggle('is-fs', next);
+    syncHeaderDrag();
 
     if (!next && mpvState.wasMaximized && TAURI?.window) {
       try {
@@ -1462,8 +1473,12 @@ document.addEventListener('click', e => {
   closeSettings();
 });
 
+// The window controls (desktop) show over the player but live in the topbar:
+// moving over them keeps the player awake as well.
+const winctl = $('.winctl');
 ['mousemove', 'pointermove', 'pointerdown', 'wheel'].forEach(ev => {
   playerFrame.addEventListener(ev, () => wakePlayer());
+  winctl?.addEventListener(ev, () => { if (isPlayerOpen()) wakePlayer(); });
 });
 
 const playerSpeedHint = $('#playerSpeedHint');
@@ -1722,6 +1737,44 @@ function handleNavCommand(dir) {
   if (playerOpen) wakePlayer();
   if (dir === 'ok') spatialNav.activate();
   else spatialNav.move(dir);
+}
+
+// Android TV remote in the player (tv-nav.js). With nothing selected, left
+// and right seek by 10 s and OK plays or pauses, as on any TV player; up and
+// down bring the controls and select the time bar, and from there the D-pad
+// moves between the controls like the phone remote. Hidden controls drop the
+// selection, so after a seek OK still means play/pause.
+export function playerRemoteKey(dir) {
+  const popupOpen = !playerSettings.hidden || !!document.querySelector('[data-pick-menu]:not([hidden])');
+  if (!popupOpen && playerFrame.classList.contains('is-idle')) spatialNav.clear();
+  const selected = !!playerModal.querySelector('.snav-focus');
+  if (!popupOpen && !selected) {
+    if (dir === 'left' || dir === 'right') {
+      mpvCommand(['seek', dir === 'right' ? '10' : '-10', 'relative']).catch(() => {});
+      wakePlayer();
+      return;
+    }
+    if (dir === 'ok') {
+      togglePlay();
+      wakePlayer();
+      return;
+    }
+    spatialNav.clear();
+  }
+  handleNavCommand(dir);
+}
+
+// Media keys of a TV remote: play/pause, and fast forward / rewind by 30 s.
+export function playerMediaKey(key) {
+  if (playerModal.hidden) return false;
+  if (key === 'MediaPlayPause') togglePlay();
+  else if (key === 'MediaPlay') mpvSet('pause', false).catch(() => {});
+  else if (key === 'MediaPause') mpvSet('pause', true).catch(() => {});
+  else if (key === 'MediaFastForward' || key === 'MediaRewind') {
+    mpvCommand(['seek', key === 'MediaFastForward' ? '30' : '-30', 'relative']).catch(() => {});
+  } else return false;
+  wakePlayer();
+  return true;
 }
 
 playerProgress.addEventListener('snav-adjust', (e) => {

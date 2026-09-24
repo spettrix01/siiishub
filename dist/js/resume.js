@@ -1,8 +1,8 @@
 import { safeJsonParse } from './dom.js';
 import { userStore } from './userstore.js';
 
+// Resume points never expire: they go when the title is finished.
 const KEY_PREFIX = 'siiis:resume:';
-const TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const MIN_SAVE_TIME = 5;
 const MAX_SAVE_PROGRESS = 0.95;
 
@@ -49,10 +49,6 @@ export function getResume(ctx) {
   if (!k) return null;
   const data = safeJsonParse(userStore.getItem(k));
   if (!data || !Number.isFinite(data.t) || !Number.isFinite(data.d)) return null;
-  if (Date.now() - (data.ts || 0) > TTL_MS) {
-    userStore.removeItem(k);
-    return null;
-  }
   if (data.t / data.d > MAX_SAVE_PROGRESS) {
     userStore.removeItem(k);
     return null;
@@ -69,7 +65,6 @@ export function listResume(limit = 20) {
     if (!k || !k.startsWith(KEY_PREFIX)) continue;
     const data = safeJsonParse(userStore.getItem(k));
     if (!data || !Number.isFinite(data.t) || !Number.isFinite(data.d) || data.d <= 0) continue;
-    if (Date.now() - (data.ts || 0) > TTL_MS) continue;
     if (data.t / data.d > MAX_SAVE_PROGRESS) continue;
     const rest = k.slice(KEY_PREFIX.length);
     const parts = rest.split(':');
@@ -97,6 +92,50 @@ export function listResume(limit = 20) {
   return all.slice(0, limit);
 }
 
+// The stream each movie or episode was last played from, kept after the
+// resume point is gone (finished): the details mark it again.
+const WATCHED_PREFIX = 'siiis:watched:';
+
+function watchedKeyOf(ctx) {
+  if (ctx?.type === 'tv' && ctx.tmdbId != null && ctx.season != null && ctx.episode != null) {
+    return `${WATCHED_PREFIX}tv:${ctx.tmdbId}:${ctx.season}:${ctx.episode}`;
+  }
+  if (ctx?.type === 'movie' && ctx.tmdbId != null) return `${WATCHED_PREFIX}movie:${ctx.tmdbId}`;
+  return null;
+}
+
+export function saveWatchedStream(ctx, streamKey) {
+  const k = watchedKeyOf(ctx);
+  if (!k || !streamKey) return;
+  userStore.setItem(k, JSON.stringify({ k: streamKey, ts: Date.now() }));
+}
+
+export function getWatchedStream(ctx) {
+  const k = watchedKeyOf(ctx);
+  const data = k ? safeJsonParse(userStore.getItem(k)) : null;
+  return typeof data?.k === 'string' ? data.k : null;
+}
+
+/** The episode of a series watched last, played or waiting in Continue
+ *  watching: `{ season, episode }`, or null. */
+export function lastEpisode(tmdbId) {
+  if (tmdbId == null) return null;
+  const prefixes = [`${WATCHED_PREFIX}tv:${tmdbId}:`, `${KEY_PREFIX}tv:${tmdbId}:`];
+  let best = null;
+  const count = userStore.length;
+  for (let i = 0; i < count; i++) {
+    const k = userStore.key(i);
+    const prefix = k && prefixes.find(p => k.startsWith(p));
+    if (!prefix) continue;
+    const [season, episode] = k.slice(prefix.length).split(':').map(Number);
+    const ts = safeJsonParse(userStore.getItem(k))?.ts || 0;
+    if (Number.isFinite(season) && Number.isFinite(episode) && (!best || ts > best.ts)) {
+      best = { season, episode, ts };
+    }
+  }
+  return best && { season: best.season, episode: best.episode };
+}
+
 export function getCardProgress(type, tmdbId) {
   if (tmdbId == null) return null;
   if (type === 'movie') {
@@ -113,7 +152,6 @@ export function getCardProgress(type, tmdbId) {
       if (!k || !k.startsWith(prefix)) continue;
       const data = safeJsonParse(userStore.getItem(k));
       if (!data || !Number.isFinite(data.t) || !Number.isFinite(data.d) || data.d <= 0) continue;
-      if (Date.now() - (data.ts || 0) > TTL_MS) continue;
       if (data.t / data.d > MAX_SAVE_PROGRESS) continue;
       if ((data.ts || 0) > latestTs) {
         latestTs = data.ts || 0;

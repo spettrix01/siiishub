@@ -8,7 +8,8 @@ import { streamPickerHtml, setupStreamPicker } from './picker.js';
 import { langPickerHtml, setupLangPicker, buildLangItems, localizedLangName } from './lang-picker.js';
 import { t, locMsg, setLang, APP_LANGUAGES, onLangChange } from './i18n.js';
 import { setTheme, currentTheme } from './theme.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_ANDROID, IS_PHONE, IS_TV } from './platform.js';
+import { parseRemoteAddress, canScanQr, scanRemoteQr, connectRemote } from './remote-client.js';
 
 const settingsModal = $('#settingsModal');
 
@@ -22,9 +23,13 @@ function settingsPanes() {
     { value: 'download', label: t('settings.pane.download') },
     { value: 'remote', label: t('settings.pane.remote') },
   ];
-  // The phone keeps the torrent tracker list at its defaults and is the
-  // player itself, with no remote control: no sections for either.
-  return IS_ANDROID ? panes.filter(p => p.value !== 'trackers' && p.value !== 'remote') : panes;
+  // Android keeps the torrent tracker list at its defaults. Instead of being
+  // controlled, the phone is the remote of a PC (its own Remote section);
+  // the TV is driven with its own remote and has no Remote section at all.
+  if (IS_TV) return panes.filter(p => p.value !== 'trackers' && p.value !== 'remote');
+  return IS_ANDROID
+    ? panes.filter(p => p.value !== 'trackers').map(p => (p.value === 'remote' ? { ...p, value: 'remoteClient' } : p))
+    : panes;
 }
 
 function nativeLangName(code) {
@@ -123,7 +128,8 @@ export function openSettings(pane = 'language') {
   setupAppLanguageSection();
   setupPlayerLangsSection();
   setupAppearanceSection();
-  if (!IS_ANDROID) setupRemoteSection();
+  if (IS_PHONE) setupRemoteClientSection();
+  else if (!IS_ANDROID) setupRemoteSection();
   setupDebridSection();
   resetHint('#tmdbHint');
   resetHint('#addonHint');
@@ -132,6 +138,7 @@ export function openSettings(pane = 'language') {
   resetHint('#appLanguageHint');
   resetHint('#playerLangsHint');
   resetHint('#remoteHint');
+  resetHint('#remoteClientHint');
   renderAddons();
 }
 
@@ -717,6 +724,60 @@ async function saveRemote() {
   }
 }
 $('#remotePortInput')?.addEventListener('change', saveRemote);
+
+// Android: the phone as the remote of a PC (remote-client.js). The PC is
+// reached by framing the QR code of its Remote section, or by its address.
+async function setupRemoteClientSection() {
+  const scanBtn = $('#remoteScanBtn');
+  if (!scanBtn) return;
+  const canScan = await canScanQr();
+  scanBtn.hidden = !canScan;
+  if (!canScan) setHint('#remoteClientHint', t('settings.remoteClient.scanUnavailable'), 'info');
+}
+
+// A newer action (another address, a scan) supersedes a pending connection.
+let remoteClientRequest = 0;
+
+async function openRemoteClient(entry) {
+  const request = ++remoteClientRequest;
+  setHint('#remoteClientHint', t('settings.remoteClient.connecting', { host: entry.host }));
+  const result = await connectRemote(entry);
+  if (request !== remoteClientRequest) return;
+  if (result === 'ok') {
+    // The address stays in the field: connecting again is one tap.
+    const input = $('#remoteAddressInput');
+    if (input) input.value = entry.host;
+    setHint('#remoteClientHint', '');
+  } else if (result === 'unreachable') {
+    setHint('#remoteClientHint', t('settings.remoteClient.unreachable', { host: entry.host }), 'error');
+  } else {
+    setHint('#remoteClientHint', '');
+  }
+}
+
+$('#remoteScanBtn')?.addEventListener('click', async () => {
+  remoteClientRequest++;
+  setHint('#remoteClientHint', '');
+  let entry;
+  try {
+    entry = await scanRemoteQr();
+  } catch (e) {
+    const key = e?.name === 'NotAllowedError' ? 'settings.remoteClient.cameraDenied' : 'settings.remoteClient.cameraError';
+    setHint('#remoteClientHint', t(key), 'error');
+    return;
+  }
+  if (entry) openRemoteClient(entry);
+});
+
+$('#remoteConnectBtn')?.addEventListener('click', () => {
+  const entry = parseRemoteAddress($('#remoteAddressInput')?.value);
+  if (!entry) {
+    remoteClientRequest++;
+    setHint('#remoteClientHint', t('settings.remoteClient.invalid'), 'error');
+    return;
+  }
+  openRemoteClient(entry);
+});
 
 async function savePlayerLangs() {
   if (!playerLangsDirty) return;

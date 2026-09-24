@@ -3,4 +3,14 @@
     <!-- Android TV boxes have no touchscreen; phones have no leanback. -->
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.software.leanback" android:required="false" />
+
+    <!-- The phone as the remote of SIIISHUB on a PC frames the QR code of the
+         PC with the camera (getUserMedia in remote-client.js; wry asks for the
+         permission at runtime). Devices without a camera type the address. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <!-- Android TV: the home screen shows this 320x180 banner, not the icon. -->
+    <application android:banner="@drawable/siiishub_tv_banner" />
 </manifest>

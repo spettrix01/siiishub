@@ -169,10 +169,33 @@
   .progress-times {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 13px;
     color: var(--text-2);
   }
+  /* Shown with a stream, once the time bar has a duration: a bare icon, white
+     (the text colour on the light theme), in a comfortable touch target. */
+  .play-toggle {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    background: none;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform .1s, opacity .1s;
+  }
+  [data-theme="light"] .play-toggle { color: var(--text); }
+  .play-toggle:active { transform: scale(0.88); opacity: .7; }
+  .play-toggle[hidden] { display: none; }
+  .play-toggle svg { display: block; width: 34px; height: 34px; }
+  .play-toggle .ico-pause,
+  .play-toggle.is-playing .ico-play { display: none; }
+  .play-toggle.is-playing .ico-pause { display: block; }
   .volume-wrap {
     display: flex;
     align-items: center;
@@ -504,6 +527,10 @@
     </div>
     <div class="progress-times">
       <span id="curTime">0:00</span>
+      <button class="play-toggle" id="btnPlayPause" type="button" aria-label="Play" hidden>
+        <svg class="ico-play" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M8 5.14v13.72c0 .79.87 1.27 1.54.84l10.54-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14Z"/></svg>
+        <svg class="ico-pause" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      </button>
       <span id="totTime">0:00</span>
     </div>
   </div>
@@ -593,6 +620,7 @@
   const elTot = document.getElementById('totTime');
   const elTrack = document.getElementById('progressTrack');
   const elMute = document.getElementById('btnMute');
+  const elPlay = document.getElementById('btnPlayPause');
   const elVol = document.getElementById('volume');
   const elVolVal = document.getElementById('volumeValue');
   const iconVolHigh = document.getElementById('iconVolHigh');
@@ -639,7 +667,7 @@
       'gateDeniedTitle': 'Access denied', 'gateDeniedSub': 'The request was denied on the app.',
       'gateRetry': 'Retry',
       'ariaHome': 'Home', 'ariaUp': 'Up', 'ariaBack': 'Back', 'ariaLeft': 'Left',
-      'ariaOk': 'OK / Select', 'ariaRight': 'Right', 'ariaDown': 'Down', 'ariaMute': 'Mute',
+      'ariaOk': 'OK / Select', 'ariaRight': 'Right', 'ariaDown': 'Down', 'ariaMute': 'Mute', 'ariaPlay': 'Play', 'ariaPause': 'Pause',
     },
     ita: {
       'status.connecting': 'Connessione…', 'status.connected': 'Connesso',
@@ -655,7 +683,7 @@
       'gateDeniedTitle': 'Accesso rifiutato', 'gateDeniedSub': 'La richiesta è stata rifiutata sull\'app.',
       'gateRetry': 'Riprova',
       'ariaHome': 'Home', 'ariaUp': 'Su', 'ariaBack': 'Indietro', 'ariaLeft': 'Sinistra',
-      'ariaOk': 'OK / Seleziona', 'ariaRight': 'Destra', 'ariaDown': 'Giù', 'ariaMute': 'Muto',
+      'ariaOk': 'OK / Seleziona', 'ariaRight': 'Destra', 'ariaDown': 'Giù', 'ariaMute': 'Muto', 'ariaPlay': 'Riproduci', 'ariaPause': 'Pausa',
     },
     spa: {
       'status.connecting': 'Conectando…',
@@ -690,6 +718,8 @@
       'ariaRight': 'Derecha',
       'ariaDown': 'Abajo',
       'ariaMute': 'Silenciar',
+      'ariaPlay': 'Reproducir',
+      'ariaPause': 'Pausa',
     },
     fra: {
       'status.connecting': 'Connexion…',
@@ -724,6 +754,8 @@
       'ariaRight': 'Droite',
       'ariaDown': 'Bas',
       'ariaMute': 'Couper le son',
+      'ariaPlay': 'Lecture',
+      'ariaPause': 'Pause',
     },
     por: {
       'status.connecting': 'Conectando…',
@@ -758,6 +790,8 @@
       'ariaRight': 'Direita',
       'ariaDown': 'Baixo',
       'ariaMute': 'Silenciar',
+      'ariaPlay': 'Reproduzir',
+      'ariaPause': 'Pausa',
     },
     deu: {
       'status.connecting': 'Verbinden…',
@@ -792,6 +826,8 @@
       'ariaRight': 'Rechts',
       'ariaDown': 'Runter',
       'ariaMute': 'Stumm',
+      'ariaPlay': 'Wiedergabe',
+      'ariaPause': 'Pause',
     },
     nld: {
       'status.connecting': 'Verbinden…',
@@ -826,6 +862,8 @@
       'ariaRight': 'Rechts',
       'ariaDown': 'Omlaag',
       'ariaMute': 'Dempen',
+      'ariaPlay': 'Afspelen',
+      'ariaPause': 'Pauzeren',
     },
     ron: {
       'status.connecting': 'Se conectează…',
@@ -860,6 +898,8 @@
       'ariaRight': 'Dreapta',
       'ariaDown': 'Jos',
       'ariaMute': 'Mut',
+      'ariaPlay': 'Redare',
+      'ariaPause': 'Pauză',
     },
     swe: {
       'status.connecting': 'Ansluter…',
@@ -894,6 +934,8 @@
       'ariaRight': 'Höger',
       'ariaDown': 'Ner',
       'ariaMute': 'Tysta',
+      'ariaPlay': 'Spela upp',
+      'ariaPause': 'Pausa',
     },
     dan: {
       'status.connecting': 'Opretter forbindelse…',
@@ -928,6 +970,8 @@
       'ariaRight': 'Højre',
       'ariaDown': 'Ned',
       'ariaMute': 'Lyd fra',
+      'ariaPlay': 'Afspil',
+      'ariaPause': 'Pause',
     },
     nor: {
       'status.connecting': 'Kobler til…',
@@ -962,6 +1006,8 @@
       'ariaRight': 'Høyre',
       'ariaDown': 'Ned',
       'ariaMute': 'Demp',
+      'ariaPlay': 'Spill av',
+      'ariaPause': 'Pause',
     },
     pol: {
       'status.connecting': 'Łączenie…',
@@ -996,6 +1042,8 @@
       'ariaRight': 'Prawo',
       'ariaDown': 'Dół',
       'ariaMute': 'Wycisz',
+      'ariaPlay': 'Odtwórz',
+      'ariaPause': 'Wstrzymaj',
     },
     ces: {
       'status.connecting': 'Připojování…',
@@ -1030,6 +1078,8 @@
       'ariaRight': 'Vpravo',
       'ariaDown': 'Dolů',
       'ariaMute': 'Ztlumit',
+      'ariaPlay': 'Přehrát',
+      'ariaPause': 'Pozastavit',
     },
     hun: {
       'status.connecting': 'Csatlakozás…',
@@ -1064,6 +1114,8 @@
       'ariaRight': 'Jobbra',
       'ariaDown': 'Le',
       'ariaMute': 'Némítás',
+      'ariaPlay': 'Lejátszás',
+      'ariaPause': 'Szünet',
     },
     rus: {
       'status.connecting': 'Подключение…',
@@ -1098,6 +1150,8 @@
       'ariaRight': 'Вправо',
       'ariaDown': 'Вниз',
       'ariaMute': 'Без звука',
+      'ariaPlay': 'Воспроизвести',
+      'ariaPause': 'Пауза',
     },
     ukr: {
       'status.connecting': 'Підключення…',
@@ -1132,6 +1186,8 @@
       'ariaRight': 'Вправо',
       'ariaDown': 'Вниз',
       'ariaMute': 'Без звуку',
+      'ariaPlay': 'Відтворити',
+      'ariaPause': 'Пауза',
     },
     ell: {
       'status.connecting': 'Σύνδεση…',
@@ -1166,6 +1222,8 @@
       'ariaRight': 'Δεξιά',
       'ariaDown': 'Κάτω',
       'ariaMute': 'Σίγαση',
+      'ariaPlay': 'Αναπαραγωγή',
+      'ariaPause': 'Παύση',
     },
     fin: {
       'status.connecting': 'Yhdistetään…',
@@ -1200,6 +1258,8 @@
       'ariaRight': 'Oikealle',
       'ariaDown': 'Alas',
       'ariaMute': 'Mykistä',
+      'ariaPlay': 'Toista',
+      'ariaPause': 'Tauko',
     },
     tur: {
       'status.connecting': 'Bağlanıyor…',
@@ -1234,6 +1294,8 @@
       'ariaRight': 'Sağ',
       'ariaDown': 'Aşağı',
       'ariaMute': 'Sessize al',
+      'ariaPlay': 'Oynat',
+      'ariaPause': 'Duraklat',
     },
     hin: {
       'status.connecting': 'कनेक्ट हो रहा है…',
@@ -1268,6 +1330,8 @@
       'ariaRight': 'दाएँ',
       'ariaDown': 'नीचे',
       'ariaMute': 'म्यूट',
+      'ariaPlay': 'चलाएँ',
+      'ariaPause': 'रोकें',
     },
     zho: {
       'status.connecting': '连接中…',
@@ -1302,6 +1366,8 @@
       'ariaRight': '右',
       'ariaDown': '下',
       'ariaMute': '静音',
+      'ariaPlay': '播放',
+      'ariaPause': '暂停',
     },
     jpn: {
       'status.connecting': '接続中…',
@@ -1336,6 +1402,8 @@
       'ariaRight': '右',
       'ariaDown': '下',
       'ariaMute': 'ミュート',
+      'ariaPlay': '再生',
+      'ariaPause': '一時停止',
     },
     kor: {
       'status.connecting': '연결 중…',
@@ -1370,6 +1438,8 @@
       'ariaRight': '오른쪽',
       'ariaDown': '아래',
       'ariaMute': '음소거',
+      'ariaPlay': '재생',
+      'ariaPause': '일시정지',
     },
   };
 
@@ -1412,6 +1482,7 @@
       if (k) b.setAttribute('aria-label', tr(k));
     });
     elMute.setAttribute('aria-label', tr('ariaMute'));
+    elPlay.setAttribute('aria-label', tr(lastState.paused ? 'ariaPlay' : 'ariaPause'));
     setStatus(statusKind, statusKey);
     if (!gate.hidden) showGate(gateState);
     renderTrackChips();
@@ -1472,6 +1543,9 @@
     }
     elCur.textContent = fmtTime(lastState.time);
     elTot.textContent = fmtTime(lastState.duration);
+    elPlay.hidden = !hasMedia || lastState.playing === false;
+    elPlay.classList.toggle('is-playing', !lastState.paused);
+    elPlay.setAttribute('aria-label', tr(lastState.paused ? 'ariaPlay' : 'ariaPause'));
     if (Number.isFinite(lastState.volume)) {
       const v = Math.round(lastState.volume);
       if (Number(elVol.value) !== v) elVol.value = String(v);
@@ -1616,6 +1690,10 @@
   connect();
 
   elMute.addEventListener('click', () => send({ name: 'mute_toggle' }));
+  elPlay.addEventListener('click', () => {
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+    send({ name: 'toggle' });
+  });
 
   function navSend(dir) {
     if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }

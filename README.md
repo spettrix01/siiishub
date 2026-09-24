@@ -76,8 +76,9 @@ device.
 ### Everywhere
 
 - **Desktop app** for Windows and Linux in a clean, borderless window.
-- **Remote control:** scan a QR code with your phone, approve it once and control playback from the couch.
+- **Remote control:** scan a QR code with your phone, in the browser or in the SIIISHUB Android app, approve it once and control playback from the couch.
 - **Android app** made for touch: bottom navigation, a full-screen landscape player and pinch to fill the screen.
+- **Android TV:** the same APK, driven with the TV remote: the D-pad moves between titles and controls, and in the player it seeks and pauses.
 
 ## Download
 
@@ -87,7 +88,7 @@ Get the latest build from the [Releases](../../releases/latest) page.
 |---|---|
 | Windows 10 and 11, 64-bit | `SIIISHUB_<version>_x64-setup.exe` |
 | Debian 13+, Ubuntu 24.04+, 64-bit | `SIIISHUB_<version>_amd64.deb` |
-| Android 8.0+ | `SIIISHUB_<version>_arm64.apk`, or `_armv7.apk` for older 32-bit devices |
+| Android 8.0+, Android TV | `SIIISHUB_<version>_arm64.apk`, or `_armv7.apk` for older 32-bit devices |
 
 The packages are not code-signed, so Windows SmartScreen and Android ask for
 confirmation the first time.

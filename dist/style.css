@@ -1087,6 +1087,17 @@ input, select { font: inherit; color: inherit; }
 }
 @keyframes dossier-fade { from { opacity: 0; } to { opacity: 1; } }
 
+/* Desktop: the details page opens below the topbar, which keeps only the
+   window controls, so the window can still be moved, minimized, maximized
+   and closed. topbar.js publishes --topbar-h. */
+html:not(.is-android) .dossier,
+html:not(.is-android) .dossier-scrim {
+  top: var(--topbar-h, 72px);
+}
+html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > :not(.winctl) {
+  visibility: hidden;
+}
+
 .dossier-card {
   position: relative;
   z-index: 1;
@@ -1590,6 +1601,27 @@ input, select { font: inherit; color: inherit; }
   color: var(--text-3);
   background: var(--surface-2);
   border-color: var(--line-2);
+}
+/* The stream a movie or episode was last played from: first in the list. */
+.stream.is-watched {
+  background: linear-gradient(90deg, var(--violet-soft), transparent 70%), var(--bg-2);
+  box-shadow: inset 0 0 0 1px rgba(var(--violet-rgb), 0.45);
+}
+.stream.is-watched:hover {
+  background: linear-gradient(90deg, var(--violet-soft), transparent 70%), var(--surface);
+}
+.stream-watched {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+  border: 1px solid rgba(var(--violet-rgb), 0.45);
+  color: var(--violet);
+  background: var(--violet-soft);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 .stream-title {
   font-family: var(--mono);
@@ -2894,6 +2926,45 @@ button:focus-visible {
   pointer-events: none;
 }
 
+/* Desktop player, windowed: the window controls stay in the top-right corner
+   over the video, in the band of the player header, and fade out with the
+   other controls when the player is idle. They belong to the topbar, which
+   stays hidden but is lifted over the player so they can show (without its
+   backdrop blur, which would still frost the video behind them); the header,
+   the torrent stats and the side panes make room for them. topbar.js
+   publishes --topbar-h and --winctl-w. */
+html:not(.is-android) body.is-player-open .topbar {
+  z-index: 260;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+html:not(.is-android) body.is-player-open:not(:has(.player-frame.is-fs)) .winctl {
+  visibility: visible;
+  transition: opacity .4s cubic-bezier(.4,0,.2,1),
+              transform .4s cubic-bezier(.4,0,.2,1);
+}
+html:not(.is-android) body.is-player-open:has(.player-frame.is-idle) .winctl {
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+}
+html:not(.is-android) body.is-player-open .winctl-btn { color: rgba(255,255,255,0.92); }
+html:not(.is-android) body.is-player-open .winctl-btn:not(.winctl-btn--close):hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+html:not(.is-android) .player-frame:not(.is-fs) .player-top {
+  min-height: var(--topbar-h, 72px);
+  padding-top: 0;
+  padding-bottom: 0;
+}
+html:not(.is-android) .player-frame:not(.is-fs):not(.is-split):not(.is-logopen) .player-top {
+  padding-right: calc(var(--winctl-w, 154px) + 0.5rem);
+}
+html:not(.is-android) .player-frame:not(.is-fs) .player-torrent-stats { top: var(--topbar-h, 72px); }
+html:not(.is-android) .player-frame:not(.is-fs) .psp-head { min-height: var(--topbar-h, 72px); }
+html:not(.is-android) .player-frame:not(.is-fs) .player-log-pane { padding-top: var(--topbar-h, 72px); }
+
 .player-frame { --side-pane-width: clamp(300px, 36%, 460px); }
 .player-video { transition: width .3s cubic-bezier(.16, 1, .3, 1); }
 .player-frame.is-split .player-video,
@@ -3245,7 +3316,10 @@ button:focus-visible {
   transition: height .15s cubic-bezier(.4,0,.2,1);
 }
 .player-progress:hover .player-progress-track,
-.player-progress:focus .player-progress-track { height: 6px; }
+.player-progress:focus .player-progress-track,
+.player-progress.snav-focus .player-progress-track { height: 6px; }
+/* Selected with a remote, the time bar shows its thumb instead of a frame. */
+.player-progress.snav-focus { outline: none !important; box-shadow: none !important; }
 .player-progress-buffered,
 .player-progress-played {
   position: absolute;
@@ -3275,7 +3349,8 @@ button:focus-visible {
   pointer-events: none;
 }
 .player-progress:hover .player-progress-thumb,
-.player-progress:focus .player-progress-thumb {
+.player-progress:focus .player-progress-thumb,
+.player-progress.snav-focus .player-progress-thumb {
   transform: translate(-50%, -50%) scale(1);
 }
 .player-progress-tip {
@@ -4406,6 +4481,104 @@ button:focus-visible {
 .remote-device .remote-device-btn,
 .remote-device .remote-device-state { margin-left: auto; }
 
+/* Android: the phone as the remote of a PC (remote-client.js). The settings
+   section, then a full-screen overlay: the camera framing the QR code, then
+   the phone page served by the PC in a frame. */
+.remote-scan-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 18px;
+}
+.remote-scan-btn[hidden] { display: none; }
+
+.remote-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+.remote-overlay[hidden] { display: none; }
+.remote-overlay-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.remote-overlay-close {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--text);
+}
+.remote-overlay-meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.remote-overlay-title { font-size: 16px; font-weight: 600; }
+.remote-overlay-host {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-3);
+}
+.remote-overlay-host:empty { display: none; }
+.remote-scan,
+.remote-frame-slot {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.remote-overlay[data-mode="scan"] .remote-frame-slot,
+.remote-overlay[data-mode="remote"] .remote-scan { display: none; }
+.remote-scan video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.remote-scan-frame {
+  position: absolute;
+  top: 45%;
+  left: 50%;
+  width: min(64vw, 280px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45);
+}
+.remote-scan-hint {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 28px;
+  margin: 0;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.45;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+.remote-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #0c0a14;
+}
+
 .snav-focus {
   outline: 3px solid var(--violet) !important;
   outline-offset: 2px;
@@ -4421,6 +4594,19 @@ html.is-android .winctl,
 html.is-android #playerFsBtn,
 html.is-android #playerSplitBtn { display: none; }
 html.is-android .topbar { padding-right: var(--layout-gutter); }
+
+/* ---------- Android TV ---------- */
+/* The big-screen layout (the desktop one, without window controls) driven
+   with the remote's D-pad (tv-nav.js): margins inside the TV safe area, and
+   the selected card lifts as it does under the mouse on the desktop. */
+html.is-tv { --layout-gutter: 48px; }
+html.is-tv .card.snav-focus .poster,
+html.is-tv .trending-card.snav-focus .trending-poster {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 36px -16px var(--violet-glow);
+}
+html.is-tv .card.snav-focus .poster img,
+html.is-tv .trending-card.snav-focus .trending-poster img { transform: scale(1.04); }
 
 
 /* Bottom navigation (Android): replaces the top tabs and the settings gear. */
@@ -4517,15 +4703,15 @@ html.has-bottom-nav .topbar {
 html.has-bottom-nav .searchbox { min-width: 0; width: auto; padding-right: 14px; }
 html.has-bottom-nav #page-scroll { padding-bottom: var(--bottom-nav-h); }
 
-/* Details view on Android, Stremio-style cover: full-width backdrop with the
+/* Details view on Android phones, Stremio-style cover: full-width backdrop with the
    title over it, no poster, no "Top Billed Cast". */
-html.is-android .dossier-poster,
-html.is-android .dossier-cast-block { display: none; }
-html.is-android .dossier-hero { aspect-ratio: 3 / 2; }
-html.is-android .dossier-hero::after {
+html.is-phone .dossier-poster,
+html.is-phone .dossier-cast-block { display: none; }
+html.is-phone .dossier-hero { aspect-ratio: 3 / 2; }
+html.is-phone .dossier-hero::after {
   background: linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, transparent 35%, var(--bg) 100%);
 }
-html.is-android .dossier-hero-title {
+html.is-phone .dossier-hero-title {
   position: absolute;
   left: 16px;
   right: 16px;
@@ -4541,8 +4727,8 @@ html.is-android .dossier-hero-title {
   color: #fff;
   text-shadow: 0 2px 14px rgba(0, 0, 0, 0.65);
 }
-html.is-android .dossier-hero + .dossier-content { margin-top: 0; padding-top: 0.6rem; }
-html.is-android .dossier-hero + .dossier-content .dossier-title { display: none; }
+html.is-phone .dossier-hero + .dossier-content { margin-top: 0; padding-top: 0.6rem; }
+html.is-phone .dossier-hero + .dossier-content .dossier-title { display: none; }
 
 /* Android: the custom (non-overlay) scrollbars reserve a strip on the right
    of every scroll container (5px on the grid, 10px on the details card).
@@ -4552,15 +4738,15 @@ html.is-android #page-scroll,
 html.is-android .dossier { scrollbar-gutter: auto; scrollbar-width: none; }
 html.is-android .dossier { overflow-y: auto; }
 
-/* Android details: Stremio's data set (logo, runtime · year · rating,
+/* Android phone details: Stremio's data set (logo, runtime · year · rating,
    overview, genres, people chips) in the app's own style. */
-html.is-android .dossier-hero-title.has-logo {
+html.is-phone .dossier-hero-title.has-logo {
   display: flex;
   justify-content: center;
   align-items: flex-end;
   text-shadow: none;
 }
-html.is-android .dossier-hero-logo {
+html.is-phone .dossier-hero-logo {
   max-width: 72%;
   max-height: 120px;
   width: auto;
@@ -4568,20 +4754,20 @@ html.is-android .dossier-hero-logo {
   object-fit: contain;
   filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.65));
 }
-html.is-android .m-title { margin: 1.2rem 16px 0; font-size: 28px; }
-html.is-android .m-dossier {
+html.is-phone .m-title { margin: 1.2rem 16px 0; font-size: 28px; }
+html.is-phone .m-dossier {
   display: flex;
   flex-direction: column;
   gap: 1.1rem;
   padding: 0.7rem 16px 1.4rem;
 }
-html.is-android .m-meta {
+html.is-phone .m-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
 }
-html.is-android .m-meta-facts {
+html.is-phone .m-meta-facts {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -4591,10 +4777,10 @@ html.is-android .m-meta-facts {
   color: var(--text-2);
   letter-spacing: 0.02em;
 }
-html.is-android .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-3); }
-html.is-android .m-vote { color: var(--violet); font-weight: 600; }
-html.is-android .m-meta-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-html.is-android .m-iconbtn {
+html.is-phone .m-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--text-3); }
+html.is-phone .m-vote { color: var(--violet); font-weight: 600; }
+html.is-phone .m-meta-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+html.is-phone .m-iconbtn {
   width: 40px;
   height: 40px;
   padding: 0;
@@ -4606,18 +4792,18 @@ html.is-android .m-iconbtn {
   border: 1px solid var(--line);
   color: var(--text);
 }
-html.is-android .m-iconbtn svg { width: 20px; height: 20px; }
-html.is-android .m-iconbtn.fav-btn[aria-pressed="true"] { color: var(--violet); border-color: var(--violet); background: var(--violet-soft); }
-html.is-android .m-people .section-eye { margin-bottom: 0.6rem; }
-html.is-android .m-chips {
+html.is-phone .m-iconbtn svg { width: 20px; height: 20px; }
+html.is-phone .m-iconbtn.fav-btn[aria-pressed="true"] { color: var(--violet); border-color: var(--violet); background: var(--violet-soft); }
+html.is-phone .m-people .section-eye { margin-bottom: 0.6rem; }
+html.is-phone .m-chips {
   display: flex;
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 2px;
   scrollbar-width: none;
 }
-html.is-android .m-chips::-webkit-scrollbar { display: none; }
-html.is-android .m-chip {
+html.is-phone .m-chips::-webkit-scrollbar { display: none; }
+html.is-phone .m-chip {
   flex: 0 0 auto;
   padding: 8px 14px;
   border-radius: var(--r-md);
@@ -4628,8 +4814,8 @@ html.is-android .m-chip {
   font-weight: 500;
   white-space: nowrap;
 }
-html.is-android .m-dossier .dossier-overview { text-align: left; padding-top: 0; }
-html.is-android .m-dossier .dossier-genres span {
+html.is-phone .m-dossier .dossier-overview { text-align: left; padding-top: 0; }
+html.is-phone .m-dossier .dossier-genres span {
   font-family: var(--body);
   font-size: 0.8rem;
   padding: 6px 12px;
@@ -4648,13 +4834,13 @@ html.is-android .plp-body, html.is-android .psp-body, html.is-android .player-se
   touch-action: pan-x pan-y;
 }
 /* Library tabs: the three segments share the pill equally, labels centred. */
-html.is-android .library-bar .seg { display: flex; width: 100%; }
-html.is-android .library-bar .seg-btn { flex: 1 1 0; min-width: 0; justify-content: center; padding: 8px 6px; }
+html.is-phone .library-bar .seg { display: flex; width: 100%; }
+html.is-phone .library-bar .seg-btn { flex: 1 1 0; min-width: 0; justify-content: center; padding: 8px 6px; }
 
-/* Settings as a page (Android): the modal markup is laid out between the
+/* Settings as a page (Android phones): the modal markup is laid out between the
    topbar and the bottom bar, without overlay or close button; the sections
    are a scrollable chip row and the active pane scrolls underneath. */
-html.is-android #settingsModal {
+html.is-phone #settingsModal {
   position: fixed;
   top: var(--topbar-h, 64px);
   right: 0;
@@ -4666,9 +4852,9 @@ html.is-android #settingsModal {
   display: block;
   padding: 0;
 }
-html.is-android #settingsModal[hidden] { display: none; }
-html.is-android #settingsModal .modal-overlay { display: none; }
-html.is-android .settings-card {
+html.is-phone #settingsModal[hidden] { display: none; }
+html.is-phone #settingsModal .modal-overlay { display: none; }
+html.is-phone .settings-card {
   --settings-panel: transparent;
   width: 100%;
   height: 100%;
@@ -4679,10 +4865,10 @@ html.is-android .settings-card {
   background: var(--bg);
   animation: none;
 }
-html.is-android .settings-close { display: none; }
-html.is-android .settings-nav { padding: 4px 0 0; overflow: visible; }
-html.is-android .settings-nav-title { padding: 8px 16px 10px; font-size: 24px; }
-html.is-android .settings-nav-list {
+html.is-phone .settings-close { display: none; }
+html.is-phone .settings-nav { padding: 4px 0 0; overflow: visible; }
+html.is-phone .settings-nav-title { padding: 8px 16px 10px; font-size: 24px; }
+html.is-phone .settings-nav-list {
   flex-direction: row;
   flex-wrap: nowrap;
   gap: 8px;
@@ -4690,8 +4876,8 @@ html.is-android .settings-nav-list {
   overflow-x: auto;
   scrollbar-width: none;
 }
-html.is-android .settings-nav-list::-webkit-scrollbar { display: none; }
-html.is-android .settings-nav-item {
+html.is-phone .settings-nav-list::-webkit-scrollbar { display: none; }
+html.is-phone .settings-nav-item {
   flex: 0 0 auto;
   width: auto;
   padding: 8px 14px;
@@ -4702,15 +4888,15 @@ html.is-android .settings-nav-item {
   font-size: 0.9rem;
   white-space: nowrap;
 }
-html.is-android .settings-nav-item.is-active {
+html.is-phone .settings-nav-item.is-active {
   color: var(--violet);
   border-color: var(--violet);
   background: var(--violet-soft);
 }
-html.is-android .settings-head { min-height: 0; padding: 10px 16px 4px; }
-html.is-android .settings-pane-title { font-size: 20px; white-space: normal; }
-html.is-android .settings-card .pane { padding: 10px 16px calc(24px + var(--bottom-nav-h)); }
-html.is-android.settings-open .searchbox { visibility: hidden; }
+html.is-phone .settings-head { min-height: 0; padding: 10px 16px 4px; }
+html.is-phone .settings-pane-title { font-size: 20px; white-space: normal; }
+html.is-phone .settings-card .pane { padding: 10px 16px calc(24px + var(--bottom-nav-h)); }
+html.is-phone.settings-open .searchbox { visibility: hidden; }
 
 /* Genre picker (Android): trigger on the right, options in a popup centred
    on the screen over a dimmed backdrop (added by android-genres.js). */
@@ -4812,11 +4998,11 @@ html.is-android .input-popup-reveal { flex: 0 0 44px; width: 44px; display: grid
 html.is-android .input-popup-actions { display: flex; justify-content: flex-end; gap: 8px; }
 html.is-android .input-popup-actions button { height: 42px; padding: 0 18px; border-radius: 10px; }
 
-/* Streams toolbar (Android): no "Streams" label, the filters sit centred
+/* Streams toolbar (Android phones): no "Streams" label, the filters sit centred
    and wrap when their labels get long. */
-html.is-android .streams-head { justify-content: center; flex-wrap: wrap; }
-html.is-android .streams-head .section-eye { display: none; }
-html.is-android .streams-filter-slot { margin: 0 auto; flex-wrap: wrap; justify-content: center; }
+html.is-phone .streams-head { justify-content: center; flex-wrap: wrap; }
+html.is-phone .streams-head .section-eye { display: none; }
+html.is-phone .streams-filter-slot { margin: 0 auto; flex-wrap: wrap; justify-content: center; }
 
 /* Keyboard up (bottom-nav.js sets the class): the bottom bar steps aside and
    the page no longer reserves its space. */
@@ -4943,9 +5129,9 @@ html.is-android #playerVideo { touch-action: none; }
   --shadow-2: 0 24px 60px -20px rgba(0,0,0,0.7), 0 8px 24px -10px rgba(20, 184, 166, 0.22);
 }
 
-/* Library > Downloads (Android): the empty message sits right under the two
+/* Library > Downloads (Android phones): the empty message sits right under the two
    download cards instead of 100px lower, close to the bottom bar. */
-html.is-android body:has(#dlMagnetBar:not([hidden])) .empty { padding-top: 32px; }
+html.is-phone body:has(#dlMagnetBar:not([hidden])) .empty { padding-top: 32px; }
 
 /* Settings > TMDB: logo and notice required by the TMDB API terms. */
 .tmdb-attribution {

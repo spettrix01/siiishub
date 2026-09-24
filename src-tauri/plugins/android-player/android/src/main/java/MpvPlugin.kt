@@ -8,6 +8,8 @@ import android.net.Uri
 import android.provider.DocumentsContract
 import android.content.Context
 import android.content.pm.ActivityInfo
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.media.AudioManager
 import android.os.Looper
 import android.util.Base64
@@ -178,11 +180,20 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
         applyInsets()
     }
 
-    /** Phones keep the browsing UI portrait (like Stremio); tablets and TVs rotate freely. */
+    /** Phones keep the browsing UI portrait (like Stremio), tablets rotate
+     *  freely and TVs keep their screen as it is: a 1080p TV is only 540 dp
+     *  high, so the screen size alone would make it a phone. */
     private fun defaultOrientation(): Int {
+        if (isTv()) return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         val swDp = activity.resources.configuration.smallestScreenWidthDp
         return if (swDp < 600) ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT
         else ActivityInfo.SCREEN_ORIENTATION_USER
+    }
+
+    private fun isTv(): Boolean {
+        val uiMode = activity.resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK
+        return uiMode == Configuration.UI_MODE_TYPE_TELEVISION ||
+            activity.packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
     }
 
     // ---------------------------------------------------------------- commands

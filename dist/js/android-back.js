@@ -6,14 +6,16 @@ import { $ } from './dom.js';
 import { IS_ANDROID } from './platform.js';
 import { closePlayer } from './player.js';
 import { closeModal } from './modal.js';
+import { closeRemoteOverlay } from './remote-client.js';
 
-const OVERLAYS = ['#genreMenu', '#alertModal', '#playerSettings', '#playerModal', '#settingsModal', '#detailsModal'];
+const OVERLAYS = ['#genreMenu', '#alertModal', '#playerSettings', '#playerModal', '#remoteOverlay', '#settingsModal', '#detailsModal'];
 const STATE_KEY = 'siiisOverlay';
 
 function closeOverlay(id) {
   const el = $(id);
   if (!el || el.hidden) return;
   if (id === '#playerModal') closePlayer();
+  else if (id === '#remoteOverlay') closeRemoteOverlay(); // also releases the camera
   else if (id === '#genreMenu') $('#genreTrigger')?.click(); // toggles the open menu shut
   else if (id === '#playerSettings') $('#playerSettingsBtn')?.click(); // toggles the panel shut
   else if (id === '#alertModal') {

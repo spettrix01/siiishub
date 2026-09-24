@@ -1,4 +1,5 @@
-// Android bottom navigation: Film / Serie / Libreria / Impostazioni.
+// Android phone bottom navigation: Film / Serie / Libreria / Impostazioni
+// (Android TV keeps the top tabs, reached with the remote's D-pad).
 // It drives the existing top tabs (hidden by CSS on Android) so section
 // switching, genres, trending and the library keep their single code path;
 // the active state and the "new downloads" badge are mirrored from them.
@@ -6,13 +7,13 @@
 // modal markup is restyled by CSS), so the bar stays usable while they are
 // open and the Back button returns to the previous section.
 import { $ } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_PHONE } from './platform.js';
 import { openSettings } from './settings-ui.js';
 import { closeModal } from './modal.js';
 
 const nav = $('#bottomNav');
 
-if (nav && IS_ANDROID) {
+if (nav && IS_PHONE) {
   nav.hidden = false;
   document.documentElement.classList.add('has-bottom-nav');
 
