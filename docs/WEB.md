@@ -63,6 +63,38 @@ sessions are kept in `./config`, the downloads in `./downloads`.
 The container runs as user 1000: the two folders must be writable by it
 (`sudo chown -R 1000:1000 config downloads` if they were created by root).
 
+### TrueNAS SCALE
+
+Create a dataset for it (here `pool/Siiishub`) and make the `apps` user
+(568) its owner: Datasets → the dataset → Permissions → Edit, user and
+group `apps`. Then Apps → Discover Apps → ⋮ → Install via YAML, a name
+(`siiishub`) and this configuration, with a password of your own:
+
+```yaml
+services:
+  siiishub:
+    image: ghcr.io/spettrix01/siiishub:latest
+    restart: unless-stopped
+    user: "568:568"
+    # The graphics for transcoding (Intel, AMD): TrueNAS's video (44) and
+    # render (107) groups.
+    group_add: ["44", "107"]
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - "30808:8080"
+    environment:
+      SIIISHUB_PASSWORD: "change-me"
+      SIIISHUB_DATA_DIR: /data/config
+      SIIISHUB_DOWNLOAD_DIR: /data/downloads
+    volumes:
+      - /mnt/pool/Siiishub:/data
+```
+
+The server makes `config` and `downloads` in the dataset, and answers on
+`http://<truenas>:30808`. The app's page in TrueNAS shows its log:
+`[transcode]` says whether it found the graphics.
+
 ## Without Docker
 
 ```sh
