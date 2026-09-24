@@ -34,6 +34,17 @@ options of these libraries and of the others they include, such as libass.
 The .deb package uses the libmpv and FFmpeg of the distribution and bundles
 neither.
 
+## Docker image
+
+`ghcr.io/spettrix01/siiishub` is built on Debian 13 (`debian:trixie-slim`)
+and installs from Debian, unmodified: FFmpeg (GPL), Mesa's VAAPI drivers
+(MIT), and on x86-64 Intel's media driver and i965 shaders from the
+`non-free` section, redistributable under their own licenses. Their sources
+and licenses are those of the Debian packages, at
+[sources.debian.org](https://sources.debian.org). The browser player loads
+[hls.js](https://github.com/video-dev/hls.js) (Apache-2.0) from jsdelivr at
+runtime.
+
 ## Other assets
 
 - The interface fonts, Bricolage Grotesque, Geist and Geist Mono, are loaded

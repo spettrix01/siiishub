@@ -1,13 +1,14 @@
-// Android genre picker: the options open as a popup centred on the screen
-// (CSS, `html.is-android .genre-menu`); this adds the backdrop that dims the
-// page while it is open. A tap on the backdrop lands outside the dropdown,
-// so topbar.js closes the menu, and nothing underneath receives the tap.
+// Android phone genre picker (the TV has the PC's dropdown): the options open
+// as a popup centred on the screen (CSS, `html.is-phone .genre-menu`); this
+// adds the backdrop that dims the page while it is open. A tap on the
+// backdrop lands outside the dropdown, so topbar.js closes the menu, and
+// nothing underneath receives the tap.
 import { $ } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_PHONE } from './platform.js';
 
 const menu = $('#genreMenu');
 
-if (menu && IS_ANDROID) {
+if (menu && IS_PHONE) {
   let backdrop = null;
   const sync = () => {
     if (menu.hidden) {

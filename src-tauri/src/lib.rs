@@ -93,8 +93,9 @@ pub fn run() {
 
             app.manage(Arc::new(state));
 
-            // The phone is the player itself: no remote-control server on Android.
-            #[cfg(not(target_os = "android"))]
+            // The phone is the player itself: no remote-control server on an
+            // Android phone. On a PC and in the TV APK the phone drives it.
+            #[cfg(any(not(target_os = "android"), feature = "tv"))]
             {
                 let state_for_remote = app.state::<Arc<AppState>>().inner().clone();
                 let cfg = state_for_remote.settings.read();
@@ -112,10 +113,14 @@ pub fn run() {
                 });
             }
 
-            let init_script = format!(
+            #[allow(unused_mut)]
+            let mut init_script = format!(
                 "window.__INITIAL_THEME__ = {};",
                 serde_json::to_string(&initial_theme).unwrap_or_else(|_| "\"\"".to_string())
             );
+            // The TV APK: the interface takes its TV look (js/platform.js).
+            #[cfg(feature = "tv")]
+            init_script.push_str(" window.__SIIISHUB_TV__ = true;");
 
             let builder = tauri::WebviewWindowBuilder::new(
                 app,

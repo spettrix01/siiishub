@@ -24,9 +24,9 @@ function settingsPanes() {
     { value: 'remote', label: t('settings.pane.remote') },
   ];
   // Android keeps the torrent tracker list at its defaults. Instead of being
-  // controlled, the phone is the remote of a PC (its own Remote section);
-  // the TV is driven with its own remote and has no Remote section at all.
-  if (IS_TV) return panes.filter(p => p.value !== 'trackers' && p.value !== 'remote');
+  // controlled, the phone is the remote of another screen (its own Remote
+  // section); the TV, like a PC, can be driven by a phone.
+  if (IS_TV) return panes.filter(p => p.value !== 'trackers');
   return IS_ANDROID
     ? panes.filter(p => p.value !== 'trackers').map(p => (p.value === 'remote' ? { ...p, value: 'remoteClient' } : p))
     : panes;
@@ -129,7 +129,7 @@ export function openSettings(pane = 'language') {
   setupPlayerLangsSection();
   setupAppearanceSection();
   if (IS_PHONE) setupRemoteClientSection();
-  else if (!IS_ANDROID) setupRemoteSection();
+  else setupRemoteSection();
   setupDebridSection();
   resetHint('#tmdbHint');
   resetHint('#addonHint');
@@ -162,7 +162,7 @@ function setupAppLanguageSection() {
     appLanguagePicker = setupStreamPicker(root, {
       items: appLanguageItems(),
       value: current,
-      popup: IS_ANDROID,
+      popup: IS_PHONE,
       onChange: async (code) => {
         setHint('#appLanguageHint', t('common.saving'));
         try {
@@ -254,7 +254,7 @@ function setupDebridSection() {
     debridProviderPicker = setupStreamPicker(root, {
       items: debridProviderItems(),
       value: debridProviderValue,
-      popup: IS_ANDROID,
+      popup: IS_PHONE,
       onChange: v => {
         debridProviderValue = v || '';
         refreshDebridTokenField(debridProviderValue);
@@ -539,7 +539,7 @@ function setupPlayerLangsSection() {
     audioSlot.dataset.ready = '1';
     audioSlot.innerHTML = langPickerHtml('player-audio');
     audioLangsPicker = setupLangPicker(audioSlot.querySelector('[data-stream-pick="player-audio"]'), {
-      popup: IS_ANDROID,
+      popup: IS_PHONE,
       values: savedAudio,
       onChange: () => { playerLangsDirty = true; },
       onClose: savePlayerLangs,
@@ -552,7 +552,7 @@ function setupPlayerLangsSection() {
     subSlot.dataset.ready = '1';
     subSlot.innerHTML = langPickerHtml('player-sub');
     subLangsPicker = setupLangPicker(subSlot.querySelector('[data-stream-pick="player-sub"]'), {
-      popup: IS_ANDROID,
+      popup: IS_PHONE,
       values: savedSubs,
       onChange: () => { playerLangsDirty = true; },
       onClose: savePlayerLangs,

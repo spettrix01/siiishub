@@ -1,12 +1,13 @@
-// Android: the text fields of the settings (TMDB key, addon URL, debrid key,
-// tracker list) and of the player settings (track search, IMDb id) are
-// edited in a popup centred on the screen, like the
-// dropdowns. Tapping a field opens the popup instead of the keyboard; OK
-// copies the text back into the field and fires its input/change handlers,
-// so saving keeps its single code path. android-back.js closes the popup
-// on Back through the siiis:popup-open/close events.
+// Android phone: the text fields of the settings (TMDB key, addon URL,
+// debrid key, tracker list) and of the player settings (track search, IMDb
+// id) are edited in a popup centred on the screen, like the dropdowns (the
+// TV edits them in place, as on a PC: tv-nav.js keeps left, right and OK
+// with the field). Tapping a field opens the popup instead of the keyboard;
+// OK copies the text back into the field and fires its input/change
+// handlers, so saving keeps its single code path. android-back.js closes
+// the popup on Back through the siiis:popup-open/close events.
 import { escapeHTML } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_PHONE } from './platform.js';
 import { t } from './i18n.js';
 
 const FIELDS = '#settingsModal input[type="text"], #settingsModal input[type="password"], #settingsModal input[type="url"], #settingsModal textarea, #playerSettings input[type="text"], #playerSettings input[type="search"]';
@@ -93,7 +94,7 @@ function openEditor(field) {
   try { editor.setSelectionRange(editor.value.length, editor.value.length); } catch { /* not a text-like input */ }
 }
 
-if (IS_ANDROID) {
+if (IS_PHONE) {
   // A tap on a field must not focus it, or the keyboard would open for the
   // page underneath: cancel its pointerdown. The popup opens on the click
   // that ends the tap. Opening it on pointerdown let that same click land on

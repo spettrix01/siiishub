@@ -1,6 +1,6 @@
 [package]
 name = "siiishub-desktop"
-version = "1.1.0"
+version = "1.2.0"
 edition = "2021"
 description = "siiishub: self-hosted streaming hub with embedded mpv"
 authors = ["siiis"]
@@ -152,6 +152,9 @@ stub-mpv = ["app"]
 # `adb forward` on Android). Debug builds always have it; builds meant for
 # users must not.
 devtools = ["app", "tauri/devtools"]
+# The Android TV APK: the desktop interface driven by the TV's remote, and the
+# phone remote's server, as on a PC. scripts/android-build.sh builds it.
+tv = ["app"]
 # siiishub-server: the interface in the browser, without Tauri or libmpv.
 server = ["dep:tower-http", "dep:tower"]
 

@@ -13,8 +13,13 @@
   - `realdebrid.rs`, `alldebrid.rs`: debrid resolution of magnets and torrents.
   - `download.rs`, `commands/downloads.rs`: downloads over P2P, HTTP and local
     files, with the poster as folder icon.
-  - `remote.rs`, `remote_page.html`: the desktop remote control, an axum HTTP
-    and WebSocket server with QR pairing and device approval.
+  - `remote.rs`, `remote_page.html`: the phone remote control, an axum HTTP
+    and WebSocket server with QR pairing and device approval, run by the
+    desktop app and the TV app on a port of their own and by the web server
+    at `/remote/`.
+  - `ops/`: what the interface asks of the backend, shared by the Tauri
+    commands (`commands/`) and the web server (`server/`, see
+    [WEB.md](WEB.md)).
   - `settings.rs`, `userdata.rs`: settings and library in the app data folder.
   - `mpv.rs` and `mpv/`: one player interface with three backends. `real.rs`
     is libmpv on desktop, `android.rs` bridges to the Kotlin plugin and
@@ -88,20 +93,22 @@ does not expose mpv nodes.
 
 ## The Android interface
 
-The same `dist/` runs on phones and on Android TV. `js/platform.js` adds the
-`is-android` class to `<html>`, plus `is-phone` or `is-tv` (a TV has no
-touchscreen: `navigator.maxTouchPoints` is 0). What phones and TVs share
-depends on `is-android` and `IS_ANDROID`, the phone layout on `is-phone` and
-`IS_PHONE`:
+The same `dist/` runs on phones and on Android TV, built into two APKs.
+`js/platform.js` adds the `is-android` class to `<html>`, plus `is-phone` or
+`is-tv`: the TV APK says it is one (`window.__SIIISHUB_TV__`, set by the
+Cargo feature `tv`), and the phone APK takes the TV look on a device without
+a touchscreen (`navigator.maxTouchPoints` is 0). What phones and TVs share,
+the platform, depends on `is-android` and `IS_ANDROID`; the phone's own
+interface, made for touch, on `is-phone` and `IS_PHONE`:
 
 - `bottom-nav.js`: bottom navigation on phones, with the settings shown as a
   page.
 - `picker.js` in popup mode, `android-inputs.js` for text fields edited in a
-  centred popup, `android-genres.js` for the genre popup.
+  centred popup, `android-genres.js` for the genre popup: phones only.
 - `android-back.js`: the Back button closes popups and overlays first, through
   history entries.
-- `android-player.js`: landscape player, settings popup, pinch to fill the
-  screen (`panscan`) and tap to show or hide the controls.
+- `android-player.js`: landscape player on both; the settings popup, pinch to
+  fill the screen (`panscan`) and tap to show or hide the controls on phones.
 - `remote-client.js`: Settings → Remote makes the phone the remote of
   SIIISHUB on a PC. It frames the QR code of the PC with the camera
   (`getUserMedia` and `BarcodeDetector`; without them the address is typed),
@@ -113,25 +120,28 @@ depends on `is-android` and `IS_ANDROID`, the phone layout on `is-phone` and
 
 ### Android TV
 
-The TV keeps the big-screen layout of the desktop, without window controls and
-with margins inside the TV safe area, and is driven with its remote
-(`tv-nav.js`):
+The TV has the interface of the desktop app, its dropdowns, text fields
+edited in place and player included, without window controls and with
+margins inside the TV safe area, and is driven with its remote (`tv-nav.js`):
 
 - The D-pad moves the selection with `spatial-nav.js`, the navigation of the
   phone remote, and OK activates it. Back is the system Back button
-  (`android-back.js`).
+  (`android-back.js`). In a text field, left, right and OK stay with the field
+  and its keyboard; up and down leave it.
 - A details page opens with its first action selected, the settings with
-  their current section. Closing the player gives the selection back to the
-  stream that was playing.
+  their current section, a dropdown with its current value, a dialog with
+  its confirmation. Closing the player or a dialog gives the selection back.
 - In the player, with nothing selected, left and right seek by 10 s and OK
   plays or pauses; up and down show the controls and select the time bar. The
   media keys play, pause and seek by 30 s.
-- There is no Remote section: the TV neither runs the remote server nor
-  controls a PC.
+- Settings → Remote works as on a PC: the TV APK runs the remote server, so
+  a phone scans its QR code and drives it. The TV's address comes from its
+  network interfaces or, when Android keeps them from apps, from its default
+  route.
 - `MpvPlugin.kt` leaves the orientation to the TV, which a 1080p screen of
   540 dp would otherwise lock like a phone. The manifest carries the 320×180
   launcher banner, and `android-build.sh` adds the `LEANBACK_LAUNCHER`
-  category.
+  category to the TV APK.
 
 Android WebView details worth knowing:
 
@@ -150,6 +160,8 @@ Android WebView details worth knowing:
   `stub-mpv` builds the desktop interface with no video.
 - Cargo feature `devtools` keeps WebView remote debugging in release builds,
   for testing only.
+- Cargo feature `tv` builds the Android TV APK; `server`, without the default
+  features, builds `siiishub-server` (see [WEB.md](WEB.md)).
 - `tauri.conf.json` holds the shared configuration. `tauri.windows.conf.json`,
   `tauri.linux.conf.json` and `tauri.android.conf.json` add the bundle
   settings of each platform.

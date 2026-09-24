@@ -1,21 +1,21 @@
-// Android player tweaks.
+// Android player tweaks (the TV has the player of the PC; the phone the rest).
 // - The phone turns to landscape (immersive) as soon as the player overlay
 //   opens, while the stream is still being prepared, instead of when the
 //   video surface appears at the end of the preparation.
-// - The settings panel is a popup centred on the screen over a dimmed
+// - Phone: the settings panel is a popup centred on the screen over a dimmed
 //   backdrop, like the app's other popups. It moves out of the controls bar:
 //   the bar's auto-hide transform would otherwise anchor a fixed element to
 //   the bar instead of the screen.
-// - Pinch on the video, like YouTube: spreading two fingers zooms the picture
+// - Phone: pinch on the video, like YouTube: spreading two fingers zooms the picture
 //   to fill the screen (mpv crops it with panscan, no black bars), pinching
 //   them together fits it back. A short hint names the mode; closing the
 //   player goes back to fit.
-// - A tap anywhere on the player that is not a control shows the overlay
+// - Phone: a tap anywhere on the player that is not a control shows the overlay
 //   when it is hidden and hides it when it is shown, like YouTube.
 // (Holding a finger on the video does not play at 2x on the phone: player.js
 // skips that on Android.)
 import { $ } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_ANDROID, IS_PHONE } from './platform.js';
 import { mpvCommand } from './api.js';
 import { t } from './i18n.js';
 
@@ -66,7 +66,7 @@ if (IS_ANDROID && modal) {
   syncMode();
 }
 
-if (IS_ANDROID && frame && settings) {
+if (IS_PHONE && frame && settings) {
   const backdrop = document.createElement('div');
   backdrop.className = 'player-settings-backdrop';
   backdrop.hidden = true;
@@ -79,7 +79,7 @@ if (IS_ANDROID && frame && settings) {
   syncBackdrop();
 }
 
-if (IS_ANDROID && video) {
+if (IS_PHONE && video) {
   let startSpread = 0;
   let done = false;
   const spread = touches => Math.hypot(
@@ -107,7 +107,7 @@ if (IS_ANDROID && video) {
   video.addEventListener('touchcancel', release, { passive: true });
 }
 
-if (IS_ANDROID && frame) {
+if (IS_PHONE && frame) {
   // player.js shows the overlay on every press (wakePlayer), so whether it
   // was hidden is read before that, in the capture phase. Presses on
   // controls, long presses and pinches are not taps.

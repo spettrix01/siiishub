@@ -75,12 +75,15 @@ the same home:
 ```bash
 bash scripts/linux-deps.sh           # Rust and tauri-cli
 bash scripts/android-setup.sh        # JDK, Android SDK and NDK, Rust targets
-bash scripts/android-build.sh apk    # installers/android/SIIISHUB_<version>_{arm64,armv7}.apk
+bash scripts/android-build.sh apk    # installers/android/SIIISHUB{,-TV}_<version>_{arm64,armv7}.apk
 ```
 
-`android-setup.sh` accepts the Android SDK licenses on your behalf. The APKs
-need Android 8.0 or newer: `arm64` fits almost every phone and tablet, `armv7`
-is for older 32-bit devices.
+`android-setup.sh` accepts the Android SDK licenses on your behalf. The build
+makes two APKs per ABI: `SIIISHUB` for phones and tablets, `SIIISHUB-TV` for
+Android TV (Cargo feature `tv`, listed in the TV launcher). `apk phone` or
+`apk tv` builds only one of them. The APKs need Android 8.0 or newer: `arm64`
+fits almost every phone and tablet, `armv7` is for older 32-bit devices and
+for the many TVs with a 32-bit system.
 
 From Windows, with the sources on the Windows drive:
 

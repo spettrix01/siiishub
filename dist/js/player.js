@@ -28,7 +28,6 @@ const playerVideoBox = $('#playerVideo');
 const playerStatus = $('#playerStatus');
 const playerLogPane = $('#playerLogPane');
 const playerLogBody = $('#playerLogBody');
-const playerLogClose = $('#playerLogClose');
 const playerEyebrow = $('#playerEyebrow');
 const playerTitleEl = $('#playerTitle');
 const playerPickers = $('#playerPickers');
@@ -190,11 +189,6 @@ playerStatus.addEventListener('click', (e) => {
     renderPlayerStatus();
     renderLogPane();
   }
-});
-playerLogClose?.addEventListener('click', () => {
-  logPaneOpen = false;
-  renderPlayerStatus();
-  renderLogPane();
 });
 
 export function isPlayerOpen() {

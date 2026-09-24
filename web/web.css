@@ -5,6 +5,10 @@ html.is-web .winctl,
 html.is-web .dl-row-btn--folder { display: none !important; }
 /* The download folder is shown, but there is no file manager to open it in. */
 html.is-web #openDownloadDir { pointer-events: none; }
+/* The details page: the app opens it below the band of its window
+   controls; a browser has none, so it takes the whole page. */
+html.is-web .dossier,
+html.is-web .dossier-scrim { top: 0; }
 /* The phone remote is at /remote/ of the server's own port. */
 html.is-web .field:has(#remotePortInput) { display: none; }
 
@@ -24,11 +28,6 @@ html.is-web .tab { white-space: nowrap; }
 /* The player (web/player.js): the app leaves the page transparent for mpv
    drawn underneath; here the video is an element of the page. */
 html.is-web body.is-player-open { background: #000; }
-/* No window controls to make room for (the app's side panes start below
-   them): the log's title sits in the band of the player's header, as the
-   settings pane's does. */
-html.is-web .player-frame:not(.is-fs) .player-log-pane { padding-top: 0; }
-html.is-web .player-frame:not(.is-fs) .plp-head { min-height: var(--topbar-h, 72px); }
 html.is-web .player-video { background: #000; }
 .web-video {
   display: block;

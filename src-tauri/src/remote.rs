@@ -443,7 +443,26 @@ pub fn local_ipv4_interfaces() -> Vec<(String, String, bool)> {
     maybe_virtual.sort();
     maybe_virtual.dedup();
     real.extend(maybe_virtual);
+    // Android may keep the interfaces from apps (netlink): the address the
+    // system would reach the internet from stands in for them.
+    if real.is_empty() {
+        if let Some(ip) = primary_ipv4() {
+            real.push(("LAN".to_string(), ip.to_string(), false));
+        }
+    }
     real
+}
+
+/// The IPv4 address of the default route. Connecting a UDP socket sends
+/// nothing: it only picks the route.
+#[cfg(feature = "app")]
+fn primary_ipv4() -> Option<std::net::Ipv4Addr> {
+    let socket = std::net::UdpSocket::bind(("0.0.0.0", 0)).ok()?;
+    socket.connect(("8.8.8.8", 80)).ok()?;
+    match socket.local_addr().ok()?.ip() {
+        IpAddr::V4(v4) if !v4.is_loopback() && !v4.is_unspecified() => Some(v4),
+        _ => None,
+    }
 }
 
 fn now_millis() -> u64 {

@@ -2962,8 +2962,8 @@ html:not(.is-android) .player-frame:not(.is-fs):not(.is-split):not(.is-logopen) 
   padding-right: calc(var(--winctl-w, 154px) + 0.5rem);
 }
 html:not(.is-android) .player-frame:not(.is-fs) .player-torrent-stats { top: var(--topbar-h, 72px); }
-html:not(.is-android) .player-frame:not(.is-fs) .psp-head { min-height: var(--topbar-h, 72px); }
-html:not(.is-android) .player-frame:not(.is-fs) .player-log-pane { padding-top: var(--topbar-h, 72px); }
+html:not(.is-android) .player-frame:not(.is-fs) .psp-head,
+html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--topbar-h, 72px); }
 
 .player-frame { --side-pane-width: clamp(300px, 36%, 460px); }
 .player-video { transition: width .3s cubic-bezier(.16, 1, .3, 1); }
@@ -4898,11 +4898,12 @@ html.is-phone .settings-pane-title { font-size: 20px; white-space: normal; }
 html.is-phone .settings-card .pane { padding: 10px 16px calc(24px + var(--bottom-nav-h)); }
 html.is-phone.settings-open .searchbox { visibility: hidden; }
 
-/* Genre picker (Android): trigger on the right, options in a popup centred
-   on the screen over a dimmed backdrop (added by android-genres.js). */
-html.is-android .genre-dropdown { position: static; align-self: flex-end; }
-html.is-android .genre-trigger { min-width: 0; }
-html.is-android .genre-menu {
+/* Genre picker (Android phone; the TV has the PC's dropdown): trigger on
+   the right, options in a popup centred on the screen over a dimmed
+   backdrop (added by android-genres.js). */
+html.is-phone .genre-dropdown { position: static; align-self: flex-end; }
+html.is-phone .genre-trigger { min-width: 0; }
+html.is-phone .genre-menu {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -4917,8 +4918,8 @@ html.is-android .genre-menu {
   animation: popupIn .18s ease;
 }
 @keyframes popupIn { from { opacity: 0; transform: translate(-50%, -50%) scale(0.96); } }
-html.is-android .genre-option { padding: 11px 14px; font-size: 15px; border-radius: 10px; }
-html.is-android .genre-backdrop {
+html.is-phone .genre-option { padding: 11px 14px; font-size: 15px; border-radius: 10px; }
+html.is-phone .genre-backdrop {
   position: fixed;
   inset: 0;
   z-index: 80;
@@ -4928,18 +4929,18 @@ html.is-android .genre-backdrop {
   animation: fadein .18s ease;
 }
 
-/* Settings dropdowns (Android): picker.js lays the menu out as a popup
+/* Settings dropdowns (Android phone): picker.js lays the menu out as a popup
    centred on the screen (`popup` option) behind a dimmed backdrop. */
-html.is-android .streams-pick-menu.is-popup {
+html.is-phone .streams-pick-menu.is-popup {
   animation: popupIn .18s ease;
   padding: 8px;
   border-radius: 16px;
 }
-html.is-android .streams-pick-menu.is-popup.streams-pick-menu-searchable { padding: 0; }
-html.is-android .streams-pick-menu.is-popup .streams-pick-option { padding: 11px 14px; font-size: 15px; border-radius: 10px; }
-html.is-android .streams-pick-menu.is-popup .streams-pick-search { padding: 12px 14px; }
-html.is-android .streams-pick-menu.is-popup .streams-pick-search input { font-size: 15px; }
-html.is-android .pick-backdrop {
+html.is-phone .streams-pick-menu.is-popup.streams-pick-menu-searchable { padding: 0; }
+html.is-phone .streams-pick-menu.is-popup .streams-pick-option { padding: 11px 14px; font-size: 15px; border-radius: 10px; }
+html.is-phone .streams-pick-menu.is-popup .streams-pick-search { padding: 12px 14px; }
+html.is-phone .streams-pick-menu.is-popup .streams-pick-search input { font-size: 15px; }
+html.is-phone .pick-backdrop {
   position: fixed;
   inset: 0;
   z-index: 9998;
@@ -4949,9 +4950,9 @@ html.is-android .pick-backdrop {
   animation: fadein .18s ease;
 }
 
-/* Settings text fields (Android): edited in a centred popup, see
+/* Settings text fields (Android phone): edited in a centred popup, see
    android-inputs.js; the backdrop is the same as the dropdown popups. */
-html.is-android .input-popup {
+html.is-phone .input-popup {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -4968,7 +4969,7 @@ html.is-android .input-popup {
   box-shadow: var(--shadow-2);
   animation: popupIn .18s ease;
 }
-html.is-android .input-popup-title {
+html.is-phone .input-popup-title {
   margin: 0;
   font-family: var(--mono);
   font-size: 0.78rem;
@@ -4976,9 +4977,9 @@ html.is-android .input-popup-title {
   text-transform: uppercase;
   color: var(--text-3);
 }
-html.is-android .input-popup-row { display: flex; align-items: stretch; gap: 8px; }
-html.is-android .input-popup-row input,
-html.is-android .input-popup-row textarea {
+html.is-phone .input-popup-row { display: flex; align-items: stretch; gap: 8px; }
+html.is-phone .input-popup-row input,
+html.is-phone .input-popup-row textarea {
   flex: 1;
   min-width: 0;
   width: 100%;
@@ -4991,12 +4992,12 @@ html.is-android .input-popup-row textarea {
   border-radius: 10px;
   outline: none;
 }
-html.is-android .input-popup-row textarea { resize: vertical; min-height: 120px; }
-html.is-android .input-popup-row input:focus,
-html.is-android .input-popup-row textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
-html.is-android .input-popup-reveal { flex: 0 0 44px; width: 44px; display: grid; place-items: center; }
-html.is-android .input-popup-actions { display: flex; justify-content: flex-end; gap: 8px; }
-html.is-android .input-popup-actions button { height: 42px; padding: 0 18px; border-radius: 10px; }
+html.is-phone .input-popup-row textarea { resize: vertical; min-height: 120px; }
+html.is-phone .input-popup-row input:focus,
+html.is-phone .input-popup-row textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px var(--violet-soft); }
+html.is-phone .input-popup-reveal { flex: 0 0 44px; width: 44px; display: grid; place-items: center; }
+html.is-phone .input-popup-actions { display: flex; justify-content: flex-end; gap: 8px; }
+html.is-phone .input-popup-actions button { height: 42px; padding: 0 18px; border-radius: 10px; }
 
 /* Streams toolbar (Android phones): no "Streams" label, the filters sit centred
    and wrap when their labels get long. */
@@ -5015,16 +5016,16 @@ html.keyboard-open .bottom-nav { display: none; }
 
 
 /* Bottom bar labels and icons stay readable over the posters. */
-html.is-android .bottom-nav-item { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55); }
-html.is-android .bottom-nav-icon svg { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45)); }
+html.is-phone .bottom-nav-item { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55); }
+html.is-phone .bottom-nav-icon svg { filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.45)); }
 
-/* Player (Android): a play/pause button in the centre too, shown with the
+/* Player (Android phone): a play/pause button in the centre too, shown with the
    controls (pause glyph while playing, play glyph while paused) and faded
    out with them; the loading screen covers it until the video starts. The
    button is exactly as big as its glyph, so only a tap on the icon toggles
    playback. The id selectors beat the desktop rule that hides the pause
    glyph of both play buttons. */
-html.is-android .player-bigplay {
+html.is-phone .player-bigplay {
   display: inline-flex;
   width: 64px;
   height: 64px;
@@ -5032,15 +5033,15 @@ html.is-android .player-bigplay {
   transition: opacity .4s cubic-bezier(.4, 0, .2, 1);
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
 }
-html.is-android .player-frame.is-paused .player-bigplay { animation: none; }
-html.is-android .player-frame.is-idle .player-bigplay { opacity: 0; pointer-events: none; }
-html.is-android .player-frame:not(.is-paused) #playerBigPlay .ico-play { display: none; }
-html.is-android .player-frame:not(.is-paused) #playerBigPlay .ico-pause { display: block; }
-html.is-android .player-bigplay svg { width: 64px; height: 64px; }
+html.is-phone .player-frame.is-paused .player-bigplay { animation: none; }
+html.is-phone .player-frame.is-idle .player-bigplay { opacity: 0; pointer-events: none; }
+html.is-phone .player-frame:not(.is-paused) #playerBigPlay .ico-play { display: none; }
+html.is-phone .player-frame:not(.is-paused) #playerBigPlay .ico-pause { display: block; }
+html.is-phone .player-bigplay svg { width: 64px; height: 64px; }
 
-/* Player settings (Android): a popup centred on the screen over a backdrop
+/* Player settings (Android phone): a popup centred on the screen over a backdrop
    (android-player.js moves the panel next to the backdrop in the frame). */
-html.is-android .player-settings {
+html.is-phone .player-settings {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -5055,16 +5056,16 @@ html.is-android .player-settings {
   transform: translate(-50%, -50%);
   animation: popupIn .18s ease;
 }
-html.is-android .player-settings[hidden] { display: none; }
-html.is-android .player-settings-body { flex: 1 1 auto; min-height: 0; max-height: none; }
-html.is-android .player-settings-backdrop {
+html.is-phone .player-settings[hidden] { display: none; }
+html.is-phone .player-settings-body { flex: 1 1 auto; min-height: 0; max-height: none; }
+html.is-phone .player-settings-backdrop {
   position: fixed;
   inset: 0;
   z-index: 40;
   background: rgba(6, 4, 12, 0.6);
   animation: fadein .18s ease;
 }
-html.is-android .player-settings-backdrop[hidden] { display: none; }
+html.is-phone .player-settings-backdrop[hidden] { display: none; }
 
 /* Android: no text selection or long-press callout anywhere in the app;
    editable fields keep selection so typed text can still be edited. */

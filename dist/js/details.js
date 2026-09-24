@@ -1,4 +1,4 @@
-import { IS_ANDROID, IS_PHONE } from './platform.js';
+import { IS_PHONE } from './platform.js';
 import { $, escapeHTML, DOTS_HTML, CHECK_SVG, COPY_SVG, copyToClipboard, openExternal } from './dom.js';
 import { state, tmdbType, TMDB_IMG } from './state.js';
 import { tmdb, fetchStreams, fetchTvSeason, rdPlay, onMediaProgress, downloadStart, downloadPlay, downloadFiles, downloadList, destroyTorrentSession } from './api.js';
@@ -371,7 +371,7 @@ function buildAggregatePicker(aggregate, baseTitle, currentId, currentIdx) {
     setupStreamPicker(root, {
       items,
       value: initialValue,
-      popup: IS_ANDROID,
+      popup: IS_PHONE,
       onChange: (val) => onPick(items.find(it => it.value === val)),
     });
     return;
@@ -398,14 +398,14 @@ function buildAggregatePicker(aggregate, baseTitle, currentId, currentIdx) {
   const epPicker = setupStreamPicker(epRoot, {
     items: epItems,
     value: initialEpValue,
-    popup: IS_ANDROID,
+    popup: IS_PHONE,
     onChange: (val) => onPick(epItems.find(it => it.value === val)),
   });
 
   setupStreamPicker(seasonRoot, {
     items: seasonItems,
     value: initialSeason,
-    popup: IS_ANDROID,
+    popup: IS_PHONE,
     onChange: (seasonVal) => {
       const bucketKey = seasonVal === 'extra' ? null : Number(seasonVal);
       epItems = itemsForBucket(bucketKey);
@@ -749,14 +749,14 @@ async function bindStreamsSection(detail, type) {
   const seasonPicker = setupStreamPicker(seasonRoot, {
     items: seasonItems,
     value: startSeason,
-    popup: IS_ANDROID,
+    popup: IS_PHONE,
     onChange: v => loadSeason(Number(v)),
   });
 
   const epPicker = setupStreamPicker(epRoot, {
     items: [{ value: '', label: t('details.loadingShort') }],
     value: '',
-    popup: IS_ANDROID,
+    popup: IS_PHONE,
     onChange: () => triggerEpisode(),
   });
 
@@ -955,7 +955,7 @@ async function loadStreams(root, type, id) {
           { value: 'seeders', label: t('details.sort.seeders') },
         ],
         value: 'quality',
-        popup: IS_ANDROID,
+        popup: IS_PHONE,
         onChange: v => { sortBy = v || 'quality'; renderList(); },
       });
 
@@ -966,7 +966,7 @@ async function loadStreams(root, type, id) {
         resPicker = setupStreamPicker(resRoot, {
           items: resItems,
           value: '',
-          popup: IS_ANDROID,
+          popup: IS_PHONE,
           onChange: v => { activeResolution = v || null; refreshFilters(); renderList(); },
         });
       }
@@ -979,7 +979,7 @@ async function loadStreams(root, type, id) {
       addonPicker = setupStreamPicker(pickerRoot, {
         items: pickerItems,
         value: '',
-        popup: IS_ANDROID,
+        popup: IS_PHONE,
         onChange: v => { activeAddon = v || null; refreshFilters(); renderList(); },
       });
     }

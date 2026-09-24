@@ -58,6 +58,29 @@ if (IS_TV) {
     if (item) spatialNav.focus(item);
   }).observe(settings, { attributes: true, attributeFilter: ['hidden'] });
 
+  // A dialog (a confirmation, a phone asking to be the remote) opens on the
+  // button it focuses, its confirmation, whatever was picked underneath; the
+  // selection goes back there when it closes.
+  const dialog = $('#alertModal');
+  let beforeDialog = null;
+  new MutationObserver(() => {
+    if (dialog.hidden) {
+      const el = beforeDialog;
+      beforeDialog = null;
+      if (el?.isConnected) spatialNav.focus(el);
+      return;
+    }
+    const sel = document.querySelector('.snav-focus');
+    if (sel && !dialog.contains(sel)) beforeDialog = sel;
+    // The dialog focuses its button once it is shown.
+    requestAnimationFrame(() => {
+      if (dialog.hidden) return;
+      const focused = dialog.contains(document.activeElement) ? document.activeElement : null;
+      const button = focused?.matches('button') ? focused : dialog.querySelector('button');
+      if (button) spatialNav.focus(button);
+    });
+  }).observe(dialog, { attributes: true, attributeFilter: ['hidden'] });
+
   // Closing the player gives the selection back to what started it; a stream
   // list redrawn meanwhile (the stream just played goes first, as watched)
   // gives it to that stream.

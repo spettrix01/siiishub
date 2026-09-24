@@ -6,12 +6,12 @@
 
 <p align="center">
   <strong>Find a title. Pick a stream. Press play.</strong><br>
-  A fast, good-looking streaming hub for Windows, Linux and Android, with the mpv player built in.
+  A fast, good-looking streaming hub for Windows, Linux, Android and Android TV, with the mpv player built in, or in your browser from your own server.
 </p>
 
 <p align="center">
   <a href="LICENSE"><img alt="License: GPL-3.0-or-later" src="https://img.shields.io/badge/license-GPL--3.0--or--later-blue"></a>
-  <img alt="Platforms: Windows, Linux, Android" src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android-555">
+  <img alt="Platforms: Windows, Linux, Android, Android TV, Docker" src="https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20Android%20%7C%20Android%20TV%20%7C%20Docker-555">
   <img alt="Built with Tauri 2 and Rust" src="https://img.shields.io/badge/built%20with-Tauri%202%20%2B%20Rust-e8732a">
 </p>
 
@@ -76,9 +76,10 @@ device.
 ### Everywhere
 
 - **Desktop app** for Windows and Linux in a clean, borderless window.
-- **Remote control:** scan a QR code with your phone, in the browser or in the SIIISHUB Android app, approve it once and control playback from the couch.
+- **Remote control:** scan a QR code with your phone, in the browser or in the SIIISHUB Android app, approve it once and control playback from the couch, on a PC, on Android TV or in the browser version.
 - **Android app** made for touch: bottom navigation, a full-screen landscape player and pinch to fill the screen.
-- **Android TV:** the same APK, driven with the TV remote: the D-pad moves between titles and controls, and in the player it seeks and pauses.
+- **Android TV app** with the interface of the desktop app, driven with the TV remote: the D-pad moves between titles and controls, and in the player it seeks and pauses.
+- **In your browser:** run the server version on a NAS or a mini PC with Docker and watch from any browser, phones and TVs included. Files the browser cannot play are converted on the fly, on the GPU when the server has one. See [docs/WEB.md](docs/WEB.md).
 
 ## Download
 
@@ -88,7 +89,9 @@ Get the latest build from the [Releases](../../releases/latest) page.
 |---|---|
 | Windows 10 and 11, 64-bit | `SIIISHUB_<version>_x64-setup.exe` |
 | Debian 13+, Ubuntu 24.04+, 64-bit | `SIIISHUB_<version>_amd64.deb` |
-| Android 8.0+, Android TV | `SIIISHUB_<version>_arm64.apk`, or `_armv7.apk` for older 32-bit devices |
+| Android 8.0+ phones and tablets | `SIIISHUB_<version>_arm64.apk`, or `_armv7.apk` for older 32-bit devices |
+| Android TV and Google TV | `SIIISHUB-TV_<version>_arm64.apk`, or `_armv7.apk` for TVs with a 32-bit system |
+| Docker: NAS, mini PC, server | `ghcr.io/spettrix01/siiishub`, set up as in [docs/WEB.md](docs/WEB.md) |
 
 The packages are not code-signed, so Windows SmartScreen and Android ask for
 confirmation the first time.
@@ -110,10 +113,11 @@ together.
 ## Privacy
 
 SIIISHUB has no account, no telemetry and no server of its own. Settings and
-API keys stay on your device. The app connects only to TMDB, to the addons and
-the debrid service you configure, to torrent peers and trackers, and to Google
-Fonts for the interface fonts. The desktop remote control listens on your
-local network, and every new device has to be approved.
+API keys stay on your device, or on your own server for the browser version.
+The app connects only to TMDB, to the addons and the debrid service you
+configure, to torrent peers and trackers, and to Google Fonts for the
+interface fonts. The remote control of the desktop and TV apps listens on
+your local network, and every new device has to be approved.
 
 ## Legal notice
 

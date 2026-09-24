@@ -1,7 +1,17 @@
 #!/bin/bash
-# Builds the SIIISHUB Android APKs, one per ABI (arm64 and armv7).
-# Usage: scripts/android-build.sh [apk|check]   (default: apk)
+# Builds the SIIISHUB Android APKs, one per ABI (arm64 and armv7), for the
+# phone and for the TV.
+# Usage: scripts/android-build.sh [apk|check] [phone|tv|all]
+#        (default: apk all)
 # Requires scripts/android-setup.sh to have run once.
+#
+# - phone: SIIISHUB_<version>_<abi>.apk, the mobile layout; the phone is the
+#   remote of a PC or of the server version.
+# - tv: SIIISHUB-TV_<version>_<abi>.apk (feature `tv`), the interface of the
+#   PC driven with the TV's remote, a phone as its remote too, and listed in
+#   the TV's launcher.
+# Both are dev.siiis.siiishub: either installs over the other, and over 1.1.0
+# (one APK for both), keeping the settings and the library.
 #
 # Environment:
 #   OUT_DIR   where the APKs are copied (default: <repo>/installers/android)
@@ -14,10 +24,16 @@ set -euo pipefail
 . "$HOME/.cargo/env"
 . "$HOME/.siiishub-android.env"
 MODE=${1:-apk}
+VARIANTS=${2:-all}
+case "$VARIANTS" in
+  all) VARIANTS="phone tv" ;;
+  phone|tv) ;;
+  *) echo "unknown variant: $VARIANTS (phone, tv or all)"; exit 1 ;;
+esac
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 OUT_DIR=${OUT_DIR:-$ROOT/installers/android}
-FEATURES=()
-if [ "${DEVTOOLS:-0}" = "1" ]; then FEATURES=(--features devtools); fi
+BASE_FEATURES=()
+if [ "${DEVTOOLS:-0}" = "1" ]; then BASE_FEATURES=(devtools); fi
 case "$ROOT" in
   /mnt/*)
     WORK=$HOME/siiishub-apk
@@ -122,47 +138,67 @@ if [ -d icons/android ]; then
   cp -r icons/android/. gen/android/app/src/main/res/
 fi
 
-# Android TV: the Leanback launcher only lists activities with this category.
+# Android TV: the Leanback launcher only lists activities with this category,
+# which only the TV APK has.
 MANIFEST=gen/android/app/src/main/AndroidManifest.xml
-if ! grep -q 'LEANBACK_LAUNCHER' "$MANIFEST"; then
-  python3 - "$MANIFEST" <<'PY'
+leanback() {
+  python3 - "$MANIFEST" "$1" <<'PY'
 import re, sys
-p = sys.argv[1]
+p, on = sys.argv[1], sys.argv[2] == 'on'
 s = open(p).read()
-s = re.sub(r'(<category android:name="android.intent.category.LAUNCHER" ?/>)',
-           r'\1\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />', s, count=1)
+line = '\n                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />'
+s = s.replace(line, '')
+if on:
+    s = re.sub(r'(<category android:name="android.intent.category.LAUNCHER" ?/>)', r'\1' + line, s, count=1)
 open(p, 'w').write(s)
-print('leanback launcher category injected')
 PY
-fi
+}
 
-case "$MODE" in
-  check)
-    # Plain cargo needs the NDK compiler and linker that `cargo tauri android`
-    # otherwise sets up (ring and a few other crates build C code).
-    NDK_BIN=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
-    export CC_aarch64_linux_android=$NDK_BIN/aarch64-linux-android26-clang
-    export AR_aarch64_linux_android=$NDK_BIN/llvm-ar
-    export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$NDK_BIN/aarch64-linux-android26-clang
-    cargo check --target aarch64-linux-android "${FEATURES[@]}" 2>&1 | tail -40
-    ;;
-  apk)
-    # One APK per ABI: libmpv weighs tens of MB per ABI.
-    cargo tauri android build --apk --split-per-abi --target aarch64 --target armv7 "${FEATURES[@]}"
-    VERSION=$(grep -m1 '"version"' tauri.conf.json | sed -E 's/.*"([0-9.]+)".*/\1/')
-    mkdir -p "$OUT_DIR"
-    find gen/android/app/build/outputs/apk -name '*release*.apk' | while read -r apk; do
-      case "$apk" in
-        *arm64*) name="SIIISHUB_${VERSION}_arm64.apk" ;;
-        *x86_64*) name="SIIISHUB_${VERSION}_x86_64.apk" ;;
-        *x86*) name="SIIISHUB_${VERSION}_x86.apk" ;;
-        *arm*) name="SIIISHUB_${VERSION}_armv7.apk" ;;
-        *) name="SIIISHUB_${VERSION}_$(basename "$apk")" ;;
-      esac
-      cp -v "$apk" "$OUT_DIR/$name"
-    done
-    echo "APKs copied to $OUT_DIR"
-    ;;
-  *) echo "unknown mode: $MODE"; exit 1 ;;
-esac
+VERSION=$(grep -m1 '"version"' tauri.conf.json | sed -E 's/.*"([0-9.]+)".*/\1/')
+for VARIANT in $VARIANTS; do
+  FEATURES=("${BASE_FEATURES[@]}")
+  PREFIX=SIIISHUB
+  if [ "$VARIANT" = tv ]; then
+    FEATURES+=(tv)
+    PREFIX=SIIISHUB-TV
+    leanback on
+  else
+    leanback off
+  fi
+  FEATURE_ARGS=()
+  if [ ${#FEATURES[@]} -gt 0 ]; then FEATURE_ARGS=(--features "$(IFS=,; echo "${FEATURES[*]}")"); fi
+  echo "== $VARIANT (${FEATURE_ARGS[*]:-no extra features})"
+  case "$MODE" in
+    check)
+      # Plain cargo needs the NDK compiler and linker that `cargo tauri android`
+      # otherwise sets up (ring and a few other crates build C code).
+      NDK_BIN=$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+      export CC_aarch64_linux_android=$NDK_BIN/aarch64-linux-android26-clang
+      export AR_aarch64_linux_android=$NDK_BIN/llvm-ar
+      export CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER=$NDK_BIN/aarch64-linux-android26-clang
+      cargo check --target aarch64-linux-android "${FEATURE_ARGS[@]}" 2>&1 | tail -40
+      ;;
+    apk)
+      # One APK per ABI: libmpv weighs tens of MB per ABI. The previous
+      # variant's APKs go first, so only this one's are copied.
+      rm -rf gen/android/app/build/outputs/apk
+      cargo tauri android build --apk --split-per-abi --target aarch64 --target armv7 "${FEATURE_ARGS[@]}"
+      mkdir -p "$OUT_DIR"
+      find gen/android/app/build/outputs/apk -name '*release*.apk' | while read -r apk; do
+        case "$apk" in
+          *arm64*) abi=arm64 ;;
+          *x86_64*) abi=x86_64 ;;
+          *x86*) abi=x86 ;;
+          *arm*) abi=armv7 ;;
+          *) abi=$(basename "$apk" .apk) ;;
+        esac
+        cp -v "$apk" "$OUT_DIR/${PREFIX}_${VERSION}_${abi}.apk"
+      done
+      ;;
+    *) echo "unknown mode: $MODE"; exit 1 ;;
+  esac
+done
+# The Gradle project is left as the phone's.
+leanback off
+[ "$MODE" = apk ] && echo "APKs copied to $OUT_DIR"
 echo "ANDROID BUILD $MODE OK"
