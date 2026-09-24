@@ -151,13 +151,14 @@ fn same_origin(headers: &HeaderMap) -> bool {
     Some(origin_host) == host || Some(origin_host) == forwarded_host
 }
 
-/// The login page and what it loads: the app's styles and translations,
-/// none of which holds anything about the user.
+/// The login page and what it loads: the app's styles, icons and
+/// translations, none of which holds anything about the user.
 fn is_public(path: &str) -> bool {
     matches!(
         path,
         "/login" | "/api/login" | "/style.css" | "/web/login.css" | "/web/login.js"
     ) || (path.starts_with("/js/locales/") && path.ends_with(".js") && !path.contains(".."))
+        || (path.starts_with("/img/icon-") && path.ends_with(".png") && !path.contains(".."))
 }
 
 /// Every request but the login page needs a session; the API answers 401
