@@ -22,6 +22,11 @@ html.is-web .tab { white-space: nowrap; }
 /* The player (web/player.js): the app leaves the page transparent for mpv
    drawn underneath; here the video is an element of the page. */
 html.is-web body.is-player-open { background: #000; }
+/* No window controls to make room for (the app's side panes start below
+   them): the log's title sits in the band of the player's header, as the
+   settings pane's does. */
+html.is-web .player-frame:not(.is-fs) .player-log-pane { padding-top: 0; }
+html.is-web .player-frame:not(.is-fs) .plp-head { min-height: var(--topbar-h, 72px); }
 html.is-web .player-video { background: #000; }
 .web-video {
   display: block;
