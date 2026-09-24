@@ -35,6 +35,12 @@ pub struct VideoInfo {
     pub bit_depth: u8,
     /// `smpte2084` (HDR10, Dolby Vision) or `arib-std-b67` (HLG) for HDR.
     pub color_transfer: String,
+    /// Dolby Vision profile (5, 7, 8...), 0 without Dolby Vision.
+    pub dv_profile: u8,
+    /// What a player without Dolby Vision gets of it
+    /// (`dv_bl_signal_compatibility_id`): 1 HDR10, 2 SDR, 4 HLG, 6 Blu-ray
+    /// HDR10; 0 nothing but wrong colours (profile 5).
+    pub dv_compat: u8,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -134,6 +140,19 @@ fn parse(j: Value) -> ProbeInfo {
         .and_then(|v| v.as_str().and_then(|s| s.parse().ok()).or(v.as_f64()))
         .unwrap_or(0.0);
 
+    // The Dolby Vision configuration of the video, when it has one.
+    let dovi = |s: &Value, field: &str| -> u8 {
+        s.get("side_data_list")
+            .and_then(|l| l.as_array())
+            .and_then(|l| {
+                l.iter().find(|d| {
+                    d.get("side_data_type").and_then(|t| t.as_str()) == Some("DOVI configuration record")
+                })
+            })
+            .and_then(|d| d.get(field))
+            .and_then(|v| v.as_u64())
+            .unwrap_or(0) as u8
+    };
     let v = streams
         .iter()
         .find(|s| s.get("codec_type").and_then(|v| v.as_str()) == Some("video"))
@@ -157,6 +176,8 @@ fn parse(j: Value) -> ProbeInfo {
                 .and_then(|v| v.as_str())
                 .unwrap_or("")
                 .to_string(),
+            dv_profile: dovi(s, "dv_profile"),
+            dv_compat: dovi(s, "dv_bl_signal_compatibility_id"),
         });
 
     let v_dur = streams

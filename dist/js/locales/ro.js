@@ -431,4 +431,5 @@ export const RO = {
   "web.login.unreachable": "Serverul nu răspunde.",
   "error.web.notInBrowser": "Nu este disponibil în browser.",
   "error.web.noPlayer": "Redarea în browser nu este încă disponibilă.",
+  "web.player.dolbyVision": "Dolby Vision fără HDR10: în browser, acest videoclip apare cu culori greșite (verde și mov). Pentru culorile corecte, alege o versiune cu HDR sau urmărește-l în aplicația SIIISHUB.",
 };

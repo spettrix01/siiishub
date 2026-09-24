@@ -431,4 +431,5 @@ export const DA = {
   "web.login.unreachable": "Serveren svarer ikke.",
   "error.web.notInBrowser": "Ikke tilgængelig i browseren.",
   "error.web.noPlayer": "Afspilning i browseren er endnu ikke tilgængelig.",
+  "web.player.dolbyVision": "Dolby Vision uden HDR10: i en browser får denne video forkerte farver (grøn og lilla). Vælg en version med HDR for de rigtige farver, eller se den i SIIISHUB-appen.",
 };

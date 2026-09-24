@@ -431,4 +431,5 @@ export const TR = {
   "web.login.unreachable": "Sunucu yanıt vermiyor.",
   "error.web.notInBrowser": "Tarayıcıda kullanılamaz.",
   "error.web.noPlayer": "Tarayıcıda oynatma henüz kullanılamıyor.",
+  "web.player.dolbyVision": "HDR10 olmadan Dolby Vision: bu video tarayıcıda yanlış renklerle görünür (yeşil ve mor). Doğru renkler için HDR’li bir sürüm seçin veya SIIISHUB uygulamasında izleyin.",
 };

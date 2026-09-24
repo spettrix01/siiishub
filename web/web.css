@@ -35,6 +35,47 @@ html.is-web .player-video { background: #000; }
   object-fit: contain;
   background: #000;
 }
+/* A notice over the video (web/player.js), below the player's header and
+   centred on the video, beside the side panes. */
+.web-notice {
+  position: absolute;
+  top: calc(var(--topbar-h, 72px) + 8px);
+  left: 16px;
+  right: 16px;
+  z-index: 13;
+  width: fit-content;
+  max-width: 620px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 8px 10px 14px;
+  border: 1px solid rgba(255, 176, 64, 0.5);
+  border-radius: 12px;
+  background: rgba(18, 14, 10, 0.9);
+  color: #f3eee6;
+  font-size: 13.5px;
+  line-height: 1.45;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.web-notice[hidden] { display: none; }
+.player-frame.is-split .web-notice,
+.player-frame.is-logopen .web-notice { right: calc(var(--side-pane-width) + 16px); }
+.web-notice-icon { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; color: #ffb040; }
+.web-notice-text { flex: 1 1 auto; }
+.web-notice-close {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.75);
+}
+.web-notice-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+.web-notice-close svg { width: 14px; height: 14px; }
+
 .web-video::cue {
   font-family: var(--body);
   font-size: clamp(16px, 2.4vw, 40px);

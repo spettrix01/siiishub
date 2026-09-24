@@ -431,4 +431,5 @@ export const NL = {
   "web.login.unreachable": "De server reageert niet.",
   "error.web.notInBrowser": "Niet beschikbaar in de browser.",
   "error.web.noPlayer": "Afspelen in de browser is nog niet beschikbaar.",
+  "web.player.dolbyVision": "Dolby Vision zonder HDR10: in een browser krijgt deze video verkeerde kleuren (groen en paars). Kies voor de juiste kleuren een versie met HDR of bekijk hem in de SIIISHUB-app.",
 };

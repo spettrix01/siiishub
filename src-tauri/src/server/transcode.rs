@@ -505,6 +505,8 @@ async fn test(accel: &Accel, step: Step, hdr: bool, sample: Option<&Path>) -> Re
         pix_fmt: String::new(),
         bit_depth: if hdr { 10 } else { 8 },
         color_transfer: if hdr { "smpte2084" } else { "" }.to_string(),
+        dv_profile: 0,
+        dv_compat: 0,
     };
     let transcoder = Transcoder {
         accel: Some(Arc::new(accel.clone())),

@@ -431,4 +431,5 @@ export const IT = {
   "web.login.unreachable": "Il server non risponde.",
   "error.web.notInBrowser": "Non disponibile nel browser.",
   "error.web.noPlayer": "La riproduzione nel browser non è ancora disponibile.",
+  "web.player.dolbyVision": "Dolby Vision senza HDR10: nel browser questo video ha i colori sbagliati (verdi e viola). Per i colori giusti scegli una versione con HDR o guardalo nell’app SIIISHUB.",
 };

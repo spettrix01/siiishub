@@ -14,6 +14,7 @@
 // Without hls.js (offline CDN) the older way remains: ffmpeg's fragmented
 // MP4 as one stream from a given second, restarted at every seek.
 import { state } from '../js/state.js';
+import { t } from '../js/i18n.js';
 
 const EVENT = 'mpv://event';
 const VOLUME_MAX = 200;
@@ -32,6 +33,36 @@ video.preload = 'auto';
 box.appendChild(video);
 const subtitleTrack = video.addTextTrack('subtitles', 'SIIISHUB', '');
 subtitleTrack.mode = 'showing';
+
+// ---------- Notice ----------
+// A word over the video about what the browser cannot do with the file,
+// until closed or for half a minute.
+const NOTICE_MS = 30000;
+const notice = document.createElement('div');
+notice.className = 'web-notice';
+notice.setAttribute('role', 'status');
+notice.hidden = true;
+notice.innerHTML = `
+  <svg class="web-notice-icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3 2 20h20L12 3zM12 10v4M12 17.5v.01"/></svg>
+  <span class="web-notice-text"></span>
+  <button class="web-notice-close" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg></button>`;
+document.getElementById('playerFrame')?.appendChild(notice);
+let noticeTimer = 0;
+
+function showNotice(text) {
+  notice.querySelector('.web-notice-text').textContent = text;
+  notice.querySelector('.web-notice-close').setAttribute('aria-label', t('common.close'));
+  notice.hidden = false;
+  clearTimeout(noticeTimer);
+  noticeTimer = setTimeout(hideNotice, NOTICE_MS);
+}
+
+function hideNotice() {
+  clearTimeout(noticeTimer);
+  notice.hidden = true;
+}
+
+notice.querySelector('.web-notice-close').addEventListener('click', hideNotice);
 
 // ---------- What the browser plays ----------
 const tester = document.createElement('video');
@@ -589,9 +620,14 @@ async function load(url) {
     media.mode = videoPlays(info.video) ? 'copy' : 'h264';
     media.transport = 'hls';
   }
-  console.info(`[player] ${info.container} ${info.video?.codec || '?'}${info.video?.bit_depth > 8 ? ' 10-bit' : ''}, `
+  console.info(`[player] ${info.container} ${info.video?.codec || '?'}${info.video?.bit_depth > 8 ? ' 10-bit' : ''}`
+    + `${info.video?.dv_profile ? ` Dolby Vision ${info.video.dv_profile}` : ''}, `
     + `audio ${info.audios.map(a => a.codec).join('/') || 'none'}: `
     + (media.mode === 'direct' ? 'as it is' : `HLS, video ${media.mode}`));
+  // Dolby Vision with nothing a player without it can show (profile 5): the
+  // browser decodes the video, with the colours green and purple.
+  if (info.video?.dv_profile && !info.video.dv_compat) showNotice(t('web.player.dolbyVision'));
+  else hideNotice();
   buildTrackList();
   prop('aid', aid);
   prop('sid', sid);
@@ -637,6 +673,7 @@ function stop() {
   generation++;
   stopped = true;
   opening = false;
+  hideNotice();
   stopSubFeed();
   destroyHls();
   closeSession();

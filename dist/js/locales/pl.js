@@ -431,4 +431,5 @@ export const PL = {
   "web.login.unreachable": "Serwer nie odpowiada.",
   "error.web.notInBrowser": "Niedostępne w przeglądarce.",
   "error.web.noPlayer": "Odtwarzanie w przeglądarce nie jest jeszcze dostępne.",
+  "web.player.dolbyVision": "Dolby Vision bez HDR10: w przeglądarce ten film ma nieprawidłowe kolory (zielony i fioletowy). Aby zobaczyć właściwe kolory, wybierz wersję z HDR lub obejrzyj go w aplikacji SIIISHUB.",
 };

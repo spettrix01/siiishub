@@ -431,4 +431,5 @@ export const HI = {
   "web.login.unreachable": "सर्वर जवाब नहीं दे रहा है।",
   "error.web.notInBrowser": "ब्राउज़र में उपलब्ध नहीं है।",
   "error.web.noPlayer": "ब्राउज़र में प्लेबैक अभी उपलब्ध नहीं है।",
+  "web.player.dolbyVision": "HDR10 के बिना Dolby Vision: ब्राउज़र में यह वीडियो गलत रंगों (हरा और बैंगनी) में दिखता है। सही रंगों के लिए HDR वाला संस्करण चुनें या इसे SIIISHUB ऐप में देखें।",
 };

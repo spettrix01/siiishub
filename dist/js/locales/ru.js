@@ -431,4 +431,5 @@ export const RU = {
   "web.login.unreachable": "Сервер не отвечает.",
   "error.web.notInBrowser": "Недоступно в браузере.",
   "error.web.noPlayer": "Воспроизведение в браузере пока недоступно.",
+  "web.player.dolbyVision": "Dolby Vision без HDR10: в браузере у этого видео неправильные цвета (зелёный и фиолетовый). Чтобы цвета были правильными, выберите версию с HDR или смотрите его в приложении SIIISHUB.",
 };

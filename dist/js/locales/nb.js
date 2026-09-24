@@ -431,4 +431,5 @@ export const NB = {
   "web.login.unreachable": "Serveren svarer ikke.",
   "error.web.notInBrowser": "Ikke tilgjengelig i nettleseren.",
   "error.web.noPlayer": "Avspilling i nettleseren er ikke tilgjengelig ennå.",
+  "web.player.dolbyVision": "Dolby Vision uten HDR10: i en nettleser får denne videoen feil farger (grønt og lilla). Velg en versjon med HDR for riktige farger, eller se den i SIIISHUB-appen.",
 };

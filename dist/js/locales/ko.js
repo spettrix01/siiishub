@@ -431,4 +431,5 @@ export const KO = {
   "web.login.unreachable": "서버가 응답하지 않습니다.",
   "error.web.notInBrowser": "브라우저에서는 사용할 수 없습니다.",
   "error.web.noPlayer": "브라우저 재생은 아직 지원되지 않습니다.",
+  "web.player.dolbyVision": "HDR10 없는 Dolby Vision: 브라우저에서는 이 동영상의 색상이 잘못 표시됩니다(초록색과 보라색). 올바른 색상으로 보려면 HDR 버전을 선택하거나 SIIISHUB 앱에서 시청하세요.",
 };

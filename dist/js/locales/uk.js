@@ -431,4 +431,5 @@ export const UK = {
   "web.login.unreachable": "Сервер не відповідає.",
   "error.web.notInBrowser": "Недоступно в браузері.",
   "error.web.noPlayer": "Відтворення в браузері поки недоступне.",
+  "web.player.dolbyVision": "Dolby Vision без HDR10: у браузері це відео має неправильні кольори (зелений і фіолетовий). Щоб кольори були правильні, виберіть версію з HDR або дивіться його в застосунку SIIISHUB.",
 };

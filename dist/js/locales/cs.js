@@ -431,4 +431,5 @@ export const CS = {
   "web.login.unreachable": "Server neodpovídá.",
   "error.web.notInBrowser": "V prohlížeči není k dispozici.",
   "error.web.noPlayer": "Přehrávání v prohlížeči zatím není k dispozici.",
+  "web.player.dolbyVision": "Dolby Vision bez HDR10: prohlížeč zobrazí toto video se špatnými barvami (zelená a fialová). Pro správné barvy zvolte verzi s HDR nebo ho sledujte v aplikaci SIIISHUB.",
 };

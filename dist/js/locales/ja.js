@@ -431,4 +431,5 @@ export const JA = {
   "web.login.unreachable": "サーバーが応答しません。",
   "error.web.notInBrowser": "ブラウザでは利用できません。",
   "error.web.noPlayer": "ブラウザでの再生はまだ利用できません。",
+  "web.player.dolbyVision": "HDR10 なしの Dolby Vision：ブラウザーではこの動画の色が正しく表示されません（緑と紫）。正しい色で見るには HDR 版を選ぶか、SIIISHUB アプリで再生してください。",
 };

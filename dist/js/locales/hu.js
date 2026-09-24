@@ -431,4 +431,5 @@ export const HU = {
   "web.login.unreachable": "A szerver nem válaszol.",
   "error.web.notInBrowser": "A böngészőben nem érhető el.",
   "error.web.noPlayer": "A böngészőben való lejátszás még nem érhető el.",
+  "web.player.dolbyVision": "Dolby Vision HDR10 nélkül: a böngészőben ez a videó hibás színekkel jelenik meg (zöld és lila). A helyes színekhez válassz HDR-es változatot, vagy nézd a SIIISHUB alkalmazásban.",
 };

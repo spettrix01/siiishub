@@ -431,4 +431,5 @@ export const ZH = {
   "web.login.unreachable": "服务器没有响应。",
   "error.web.notInBrowser": "在浏览器中不可用。",
   "error.web.noPlayer": "浏览器播放暂不可用。",
+  "web.player.dolbyVision": "不含 HDR10 的杜比视界：此视频在浏览器中颜色会出错（偏绿和偏紫）。要获得正确的颜色，请选择带 HDR 的版本，或在 SIIISHUB 应用中观看。",
 };

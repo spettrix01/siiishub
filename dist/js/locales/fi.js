@@ -431,4 +431,5 @@ export const FI = {
   "web.login.unreachable": "Palvelin ei vastaa.",
   "error.web.notInBrowser": "Ei käytettävissä selaimessa.",
   "error.web.noPlayer": "Toisto selaimessa ei ole vielä käytettävissä.",
+  "web.player.dolbyVision": "Dolby Vision ilman HDR10:tä: selaimessa tämän videon värit näkyvät väärin (vihreä ja violetti). Saat oikeat värit valitsemalla HDR-version tai katsomalla sen SIIISHUB-sovelluksessa.",
 };
