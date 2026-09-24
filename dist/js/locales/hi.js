@@ -424,4 +424,11 @@ export const HI = {
   "settings.remoteClient.unreachable": "{host} जवाब नहीं दे रहा। जाँचें कि PC पर SIIISHUB खुला है और दोनों डिवाइस एक ही नेटवर्क पर हैं।",
   "settings.remoteClient.invalid": "अमान्य पता। उदाहरण: 192.168.1.10:9871",
   "details.stream.lastWatched": "पिछली बार देखा",
+  "web.login.password": "पासवर्ड",
+  "web.login.submit": "साइन इन करें",
+  "web.login.wrong": "गलत पासवर्ड।",
+  "web.login.tooMany": "बहुत अधिक प्रयास: एक मिनट बाद फिर से कोशिश करें।",
+  "web.login.unreachable": "सर्वर जवाब नहीं दे रहा है।",
+  "error.web.notInBrowser": "ब्राउज़र में उपलब्ध नहीं है।",
+  "error.web.noPlayer": "ब्राउज़र में प्लेबैक अभी उपलब्ध नहीं है।",
 };

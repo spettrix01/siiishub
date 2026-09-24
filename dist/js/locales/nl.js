@@ -424,4 +424,11 @@ export const NL = {
   "settings.remoteClient.unreachable": "{host} reageert niet. Controleer of SIIISHUB op de pc geopend is en of beide apparaten in hetzelfde netwerk zitten.",
   "settings.remoteClient.invalid": "Ongeldig adres. Voorbeeld: 192.168.1.10:9871",
   "details.stream.lastWatched": "Laatst bekeken",
+  "web.login.password": "Wachtwoord",
+  "web.login.submit": "Aanmelden",
+  "web.login.wrong": "Onjuist wachtwoord.",
+  "web.login.tooMany": "Te veel pogingen: probeer het over een minuut opnieuw.",
+  "web.login.unreachable": "De server reageert niet.",
+  "error.web.notInBrowser": "Niet beschikbaar in de browser.",
+  "error.web.noPlayer": "Afspelen in de browser is nog niet beschikbaar.",
 };

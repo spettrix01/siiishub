@@ -424,4 +424,11 @@ export const NB = {
   "settings.remoteClient.unreachable": "{host} svarer ikke. Sjekk at SIIISHUB er åpen på PC-en, og at begge enhetene er på samme nettverk.",
   "settings.remoteClient.invalid": "Ugyldig adresse. Eksempel: 192.168.1.10:9871",
   "details.stream.lastWatched": "Sist sett",
+  "web.login.password": "Passord",
+  "web.login.submit": "Logg inn",
+  "web.login.wrong": "Feil passord.",
+  "web.login.tooMany": "For mange forsøk: prøv igjen om ett minutt.",
+  "web.login.unreachable": "Serveren svarer ikke.",
+  "error.web.notInBrowser": "Ikke tilgjengelig i nettleseren.",
+  "error.web.noPlayer": "Avspilling i nettleseren er ikke tilgjengelig ennå.",
 };

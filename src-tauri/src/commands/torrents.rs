@@ -12,7 +12,7 @@ pub async fn torrent_stats(
     state: State<'_, Arc<AppState>>,
     info_hash: String,
 ) -> CmdResult<Option<TorrentStats>> {
-    Ok(state.torrents.stats(&info_hash))
+    Ok(crate::ops::torrents::stats(&state, &info_hash))
 }
 
 #[tauri::command]
@@ -20,6 +20,6 @@ pub async fn session_destroy(
     state: State<'_, Arc<AppState>>,
     info_hash: String,
 ) -> CmdResult<()> {
-    state.torrents.destroy(&info_hash);
+    crate::ops::torrents::destroy(&state, &info_hash);
     Ok(())
 }

@@ -1,4 +1,6 @@
 fn main() {
+    // The web server (feature `server` alone) has no Tauri context to build.
+    #[cfg(feature = "app")]
     tauri_build::build();
 
     // Windows: link against the import library generated from libmpv-2.dll and

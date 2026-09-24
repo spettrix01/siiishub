@@ -424,4 +424,11 @@ export const HU = {
   "settings.remoteClient.unreachable": "{host} nem válaszol. Ellenőrizd, hogy a SIIISHUB fut-e a számítógépen, és hogy a két eszköz ugyanazon a hálózaton van-e.",
   "settings.remoteClient.invalid": "Érvénytelen cím. Példa: 192.168.1.10:9871",
   "details.stream.lastWatched": "Legutóbb nézett",
+  "web.login.password": "Jelszó",
+  "web.login.submit": "Bejelentkezés",
+  "web.login.wrong": "Hibás jelszó.",
+  "web.login.tooMany": "Túl sok próbálkozás: próbáld újra egy perc múlva.",
+  "web.login.unreachable": "A szerver nem válaszol.",
+  "error.web.notInBrowser": "A böngészőben nem érhető el.",
+  "error.web.noPlayer": "A böngészőben való lejátszás még nem érhető el.",
 };

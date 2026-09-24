@@ -424,4 +424,11 @@ export const JA = {
   "settings.remoteClient.unreachable": "{host} が応答しません。PC で SIIISHUB が開いていること、両方のデバイスが同じネットワークにあることを確認してください。",
   "settings.remoteClient.invalid": "無効なアドレスです。例：192.168.1.10:9871",
   "details.stream.lastWatched": "前回視聴",
+  "web.login.password": "パスワード",
+  "web.login.submit": "サインイン",
+  "web.login.wrong": "パスワードが違います。",
+  "web.login.tooMany": "試行回数が多すぎます。1分後にもう一度お試しください。",
+  "web.login.unreachable": "サーバーが応答しません。",
+  "error.web.notInBrowser": "ブラウザでは利用できません。",
+  "error.web.noPlayer": "ブラウザでの再生はまだ利用できません。",
 };

@@ -424,4 +424,11 @@ export const KO = {
   "settings.remoteClient.unreachable": "{host}이(가) 응답하지 않습니다. PC에서 SIIISHUB가 열려 있고 두 기기가 같은 네트워크에 있는지 확인하세요.",
   "settings.remoteClient.invalid": "잘못된 주소입니다. 예: 192.168.1.10:9871",
   "details.stream.lastWatched": "최근 시청",
+  "web.login.password": "비밀번호",
+  "web.login.submit": "로그인",
+  "web.login.wrong": "비밀번호가 올바르지 않습니다.",
+  "web.login.tooMany": "시도 횟수가 너무 많습니다. 1분 후에 다시 시도하세요.",
+  "web.login.unreachable": "서버가 응답하지 않습니다.",
+  "error.web.notInBrowser": "브라우저에서는 사용할 수 없습니다.",
+  "error.web.noPlayer": "브라우저 재생은 아직 지원되지 않습니다.",
 };

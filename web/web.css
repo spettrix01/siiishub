@@ -1,0 +1,39 @@
+/* SIIISHUB in the browser (siiishub-server): no window of its own to
+   control, and the download folder is on the server, not on the device
+   showing the page. Loaded after the app's style.css. */
+html.is-web .winctl,
+html.is-web .dl-row-btn--folder { display: none !important; }
+/* The download folder is shown, but there is no file manager to open it in. */
+html.is-web #openDownloadDir { pointer-events: none; }
+
+/* The desktop interface in every browser, tablets and phones included (the
+   Android flags are the app's, js/platform.js). Narrower than a desktop
+   window, the side margins shrink (the app's 160px down to 24px between
+   1080 and 808px wide) and the search box takes the room left, so the top
+   bar stays on one row down to 721px, where the app's own layout stacks it. */
+html.is-web {
+  --layout-gutter: max(calc((100vw - 1320px) / 2), min(160px, max(24px, calc((100vw - 760px) / 2))));
+}
+@media (min-width: 721px) {
+  html.is-web .searchbox { width: 100%; max-width: 480px; min-width: 0; }
+}
+html.is-web .tab { white-space: nowrap; }
+
+/* The player (web/player.js): the app leaves the page transparent for mpv
+   drawn underneath; here the video is an element of the page. */
+html.is-web body.is-player-open { background: #000; }
+html.is-web .player-video { background: #000; }
+.web-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+.web-video::cue {
+  font-family: var(--body);
+  font-size: clamp(16px, 2.4vw, 40px);
+  line-height: 1.3;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+}

@@ -1,0 +1,77 @@
+/* Login page of siiishub-server, on top of the app's style.css (fonts,
+   colours and themes). */
+.login-page {
+  overflow: auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+.login-card {
+  margin: auto;
+  width: min(360px, 100%);
+  padding: 36px 28px 30px;
+  box-sizing: border-box;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-2);
+}
+
+.login-brand {
+  margin: 0 0 28px;
+  font-family: var(--display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  text-align: center;
+  color: var(--text);
+}
+.login-brand em {
+  font-style: normal;
+  color: var(--violet);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-label {
+  font-size: 0.85rem;
+  color: var(--text-2);
+}
+
+.login-input {
+  padding: 12px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  background: var(--bg-2);
+  color: var(--text);
+  font: inherit;
+  outline: none;
+}
+.login-input:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--violet-soft);
+}
+
+.login-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--danger);
+}
+
+.login-submit {
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 0;
+  border-radius: var(--r-md);
+  background: var(--violet);
+  color: #140d05;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.login-submit:hover { background: var(--violet-2); }
+.login-submit:disabled { opacity: 0.6; cursor: default; }

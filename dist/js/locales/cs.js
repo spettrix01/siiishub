@@ -424,4 +424,11 @@ export const CS = {
   "settings.remoteClient.unreachable": "{host} neodpovídá. Zkontroluj, že je SIIISHUB na počítači spuštěný a že jsou obě zařízení ve stejné síti.",
   "settings.remoteClient.invalid": "Neplatná adresa. Příklad: 192.168.1.10:9871",
   "details.stream.lastWatched": "Naposledy sledováno",
+  "web.login.password": "Heslo",
+  "web.login.submit": "Přihlásit se",
+  "web.login.wrong": "Nesprávné heslo.",
+  "web.login.tooMany": "Příliš mnoho pokusů: zkuste to znovu za minutu.",
+  "web.login.unreachable": "Server neodpovídá.",
+  "error.web.notInBrowser": "V prohlížeči není k dispozici.",
+  "error.web.noPlayer": "Přehrávání v prohlížeči zatím není k dispozici.",
 };

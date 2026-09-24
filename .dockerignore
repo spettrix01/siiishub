@@ -1,0 +1,10 @@
+# Only src-tauri (sources), dist and web go into the image.
+.git
+installers
+docs
+scripts
+src-tauri/target
+src-tauri/gen
+src-tauri/binaries
+src-tauri/plugins/android-player/android/build
+src-tauri/plugins/android-player/target

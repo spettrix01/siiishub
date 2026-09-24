@@ -33,6 +33,8 @@ pub struct VideoInfo {
     pub height: u32,
     pub pix_fmt: String,
     pub bit_depth: u8,
+    /// `smpte2084` (HDR10, Dolby Vision) or `arib-std-b67` (HLG) for HDR.
+    pub color_transfer: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -150,6 +152,11 @@ fn parse(j: Value) -> ProbeInfo {
                 .get("bits_per_raw_sample")
                 .and_then(|v| v.as_str().and_then(|s| s.parse().ok()).or(v.as_u64()))
                 .unwrap_or(8) as u8,
+            color_transfer: s
+                .get("color_transfer")
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string(),
         });
 
     let v_dur = streams

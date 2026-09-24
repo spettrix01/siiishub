@@ -424,4 +424,11 @@ export const ES = {
   "settings.remoteClient.unreachable": "{host} no responde. Comprueba que SIIISHUB esté abierto en el PC y que ambos dispositivos estén en la misma red.",
   "settings.remoteClient.invalid": "Dirección no válida. Ejemplo: 192.168.1.10:9871",
   "details.stream.lastWatched": "Visto la última vez",
+  "web.login.password": "Contraseña",
+  "web.login.submit": "Iniciar sesión",
+  "web.login.wrong": "Contraseña incorrecta.",
+  "web.login.tooMany": "Demasiados intentos: vuelve a intentarlo dentro de un minuto.",
+  "web.login.unreachable": "El servidor no responde.",
+  "error.web.notInBrowser": "No disponible en el navegador.",
+  "error.web.noPlayer": "La reproducción en el navegador aún no está disponible.",
 };

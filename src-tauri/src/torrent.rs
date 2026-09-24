@@ -586,7 +586,7 @@ impl TorrentManager {
 
             if let Some(root) = perm_root.as_ref() {
                 tokio::time::sleep(Duration::from_millis(800)).await;
-                crate::commands::cleanup_title_folder_if_empty(root).await;
+                crate::ops::downloads::cleanup_title_folder_if_empty(root).await;
                 if root.exists() {
                     tracing::debug!(
                         "[torrent] {info_hash_lc_task} title folder kept (siblings present): {}",

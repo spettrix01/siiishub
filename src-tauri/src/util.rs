@@ -6,6 +6,18 @@ pub fn loc(code: &str) -> String {
     serde_json::json!({ "code": code }).to_string()
 }
 
+/// Runs a background task: on Tauri's runtime in the app, on the server's
+/// tokio runtime in the web server.
+pub fn spawn<F>(task: F)
+where
+    F: std::future::Future<Output = ()> + Send + 'static,
+{
+    #[cfg(feature = "app")]
+    tauri::async_runtime::spawn(task);
+    #[cfg(not(feature = "app"))]
+    tokio::spawn(task);
+}
+
 /// Resolves when the token is cancelled; pends forever when no token is given,
 /// so it can be dropped into `tokio::select!` without branching at call sites.
 pub async fn cancelled_opt(cancel: Option<&tokio_util::sync::CancellationToken>) {
@@ -66,6 +78,7 @@ pub fn safe_filename(name: &str) -> String {
 
 static LOG_DIR: OnceLock<PathBuf> = OnceLock::new();
 
+#[cfg_attr(not(feature = "app"), allow(dead_code))]
 pub fn set_log_dir(dir: PathBuf) {
     let _ = LOG_DIR.set(dir);
 }
@@ -73,6 +86,7 @@ pub fn set_log_dir(dir: PathBuf) {
 /// App data folder: the one given to `set_log_dir` during setup, otherwise
 /// the platform default.
 #[cfg(windows)]
+#[cfg_attr(not(feature = "app"), allow(dead_code))]
 pub fn app_data_dir() -> Option<PathBuf> {
     LOG_DIR.get().cloned().or_else(default_app_data_dir)
 }

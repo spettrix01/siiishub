@@ -5,13 +5,13 @@ use tauri::State;
 
 use crate::state::AppState;
 
-use super::shared::{err, CmdResult};
+use super::shared::CmdResult;
 
 #[tauri::command]
 pub async fn userdata_load(
     state: State<'_, Arc<AppState>>,
 ) -> CmdResult<BTreeMap<String, String>> {
-    Ok(state.userdata.snapshot())
+    Ok(crate::ops::userdata::load(&state))
 }
 
 #[tauri::command]
@@ -20,7 +20,7 @@ pub async fn userdata_set(
     key: String,
     value: String,
 ) -> CmdResult<()> {
-    state.userdata.set(key, value).await.map_err(err)
+    crate::ops::userdata::set(&state, key, value).await
 }
 
 #[tauri::command]
@@ -28,5 +28,5 @@ pub async fn userdata_remove(
     state: State<'_, Arc<AppState>>,
     key: String,
 ) -> CmdResult<()> {
-    state.userdata.remove(&key).await.map_err(err)
+    crate::ops::userdata::remove(&state, &key).await
 }

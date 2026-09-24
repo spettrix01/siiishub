@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<meta name="theme-color" content="#131316" />
+<title>SIIISHUB</title>
+<script>
+  // The theme last used here (web/web.js keeps a copy), before the first paint.
+  (function () {
+    try {
+      var root = document.documentElement;
+      if (localStorage.getItem('siiishub-web-theme') === 'light') root.setAttribute('data-theme', 'light');
+      var accent = localStorage.getItem('siiishub-web-accent');
+      if (accent === 'purple' || accent === 'teal') root.setAttribute('data-accent', accent);
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,200..800&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css" />
+<link rel="stylesheet" href="/web/login.css" />
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%231a1428'/><stop offset='1' stop-color='%23120f1c'/></linearGradient></defs><rect width='64' height='64' rx='14' fill='url(%23g)'/><text x='32' y='45' font-family='system-ui,-apple-system,Segoe UI,sans-serif' font-size='34' font-weight='800' fill='%23b07cff' text-anchor='middle' letter-spacing='-1'>SH</text></svg>" />
+</head>
+<body class="login-page">
+<main class="login-card">
+  <h1 class="login-brand">SIIIS<em>HUB</em></h1>
+  <form class="login-form" id="loginForm">
+    <!-- Lets password managers save and fill the password. -->
+    <input type="text" name="username" value="siiishub" autocomplete="username" hidden />
+    <label class="login-label" for="loginPassword" data-i18n="web.login.password">Password</label>
+    <input class="login-input" id="loginPassword" name="password" type="password" autocomplete="current-password" required autofocus />
+    <p class="login-error" id="loginError" role="alert" hidden></p>
+    <button class="login-submit" id="loginSubmit" type="submit" data-i18n="web.login.submit">Sign in</button>
+  </form>
+</main>
+<script type="module" src="/web/login.js"></script>
+</body>
+</html>

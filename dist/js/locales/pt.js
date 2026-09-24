@@ -424,4 +424,11 @@ export const PT = {
   "settings.remoteClient.unreachable": "{host} não responde. Verifica se o SIIISHUB está aberto no PC e se ambos os dispositivos estão na mesma rede.",
   "settings.remoteClient.invalid": "Endereço inválido. Exemplo: 192.168.1.10:9871",
   "details.stream.lastWatched": "Visto da última vez",
+  "web.login.password": "Palavra-passe",
+  "web.login.submit": "Iniciar sessão",
+  "web.login.wrong": "Palavra-passe incorreta.",
+  "web.login.tooMany": "Demasiadas tentativas: tenta novamente dentro de um minuto.",
+  "web.login.unreachable": "O servidor não responde.",
+  "error.web.notInBrowser": "Não disponível no navegador.",
+  "error.web.noPlayer": "A reprodução no navegador ainda não está disponível.",
 };

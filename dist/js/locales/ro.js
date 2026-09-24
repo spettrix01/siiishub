@@ -424,4 +424,11 @@ export const RO = {
   "settings.remoteClient.unreachable": "{host} nu răspunde. Verifică dacă SIIISHUB este deschis pe PC și dacă ambele dispozitive sunt în aceeași rețea.",
   "settings.remoteClient.invalid": "Adresă nevalidă. Exemplu: 192.168.1.10:9871",
   "details.stream.lastWatched": "Ultimul vizionat",
+  "web.login.password": "Parolă",
+  "web.login.submit": "Conectare",
+  "web.login.wrong": "Parolă greșită.",
+  "web.login.tooMany": "Prea multe încercări: încearcă din nou peste un minut.",
+  "web.login.unreachable": "Serverul nu răspunde.",
+  "error.web.notInBrowser": "Nu este disponibil în browser.",
+  "error.web.noPlayer": "Redarea în browser nu este încă disponibilă.",
 };

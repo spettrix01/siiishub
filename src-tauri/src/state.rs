@@ -1,14 +1,16 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
+#[cfg(feature = "app")]
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use parking_lot::Mutex;
-use tauri::{AppHandle, Manager};
 use tokio_util::sync::CancellationToken;
 
 use crate::download::DownloadManager;
+#[cfg(feature = "app")]
 use crate::mpv::Mpv;
+#[cfg(feature = "app")]
 use crate::remote::RemoteController;
 use crate::settings::{PublicSettings, SettingsStore};
 use crate::torrent::TorrentManager;
@@ -20,20 +22,36 @@ pub struct AppState {
     pub http: reqwest::Client,
     pub torrents: TorrentManager,
     pub downloads: DownloadManager,
+    #[cfg(feature = "app")]
     pub mpv: Mutex<Option<Arc<Mpv>>>,
     pub data_dir: PathBuf,
     pub download_dir: PathBuf,
+    #[cfg(feature = "app")]
     pub main_hwnd: Mutex<Option<isize>>,
+    #[cfg(feature = "app")]
     pub remote: RemoteController,
     resolve_cancels: Mutex<HashMap<String, CancellationToken>>,
 }
 
 impl AppState {
-    pub async fn initialize(app: AppHandle) -> Result<Self> {
+    #[cfg(feature = "app")]
+    pub async fn initialize(app: tauri::AppHandle) -> Result<Self> {
+        use tauri::Manager;
         let data_dir = app
             .path()
             .app_data_dir()
             .context("failed to resolve app_data_dir")?;
+        #[cfg(target_os = "android")]
+        let download_dir = android_download_dir(&data_dir);
+        #[cfg(not(target_os = "android"))]
+        let download_dir = data_dir.join("download");
+        Self::open(data_dir, download_dir).await
+    }
+
+    /// Opens the stores kept in `data_dir` and the torrent session writing to
+    /// `download_dir`: the app passes its platform folders, the web server
+    /// the ones it is configured with.
+    pub async fn open(data_dir: PathBuf, download_dir: PathBuf) -> Result<Self> {
         std::fs::create_dir_all(&data_dir).ok();
 
         let settings = SettingsStore::open(data_dir.join("settings.json")).await?;
@@ -45,10 +63,6 @@ impl AppState {
             .build()
             .context("building reqwest client")?;
 
-        #[cfg(target_os = "android")]
-        let download_dir = android_download_dir(&data_dir);
-        #[cfg(not(target_os = "android"))]
-        let download_dir = data_dir.join("download");
         std::fs::create_dir_all(&download_dir).ok();
         let temp_dir = download_dir.join("download_temp");
         std::fs::create_dir_all(&temp_dir).ok();
@@ -70,6 +84,7 @@ impl AppState {
         let downloads_persist = data_dir.join("downloads.json");
         let downloads = DownloadManager::new(downloads_persist, download_dir.clone());
 
+        #[cfg(feature = "app")]
         let remote = RemoteController::new(settings.clone());
 
         Ok(Self {
@@ -78,10 +93,13 @@ impl AppState {
             http,
             torrents,
             downloads,
+            #[cfg(feature = "app")]
             mpv: Mutex::new(None),
             data_dir,
             download_dir,
+            #[cfg(feature = "app")]
             main_hwnd: Mutex::new(None),
+            #[cfg(feature = "app")]
             remote,
             resolve_cancels: Mutex::new(HashMap::new()),
         })
@@ -116,18 +134,22 @@ impl AppState {
         )
     }
 
+    #[cfg(feature = "app")]
     pub fn set_mpv(&self, mpv: Arc<Mpv>) {
         *self.mpv.lock() = Some(mpv);
     }
 
+    #[cfg(feature = "app")]
     pub fn mpv(&self) -> Option<Arc<Mpv>> {
         self.mpv.lock().clone()
     }
 
+    #[cfg(feature = "app")]
     pub fn set_main_hwnd(&self, hwnd: isize) {
         *self.main_hwnd.lock() = Some(hwnd);
     }
 
+    #[cfg(feature = "app")]
     pub fn main_hwnd(&self) -> Option<isize> {
         *self.main_hwnd.lock()
     }

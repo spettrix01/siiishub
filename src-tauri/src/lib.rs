@@ -1,19 +1,32 @@
+// Two builds share this crate: the app (feature `app`: Tauri, the embedded
+// player, the remote control) and the web server (feature `server`: the same
+// interface in a browser). What both need lives outside the app modules, and
+// `ops` holds what the interface asks of the backend.
+#[cfg(feature = "app")]
 use std::sync::Arc;
 
+#[cfg(feature = "app")]
 use tauri::Manager;
 
 mod alldebrid;
+#[cfg(feature = "app")]
 mod commands;
 mod download;
 mod ffprobe;
+#[cfg(feature = "app")]
 mod mpv;
+pub mod ops;
+#[cfg(feature = "app")]
 mod power;
 mod realdebrid;
+#[cfg(feature = "app")]
 mod remote;
 #[cfg(all(windows, feature = "real-mpv"))]
 mod render;
 #[cfg(all(target_os = "linux", feature = "real-mpv"))]
 mod render_linux;
+#[cfg(feature = "server")]
+pub mod server;
 mod settings;
 mod state;
 mod stremio;
@@ -24,6 +37,7 @@ mod util;
 
 pub use state::AppState;
 
+#[cfg(feature = "app")]
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     #[cfg(not(target_os = "android"))]

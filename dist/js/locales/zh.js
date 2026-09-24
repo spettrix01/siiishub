@@ -424,4 +424,11 @@ export const ZH = {
   "settings.remoteClient.unreachable": "{host} 没有响应。请确认电脑上已打开 SIIISHUB，并且两台设备在同一网络中。",
   "settings.remoteClient.invalid": "地址无效。示例：192.168.1.10:9871",
   "details.stream.lastWatched": "上次观看",
+  "web.login.password": "密码",
+  "web.login.submit": "登录",
+  "web.login.wrong": "密码错误。",
+  "web.login.tooMany": "尝试次数过多：请一分钟后再试。",
+  "web.login.unreachable": "服务器没有响应。",
+  "error.web.notInBrowser": "在浏览器中不可用。",
+  "error.web.noPlayer": "浏览器播放暂不可用。",
 };

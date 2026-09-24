@@ -424,4 +424,11 @@ export const EL = {
   "settings.remoteClient.unreachable": "Ο {host} δεν απαντά. Βεβαιώσου ότι το SIIISHUB είναι ανοιχτό στον υπολογιστή και ότι οι δύο συσκευές είναι στο ίδιο δίκτυο.",
   "settings.remoteClient.invalid": "Μη έγκυρη διεύθυνση. Παράδειγμα: 192.168.1.10:9871",
   "details.stream.lastWatched": "Τελευταία προβολή",
+  "web.login.password": "Κωδικός πρόσβασης",
+  "web.login.submit": "Σύνδεση",
+  "web.login.wrong": "Λάθος κωδικός πρόσβασης.",
+  "web.login.tooMany": "Πάρα πολλές προσπάθειες: δοκιμάστε ξανά σε ένα λεπτό.",
+  "web.login.unreachable": "Ο διακομιστής δεν απαντά.",
+  "error.web.notInBrowser": "Δεν είναι διαθέσιμο στο πρόγραμμα περιήγησης.",
+  "error.web.noPlayer": "Η αναπαραγωγή στο πρόγραμμα περιήγησης δεν είναι ακόμη διαθέσιμη.",
 };

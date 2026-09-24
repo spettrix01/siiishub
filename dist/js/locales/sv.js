@@ -424,4 +424,11 @@ export const SV = {
   "settings.remoteClient.unreachable": "{host} svarar inte. Kontrollera att SIIISHUB är öppet på datorn och att båda enheterna är på samma nätverk.",
   "settings.remoteClient.invalid": "Ogiltig adress. Exempel: 192.168.1.10:9871",
   "details.stream.lastWatched": "Senast sedd",
+  "web.login.password": "Lösenord",
+  "web.login.submit": "Logga in",
+  "web.login.wrong": "Fel lösenord.",
+  "web.login.tooMany": "För många försök: försök igen om en minut.",
+  "web.login.unreachable": "Servern svarar inte.",
+  "error.web.notInBrowser": "Inte tillgängligt i webbläsaren.",
+  "error.web.noPlayer": "Uppspelning i webbläsaren är inte tillgänglig ännu.",
 };

@@ -424,4 +424,11 @@ export const DA = {
   "settings.remoteClient.unreachable": "{host} svarer ikke. Kontrollér, at SIIISHUB er åben på pc'en, og at begge enheder er på det samme netværk.",
   "settings.remoteClient.invalid": "Ugyldig adresse. Eksempel: 192.168.1.10:9871",
   "details.stream.lastWatched": "Sidst set",
+  "web.login.password": "Adgangskode",
+  "web.login.submit": "Log ind",
+  "web.login.wrong": "Forkert adgangskode.",
+  "web.login.tooMany": "For mange forsøg: prøv igen om et minut.",
+  "web.login.unreachable": "Serveren svarer ikke.",
+  "error.web.notInBrowser": "Ikke tilgængelig i browseren.",
+  "error.web.noPlayer": "Afspilning i browseren er endnu ikke tilgængelig.",
 };

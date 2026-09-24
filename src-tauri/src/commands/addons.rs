@@ -3,18 +3,16 @@ use std::sync::Arc;
 use tauri::State;
 
 use crate::state::AppState;
-use crate::stremio::{self, AddonManifest, StreamsResult, SubtitlesResult};
+use crate::stremio::{AddonManifest, StreamsResult, SubtitlesResult};
 
-use super::shared::{err, CmdResult};
+use super::shared::CmdResult;
 
 #[tauri::command]
 pub async fn addon_meta(
     state: State<'_, Arc<AppState>>,
     url: String,
 ) -> CmdResult<AddonManifest> {
-    stremio::fetch_manifest(&state.http, &url)
-        .await
-        .map_err(err)
+    crate::ops::addons::meta(&state, &url).await
 }
 
 #[tauri::command]
@@ -23,8 +21,7 @@ pub async fn streams_fetch(
     kind: String,
     id: String,
 ) -> CmdResult<StreamsResult> {
-    let addons = state.settings.read().addons;
-    Ok(stremio::fetch_streams(&state.http, &addons, &kind, &id).await)
+    Ok(crate::ops::addons::streams(&state, &kind, &id).await)
 }
 
 #[tauri::command]
@@ -33,6 +30,5 @@ pub async fn subtitles_fetch(
     kind: String,
     id: String,
 ) -> CmdResult<SubtitlesResult> {
-    let addons = state.settings.read().addons;
-    Ok(stremio::fetch_subtitles(&state.http, &addons, &kind, &id).await)
+    Ok(crate::ops::addons::subtitles(&state, &kind, &id).await)
 }

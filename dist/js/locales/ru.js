@@ -424,4 +424,11 @@ export const RU = {
   "settings.remoteClient.unreachable": "{host} не отвечает. Убедитесь, что SIIISHUB открыт на компьютере и оба устройства находятся в одной сети.",
   "settings.remoteClient.invalid": "Неверный адрес. Пример: 192.168.1.10:9871",
   "details.stream.lastWatched": "Последний просмотр",
+  "web.login.password": "Пароль",
+  "web.login.submit": "Войти",
+  "web.login.wrong": "Неверный пароль.",
+  "web.login.tooMany": "Слишком много попыток: повторите через минуту.",
+  "web.login.unreachable": "Сервер не отвечает.",
+  "error.web.notInBrowser": "Недоступно в браузере.",
+  "error.web.noPlayer": "Воспроизведение в браузере пока недоступно.",
 };

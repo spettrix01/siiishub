@@ -424,4 +424,11 @@ export const UK = {
   "settings.remoteClient.unreachable": "{host} не відповідає. Переконайтеся, що SIIISHUB відкрито на комп’ютері й обидва пристрої в одній мережі.",
   "settings.remoteClient.invalid": "Недійсна адреса. Приклад: 192.168.1.10:9871",
   "details.stream.lastWatched": "Останній перегляд",
+  "web.login.password": "Пароль",
+  "web.login.submit": "Увійти",
+  "web.login.wrong": "Неправильний пароль.",
+  "web.login.tooMany": "Забагато спроб: повторіть через хвилину.",
+  "web.login.unreachable": "Сервер не відповідає.",
+  "error.web.notInBrowser": "Недоступно в браузері.",
+  "error.web.noPlayer": "Відтворення в браузері поки недоступне.",
 };

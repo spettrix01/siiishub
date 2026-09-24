@@ -1,0 +1,34 @@
+# SIIISHUB in the browser: `docker compose up -d`, then open
+# http://<server>:8080 and sign in with SIIISHUB_PASSWORD. docs/WEB.md has
+# the details (HTTPS, reverse proxy, permissions of the folders).
+services:
+  siiishub:
+    image: ghcr.io/spettrix01/siiishub:latest
+    # Built from these sources instead: replace `image` with `build: .`
+    container_name: siiishub
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SIIISHUB_PASSWORD: "change-me"
+    volumes:
+      # Settings, library and sessions.
+      - ./config:/config
+      # Downloads and the torrents being streamed.
+      - ./downloads:/downloads
+    # Transcoding on the GPU, for the videos the browser cannot decode
+    # (docs/WEB.md). Intel and AMD graphics, integrated ones too: uncomment
+    # `devices` and `group_add`, with the id of the host's render group
+    # (`getent group render | cut -d: -f3` on the host).
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # group_add:
+    #   - "105"
+    # NVIDIA, with the NVIDIA Container Toolkit installed on the host:
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]

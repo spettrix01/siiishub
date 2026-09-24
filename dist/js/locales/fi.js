@@ -424,4 +424,11 @@ export const FI = {
   "settings.remoteClient.unreachable": "{host} ei vastaa. Varmista, että SIIISHUB on auki tietokoneella ja että molemmat laitteet ovat samassa verkossa.",
   "settings.remoteClient.invalid": "Virheellinen osoite. Esimerkki: 192.168.1.10:9871",
   "details.stream.lastWatched": "Viimeksi katsottu",
+  "web.login.password": "Salasana",
+  "web.login.submit": "Kirjaudu sisään",
+  "web.login.wrong": "Väärä salasana.",
+  "web.login.tooMany": "Liian monta yritystä: yritä uudelleen minuutin kuluttua.",
+  "web.login.unreachable": "Palvelin ei vastaa.",
+  "error.web.notInBrowser": "Ei käytettävissä selaimessa.",
+  "error.web.noPlayer": "Toisto selaimessa ei ole vielä käytettävissä.",
 };

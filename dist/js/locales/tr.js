@@ -424,4 +424,11 @@ export const TR = {
   "settings.remoteClient.unreachable": "{host} yanıt vermiyor. Bilgisayarda SIIISHUB'ın açık olduğunu ve iki cihazın aynı ağda olduğunu kontrol et.",
   "settings.remoteClient.invalid": "Geçersiz adres. Örnek: 192.168.1.10:9871",
   "details.stream.lastWatched": "Son izlenen",
+  "web.login.password": "Parola",
+  "web.login.submit": "Oturum aç",
+  "web.login.wrong": "Yanlış parola.",
+  "web.login.tooMany": "Çok fazla deneme: bir dakika sonra yeniden deneyin.",
+  "web.login.unreachable": "Sunucu yanıt vermiyor.",
+  "error.web.notInBrowser": "Tarayıcıda kullanılamaz.",
+  "error.web.noPlayer": "Tarayıcıda oynatma henüz kullanılamıyor.",
 };

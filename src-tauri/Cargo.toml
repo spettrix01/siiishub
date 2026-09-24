@@ -5,6 +5,7 @@ edition = "2021"
 description = "siiishub: self-hosted streaming hub with embedded mpv"
 authors = ["siiis"]
 license = "GPL-3.0-or-later"
+default-run = "SIIISHUB"
 
 [lib]
 name = "siiishub_desktop_lib"
@@ -13,27 +14,42 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [[bin]]
 name = "SIIISHUB"
 path = "src/main.rs"
+required-features = ["app"]
+
+# The browser interface served over HTTP, for Docker (docs/WEB.md):
+#   cargo build --release --no-default-features --features server
+[[bin]]
+name = "siiishub-server"
+path = "src/bin/siiishub-server.rs"
+required-features = ["server"]
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "2", features = [], optional = true }
 
 [dependencies]
-tauri = { version = "2", features = [] }
-tauri-plugin-shell = "2"
-tauri-plugin-dialog = "2"
+tauri = { version = "2", features = [], optional = true }
+tauri-plugin-shell = { version = "2", optional = true }
+tauri-plugin-dialog = { version = "2", optional = true }
 
-# Remote control: embedded HTTP + WebSocket server for phone UI
+# Remote control: embedded HTTP + WebSocket server for phone UI. The web
+# server (feature `server`) is built on it too.
 axum = { version = "0.8", features = ["ws"] }
+# siiishub-server: static files, and media files served with byte ranges.
+tower-http = { version = "0.6", features = ["fs"], optional = true }
+tower = { version = "0.5", features = ["util"], optional = true }
 local-ip-address = "0.6"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 
 # Async / runtime
 tokio = { version = "1", features = ["full"] }
-tokio-util = "0.7"
+# `io`: the web server streams ffmpeg's output as an HTTP body.
+tokio-util = { version = "0.7", features = ["io"] }
 futures = "0.3"
 
 # Serialization
-serde = { version = "1", features = ["derive"] }
+# `rc`: librqbit deserializes `Arc<str>` without asking for it; in the app
+# Tauri's dependencies turn it on, the web server has to.
+serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 
 # HTTP
@@ -101,29 +117,43 @@ windows = { version = "0.59", features = [
 # (screensaver inhibit over D-Bus, folder icons via GIO). The versions must
 # match the ones tauri/wry are built against (gtk 0.18, webkit2gtk 2.0).
 [target.'cfg(target_os = "linux")'.dependencies]
-gtk = "0.18"
-webkit2gtk = "2.0"
-libloading = "0.8"
-libc = "0.2"
+gtk = { version = "0.18", optional = true }
+webkit2gtk = { version = "2.0", optional = true }
+libloading = { version = "0.8", optional = true }
+libc = { version = "0.2", optional = true }
 
 # Android: embedded libmpv through the Kotlin plugin, logs to logcat.
 [target.'cfg(target_os = "android")'.dependencies]
-siiishub-android-player = { path = "plugins/android-player" }
+siiishub-android-player = { path = "plugins/android-player", optional = true }
 tracing-android = "0.2"
 
 [features]
-# Default: tauri custom protocol + the embedded libmpv player. `real-mpv` only
-# pulls libmpv on desktop; Android always plays through the Kotlin plugin. To
-# work on the desktop UI before libmpv is set up:
+# Default: the app (Tauri) with its custom protocol and the embedded libmpv
+# player. `real-mpv` only pulls libmpv on desktop; Android always plays
+# through the Kotlin plugin. To work on the desktop UI before libmpv is set up:
 #   cargo check --no-default-features --features custom-protocol,stub-mpv
-default = ["custom-protocol", "real-mpv"]
-custom-protocol = ["tauri/custom-protocol"]
-real-mpv = ["dep:libmpv2", "dep:libmpv2-sys"]
-stub-mpv = []
+default = ["app", "custom-protocol", "real-mpv"]
+# The desktop and Android app. Every app feature below turns it on.
+app = [
+    "dep:tauri",
+    "dep:tauri-plugin-shell",
+    "dep:tauri-plugin-dialog",
+    "dep:tauri-build",
+    "dep:gtk",
+    "dep:webkit2gtk",
+    "dep:libloading",
+    "dep:libc",
+    "dep:siiishub-android-player",
+]
+custom-protocol = ["app", "tauri/custom-protocol"]
+real-mpv = ["app", "dep:libmpv2", "dep:libmpv2-sys"]
+stub-mpv = ["app"]
 # WebView remote debugging in release builds (DevTools, chrome://inspect,
 # `adb forward` on Android). Debug builds always have it; builds meant for
 # users must not.
-devtools = ["tauri/devtools"]
+devtools = ["app", "tauri/devtools"]
+# siiishub-server: the interface in the browser, without Tauri or libmpv.
+server = ["dep:tower-http", "dep:tower"]
 
 # librqbit's SHA-1 wrapper links OpenSSL or aws-lc; the local copy hashes in
 # pure Rust so the Android cross-build needs no native crypto toolchain.
