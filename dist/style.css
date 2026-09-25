@@ -3265,7 +3265,8 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 }
 .player-volume input[type="range"] { position: relative; z-index: 1; }
 .player-volume:hover .player-volume-bar,
-.player-volume:focus-within .player-volume-bar {
+.player-volume:focus-within .player-volume-bar,
+.player-volume:has(.snav-focus) .player-volume-bar {
   width: 92px;
   padding-right: 0.55rem;
 }
@@ -4816,7 +4817,16 @@ body.is-player-open .backdrop { display: none; }
   outline: 3px solid var(--violet) !important;
   outline-offset: 2px;
   box-shadow: 0 0 0 6px var(--violet-soft), 0 12px 36px -8px var(--violet-glow) !important;
-  scroll-margin-top: 96px;
+}
+/* Lines of a list that scrolls fill it from edge to edge: the selection is
+   drawn inside them, where the list does not cut it. */
+.settings-nav-item.snav-focus,
+.alert-select-item.snav-focus,
+.streams-pick-option.snav-focus,
+.genre-option.snav-focus,
+.player-settings-opt.snav-focus {
+  outline-offset: -3px;
+  box-shadow: none !important;
 }
 
 /* ---------- Android build ---------- */

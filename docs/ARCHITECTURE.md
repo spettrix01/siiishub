@@ -94,6 +94,38 @@ does not expose mpv nodes.
 - Downloads go to the shared `Download/SIIISHUB` folder when it is writable
   (Android 11 and newer), otherwise to the private app folder.
 
+## Navigation with a remote
+
+The phone remote (`remote.rs` passes its keys to the interface as
+`remote://cmd`, handled in `player.js`) and the Android TV remote
+(`tv-nav.js`) drive the interface through `spatial-nav.js`, which moves a
+selection (`.snav-focus`) the way a TV interface does:
+
+- The open layer (the page, a details page, the settings, a dialog, a menu,
+  the player) is divided into zones, listed in `ZONES`. In a row (the tabs,
+  a rail of posters, the buttons of a stream) left and right go along it; a
+  box (the grid of posters, the list of streams, a section of the settings)
+  is made of rows, and up and down go to the next row keeping the column. At
+  the edge of a zone the move carries on in the zone around it.
+- Rows are measured as laid out, as if nothing were scrolled vertically, so
+  they keep their order however far the page or a list has scrolled. Only
+  real scrollers scroll to show the selection, centred along the move.
+- Coming back into a zone, the selection returns to what it had selected
+  there (the topbar, the rails, the grid, the parts of a details page), or
+  goes to its current choice (the section shown, the track in use, the
+  button that confirms), or to its first item (a section of the settings,
+  a form).
+- The settings show a section as soon as the selection reaches it in their
+  menu; right goes into it, left back to the menu.
+- What opens starts on its current choice or first action (a details page,
+  the settings, a dropdown, a dialog, the player's settings), and what
+  closes gives the selection back to what opened it. OK on the time bar
+  plays or pauses, on the volume mutes.
+- Back closes the innermost thing open (a menu, a dialog, which is
+  cancelled), goes from a section of the settings back to their menu, and on
+  the page brings the selection up to the tabs and the page to its top.
+  Home closes everything and selects the Movies tab.
+
 ## The Android interface
 
 The same `dist/` runs on phones and on Android TV, built into two APKs.
@@ -128,12 +160,15 @@ edited in place and player included, without window controls and with
 margins inside the TV safe area, and is driven with its remote (`tv-nav.js`):
 
 - The D-pad moves the selection with `spatial-nav.js`, the navigation of the
-  phone remote, and OK activates it. Back is the system Back button
-  (`android-back.js`). In a text field, left, right and OK stay with the field
-  and its keyboard; up and down leave it.
-- A details page opens with its first action selected, the settings with
-  their current section, a dropdown with its current value, a dialog with
-  its confirmation. Closing the player or a dialog gives the selection back.
+  phone remote (see Navigation with a remote), and OK activates it. In a
+  text field, left, right and OK stay with the field and its keyboard; up
+  and down leave it.
+- Back is the system Back button (`android-back.js`). It goes from a section
+  of the settings to their menu, keeping their history entry; while the
+  selection is in the page, below the topbar, the page holds an entry of its
+  own, so Back first brings the selection up to the tabs and only the next
+  one leaves the app. The details keep their entry while they hide under
+  the player.
 - In the player, with nothing selected, left and right seek by 10 s and OK
   plays or pauses; up and down show the controls and select the time bar. The
   media keys play, pause and seek by 30 s.

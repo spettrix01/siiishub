@@ -1771,6 +1771,14 @@ export function playerMediaKey(key) {
   return true;
 }
 
+playerProgress.addEventListener('snav-activate', () => {
+  togglePlay();
+  wakePlayer();
+});
+playerVol.addEventListener('snav-activate', () => {
+  toggleMute();
+  wakePlayer();
+});
 playerProgress.addEventListener('snav-adjust', (e) => {
   const step = e.detail === 'right' ? 10 : -10;
   mpvCommand(['seek', String(step), 'relative']).catch(() => {});

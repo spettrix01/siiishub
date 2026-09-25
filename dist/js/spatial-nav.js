@@ -1,4 +1,15 @@
+// D-pad navigation, for the phone remote (player.js) and Android TV
+// (tv-nav.js): it moves the selection (`.snav-focus`) the way a TV interface
+// does. The open layer (activeScope) is divided into zones (ZONES). In a row
+// (the tabs, a rail of posters, the buttons of a stream) left and right go
+// along it; a box (the grid of posters, a list, a section of the settings)
+// is made of rows, and up and down go to the next row keeping the column. At
+// the edge of a zone the move carries on in the zone around it, to its next
+// part that way. Coming into a zone, the selection goes back to what it had
+// selected (REMEMBER), or to its current choice (PREFERRED), or to its first
+// item (FROM_TOP), else to the item nearest the one left behind.
 import { $, $$ } from './dom.js';
+import { IS_TV } from './platform.js';
 
 const FOCUS_CLASS = 'snav-focus';
 
@@ -10,6 +21,7 @@ const FOCUSABLE = [
   '.brand',
   '.genre-trigger',
   '.dl-row-btn',
+  '.alert-select-item',
   'button:not([disabled])',
   'a[href]',
   '[role="option"]',
@@ -19,21 +31,112 @@ const FOCUSABLE = [
   'select:not([disabled])',
 ].join(',');
 
+// Never selected: the side pane of the player; the arrows of the rail, which
+// the selection scrolls itself; the window buttons; the close buttons of the
+// details and of the settings, which Back closes; the checkbox of a line in
+// a list, the whole line being selected instead.
+const EXCLUDED = '#playerSidePane, .trending-nav, .winctl, .dossier-close, .settings-close, .alert-select-item input';
+
+// Zones and how their parts are laid out.
+const ZONES = [
+  // The page
+  ['.topbar', 'box'],
+  ['.tabs', 'row'],
+  ['.searchbox', 'row'],
+  ['.trending-rail', 'row'],
+  ['.filter-bar', 'row'],
+  ['.seg', 'row'],
+  ['.dl-magnet-bar-inner', 'box'],
+  ['.dl-magnet-row', 'row'],
+  ['#grid', 'box'],
+  ['.dl-rows', 'box'],
+  ['.dl-row', 'row'],
+  ['a.card[data-group-key]', 'row'],
+  // A film or a series
+  ['.dossier-actions', 'row'],
+  ['.dossier-cast', 'row'],
+  ['.streams-picker', 'row'],
+  ['.streams-filter-slot', 'row'],
+  ['.stream-list', 'box'],
+  ['.stream-actions', 'row'],
+  // The settings
+  ['.settings-nav-list', 'box'],
+  ['.settings-card .pane', 'box'],
+  ['.field-row', 'row'],
+  ['.player-langs-row', 'row'],
+  ['.actions', 'row'],
+  ['.theme-grid', 'box'],
+  ['.addon-add', 'row'],
+  ['.addon-list', 'box'],
+  ['.addon-item', 'row'],
+  ['.remote-ifaces', 'box'],
+  ['.remote-iface', 'row'],
+  ['.remote-devices', 'box'],
+  ['.remote-device', 'row'],
+  ['.account-card', 'row'],
+  ['.account-actions', 'row'],
+  // Dialogs and menus
+  ['.alert-form', 'box'],
+  ['.alert-select-list', 'box'],
+  ['.alert-actions', 'row'],
+  ['[data-pick-options]', 'box'],
+  ['.genre-menu', 'box'],
+  // The player
+  ['.player-top', 'row'],
+  ['.player-pickers', 'row'],
+  ['.player-controls', 'box'],
+  ['.player-row', 'row'],
+  ['.player-volume', 'row'],
+  ['.player-settings-tabs', 'row'],
+  ['.player-settings-body', 'box'],
+  ['.player-settings-extra', 'row'],
+  ['.player-settings-imdb-wrap', 'row'],
+];
+const ZONE_SELECTOR = ZONES.map(([sel]) => sel).join(',');
+
+// Zones that give the selection back to what it had selected in them: the
+// topbar, the rails, the grid, the parts of a details page.
+const REMEMBER = '.topbar, .trending-rail, #grid, .dossier-actions, .dossier-cast, .streams-picker, .streams-filter-slot, .stream-list';
+
+// What a zone selects when the selection comes into it (and it remembers
+// nothing): the tab of the section shown, its current choice, the button
+// that confirms.
+const PREFERRED = [
+  ['.topbar', '.tab.is-active'],
+  ['.settings-nav-list', '.settings-nav-item.is-active'],
+  ['.actions', 'button.primary'],
+  ['.alert-actions', '[data-alert-ok]'],
+  ['.player-row', '#playerPlayBtn'],
+  ['.player-volume', '#playerMuteBtn'],
+  ['.player-settings-tabs', '.is-active'],
+  ['.player-settings-body', '.player-settings-opt.is-active'],
+];
+
+// Zones read from the top unless the selection comes up into them: a
+// section of the settings, the fields and the lines of a dialog.
+const FROM_TOP = '.settings-card .pane, .alert-form, .alert-select-list';
+
+// Tabs that show their content as soon as the selection reaches them: the
+// sections of the settings, the tabs of the player's settings.
+const AUTO_OPEN = '.settings-nav-item, .player-settings-tabs [data-pst-tab]';
+
 let current = null;
 let lastBaseFocus = null;
-
-function topModal() {
-  for (const sel of ['#alertModal', '#detailsModal', '#settingsModal']) {
-    const m = $(sel);
-    if (m && !m.hidden) return m;
-  }
-  return null;
-}
+// The item selected last in each zone.
+let remembered = new WeakMap();
+// Whether the D-pad is in use: always on Android TV; with the phone remote,
+// until the mouse is used.
+let dpad = false;
+const inUse = () => IS_TV || dpad;
+// Home closes everything at once: nothing gives the selection back.
+let homing = false;
 
 function activeScope() {
   // The Android popup editing a text field (android-inputs.js).
   const inputPopup = $('.input-popup');
   if (inputPopup) return inputPopup;
+  const qr = $('#qrOverlay');
+  if (qr && !qr.hidden) return qr;
   const openMenu = $('[data-pick-menu]:not([hidden])');
   if (openMenu) return openMenu;
   const genreMenu = $('#genreMenu');
@@ -64,7 +167,186 @@ function isVisible(el) {
 }
 
 function candidates(scope) {
-  return $$(FOCUSABLE, scope).filter(el => isVisible(el) && !el.closest('#playerSidePane'));
+  return $$(FOCUSABLE, scope).filter(el => isVisible(el) && !el.closest(EXCLUDED));
+}
+
+// Geometry of one move, measured once.
+let cache = null;
+
+function isZone(el) {
+  let zone = cache.zone.get(el);
+  if (zone === undefined) {
+    zone = el.nodeType === 1 && el.matches(ZONE_SELECTOR);
+    cache.zone.set(el, zone);
+  }
+  return zone;
+}
+
+function zoneType(el) {
+  const zone = ZONES.find(([sel]) => el.matches(sel));
+  return zone ? zone[1] : 'box';
+}
+
+// How far the scrollers around `el` have moved it up.
+function scrolledBy(el) {
+  let dy = cache.shift.get(el);
+  if (dy === undefined) {
+    const parent = el.parentElement;
+    dy = !parent || getComputedStyle(el).position === 'fixed'
+      ? 0
+      : parent.scrollTop + scrolledBy(parent);
+    cache.shift.set(el, dy);
+  }
+  return dy;
+}
+
+// Where `el` is laid out, as if nothing were scrolled vertically: rows keep
+// their order however far a page or a list has scrolled, and what scrolled
+// up out of view stays below the topbar it went under. Across, it is where
+// it shows, so a rail scrolled sideways lines up with what it shows.
+function rectOf(el) {
+  let r = cache.rect.get(el);
+  if (!r) {
+    const b = el.getBoundingClientRect();
+    const dy = scrolledBy(el);
+    r = { left: b.left, right: b.right, top: b.top + dy, bottom: b.bottom + dy };
+    cache.rect.set(el, r);
+  }
+  return r;
+}
+
+function unionRect(els) {
+  let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
+  for (const el of els) {
+    const r = rectOf(el);
+    left = Math.min(left, r.left);
+    top = Math.min(top, r.top);
+    right = Math.max(right, r.right);
+    bottom = Math.max(bottom, r.bottom);
+  }
+  return { left, top, right, bottom };
+}
+
+// The innermost zone holding `el` (itself if it is one), or the scope.
+function zoneAround(el, scope) {
+  for (let p = el; p && p !== scope; p = p.parentElement) {
+    if (isZone(p)) return p;
+  }
+  return scope;
+}
+
+// The parts of a zone a move goes between: its own items, and the zones
+// inside it taken whole, each where its items are.
+function unitsOf(zone, items) {
+  const parts = new Map();
+  for (const item of items) {
+    if (!zone.contains(item)) continue;
+    let unit = item;
+    if (item !== zone) {
+      for (let p = item.parentElement; p && p !== zone; p = p.parentElement) {
+        if (isZone(p)) unit = p;
+      }
+    }
+    if (!parts.has(unit)) parts.set(unit, []);
+    parts.get(unit).push(item);
+  }
+  return [...parts].map(([el, its]) => ({ el, r: unionRect(its) }));
+}
+
+// Parts side by side, overlapping for at least half the height of the
+// smaller one, make a row; the rows top to bottom, each left to right.
+function rowsOf(units) {
+  const sorted = [...units].sort((a, b) => a.r.top - b.r.top || a.r.left - b.r.left);
+  const rows = [];
+  for (const u of sorted) {
+    const row = rows[rows.length - 1];
+    const height = u.r.bottom - u.r.top;
+    if (row && Math.min(row.bottom, u.r.bottom) - u.r.top > Math.min(height, row.bottom - row.top) / 2) {
+      row.units.push(u);
+      row.bottom = Math.max(row.bottom, u.r.bottom);
+    } else {
+      rows.push({ units: [u], top: u.r.top, bottom: u.r.bottom });
+    }
+  }
+  return rows.map(row => row.units.sort((a, b) => a.r.left - b.r.left || a.r.top - b.r.top));
+}
+
+// The part of a row under `x`, or the nearest to it.
+function nearestX(row, x) {
+  let best = null;
+  let bestScore = Infinity;
+  for (const u of row) {
+    const off = x < u.r.left ? u.r.left - x : x > u.r.right ? x - u.r.right : 0;
+    const score = off * 1000 + Math.abs((u.r.left + u.r.right) / 2 - x);
+    if (score < bestScore) { bestScore = score; best = u; }
+  }
+  return best;
+}
+
+// The part on one side of a box nearest `y`.
+function nearestSide(units, side, y) {
+  const edgeOf = u => (side === 'left' ? u.r.left : u.r.right);
+  const edge = side === 'left'
+    ? Math.min(...units.map(edgeOf))
+    : Math.max(...units.map(edgeOf));
+  let best = null;
+  let bestScore = Infinity;
+  for (const u of units) {
+    if (Math.abs(edgeOf(u) - edge) > 12) continue;
+    const score = y < u.r.top ? u.r.top - y : y > u.r.bottom ? y - u.r.bottom : 0;
+    if (score < bestScore) { bestScore = score; best = u; }
+  }
+  return best;
+}
+
+// The next part after `fromEl` going `dir` inside `zone`; null at its edge.
+function stepIn(zone, fromEl, dir, ref, items, scope) {
+  const units = unitsOf(zone, items);
+  const from = units.find(u => u.el === fromEl);
+  if (!from) return null;
+  const type = zone === scope && !isZone(scope) ? 'box' : zoneType(zone);
+  const rows = rowsOf(units);
+  if (type === 'row') {
+    if (dir === 'up' || dir === 'down') return null;
+    const order = rows.flat();
+    const i = order.indexOf(from);
+    return order[dir === 'right' ? i + 1 : i - 1] || null;
+  }
+  const ri = rows.findIndex(row => row.includes(from));
+  if (dir === 'left' || dir === 'right') {
+    const row = rows[ri];
+    const i = row.indexOf(from);
+    return row[dir === 'right' ? i + 1 : i - 1] || null;
+  }
+  const next = rows[dir === 'down' ? ri + 1 : ri - 1];
+  return next ? nearestX(next, ref.x) : null;
+}
+
+// The item the selection lands on coming into `el` (an item, or a zone)
+// going `dir`.
+function enter(el, dir, ref, items, fromTop = false) {
+  // A zone that is an item itself (a download card) is entered on itself.
+  if (!isZone(el) || items.includes(el)) return el;
+  if (el.matches(REMEMBER)) {
+    const mem = remembered.get(el);
+    if (mem && items.includes(mem) && el.contains(mem)) return mem;
+  }
+  for (const [zoneSel, itemSel] of PREFERRED) {
+    if (!el.matches(zoneSel)) continue;
+    const pick = el.querySelector(itemSel);
+    if (pick && items.includes(pick)) return pick;
+  }
+  const units = unitsOf(el, items);
+  if (!units.length) return null;
+  const rows = rowsOf(units);
+  const top = fromTop || (dir !== 'up' && el.matches(FROM_TOP));
+  let unit;
+  if (top) unit = rows[0][0];
+  else if (dir === 'down') unit = nearestX(rows[0], ref.x);
+  else if (dir === 'up') unit = nearestX(rows[rows.length - 1], ref.x);
+  else if (zoneType(el) === 'row') unit = dir === 'right' ? rows.flat()[0] : rows.flat().at(-1);
+  else unit = nearestSide(units, dir === 'right' ? 'left' : 'right', ref.y);
+  return unit ? enter(unit.el, dir, ref, items, top) : null;
 }
 
 function clearFocus() {
@@ -72,57 +354,73 @@ function clearFocus() {
   current = null;
 }
 
-// A move keeps the focus in the middle of its scroller along the direction
-// of travel (rows centred going up and down, cards centred in a rail going
-// sideways), so what comes next is always in view; focusing without a move
-// scrolls as little as possible.
+// How far a scroller has to go to show `a`-`b` within `lo`-`hi`: centred,
+// or else just enough, with a margin.
+function scrollDelta(a, b, lo, hi, centre) {
+  if (centre) return (a + b) / 2 - (lo + hi) / 2;
+  const margin = Math.min(48, (hi - lo) / 6);
+  if (a < lo + margin) return a - lo - margin;
+  if (b > hi - margin) return Math.min(b - hi + margin, a - lo - margin);
+  return 0;
+}
+
+// A move keeps the selection in the middle of its scrollers along the
+// direction of travel (rows centred going up and down, cards centred in a
+// rail going sideways), so what comes next is always in view; the other way,
+// and without a move, they scroll as little as possible. Only what scrolls
+// does: a box that just hides its overflow (the player's frame) stays put.
+function reveal(el, dir) {
+  const r = el.getBoundingClientRect();
+  let { top, bottom, left, right } = r;
+  for (let node = el; node.parentElement; node = node.parentElement) {
+    if (getComputedStyle(node).position === 'fixed') break;
+    const p = node.parentElement;
+    if (p === document.body || p === document.documentElement) break;
+    const cs = getComputedStyle(p);
+    const scrollsY = /auto|scroll/.test(cs.overflowY) && p.scrollHeight > p.clientHeight;
+    const scrollsX = /auto|scroll/.test(cs.overflowX) && p.scrollWidth > p.clientWidth;
+    if (!scrollsY && !scrollsX) continue;
+    const box = p.getBoundingClientRect();
+    const boxTop = box.top + p.clientTop;
+    const boxLeft = box.left + p.clientLeft;
+    let dy = 0;
+    let dx = 0;
+    if (scrollsY) {
+      dy = scrollDelta(top, bottom, boxTop, boxTop + p.clientHeight, dir === 'up' || dir === 'down');
+      dy = Math.max(-p.scrollTop, Math.min(p.scrollHeight - p.clientHeight - p.scrollTop, dy));
+    }
+    if (scrollsX) {
+      dx = scrollDelta(left, right, boxLeft, boxLeft + p.clientWidth, dir === 'left' || dir === 'right');
+      dx = Math.max(-p.scrollLeft, Math.min(p.scrollWidth - p.clientWidth - p.scrollLeft, dx));
+    }
+    if (Math.abs(dy) < 1 && Math.abs(dx) < 1) continue;
+    p.scrollBy({ top: dy, left: dx, behavior: 'smooth' });
+    top -= dy;
+    bottom -= dy;
+    left -= dx;
+    right -= dx;
+  }
+}
+
 function setFocus(el, dir = null) {
   if (current && current !== el) current.classList.remove(FOCUS_CLASS);
   current = el || null;
   if (!current) return;
   current.classList.add(FOCUS_CLASS);
-  if (activeScope() === document.body) lastBaseFocus = current;
-  const vertical = dir === 'up' || dir === 'down';
-  const horizontal = dir === 'left' || dir === 'right';
-  try {
-    current.scrollIntoView({
-      block: vertical ? 'center' : 'nearest',
-      inline: horizontal ? 'center' : 'nearest',
-      behavior: 'smooth',
-    });
-  } catch {
-    current.scrollIntoView();
+  const scope = activeScope();
+  if (scope === document.body) lastBaseFocus = current;
+  for (let p = current.parentElement; p && p !== scope; p = p.parentElement) {
+    if (p.matches(REMEMBER)) remembered.set(p, current);
   }
-}
-
-function gap(aMin, aMax, bMin, bMax) {
-  if (bMax < aMin) return aMin - bMax;
-  if (bMin > aMax) return bMin - aMax;
-  return 0;
-}
-
-// Whether `r` lies entirely in the direction of the move from `cr`, edge to
-// edge. Comparing centres alone let a neighbour in the same row win a move up
-// or down: cards whose titles wrap on a different number of lines have
-// centres a few pixels apart.
-const EDGE_SLACK = 2;
-function isAhead(dir, cr, r) {
-  if (dir === 'up') return r.bottom <= cr.top + EDGE_SLACK;
-  if (dir === 'down') return r.top >= cr.bottom - EDGE_SLACK;
-  if (dir === 'left') return r.right <= cr.left + EDGE_SLACK;
-  return r.left >= cr.right - EDGE_SLACK;
-}
-
-// Scrollers around `el` within `scope`, innermost first. A move stays in the
-// innermost one that has something in its direction: otherwise the row above,
-// scrolled out of view, lost to the topbar that is always on screen.
-function scrollersOf(el, scope) {
-  const out = [];
-  for (let p = el.parentElement; p && p !== scope && p !== document.body; p = p.parentElement) {
-    const cs = getComputedStyle(p);
-    if (/auto|scroll/.test(cs.overflowY + cs.overflowX)) out.push(p);
-  }
-  return out;
+  if (dir && current.matches(AUTO_OPEN) && !current.classList.contains('is-active')) current.click();
+  // A field being typed in is left behind.
+  const typing = document.activeElement;
+  if (dir && typing !== current && typing?.matches?.('input, textarea, select')) typing.blur();
+  reveal(current, dir);
+  // Android TV keeps Back for the page while the selection is in it
+  // (android-back.js).
+  const where = scope !== document.body ? 'layer' : current.closest('.topbar') ? 'topbar' : 'page';
+  document.dispatchEvent(new CustomEvent('snav:focus', { detail: { where } }));
 }
 
 function pickInitial(list) {
@@ -132,170 +430,290 @@ function pickInitial(list) {
     return r.bottom > 0 && r.top < vh;
   });
   const pool = inView.length ? inView : list;
-  return pool.find(el => el.matches('.streams-pick-option.is-active, .settings-nav-item.is-active, #playerProgress, .play-btn, [data-play], .dossier-actions button, [data-rd-play], a.card, .trending-card'))
+  return pool.find(el => el.matches('.streams-pick-option.is-active, .genre-option.is-active, .settings-nav-item.is-active, #playerProgress, .play-btn, [data-play], .dossier-actions button, [data-rd-play], a.card, .trending-card'))
     || pool[0]
     || null;
 }
 
 function move(dir) {
+  dpad = true;
   const scope = activeScope();
   if (!scope) return;
-  const list = candidates(scope);
-  if (!list.length) return;
+  cache = { zone: new Map(), shift: new Map(), rect: new Map() };
+  try {
+    const items = candidates(scope);
+    if (!items.length) return;
 
-  if (!current || !list.includes(current) || !isVisible(current)) {
-    let start = null;
-    if (scope === document.body && lastBaseFocus &&
-        list.includes(lastBaseFocus) && isVisible(lastBaseFocus)) {
-      start = lastBaseFocus;
-    }
-    setFocus(start || pickInitial(list));
-    return;
-  }
-
-  const axis = current.getAttribute('data-snav-axis');
-  if ((axis === 'x' && (dir === 'left' || dir === 'right')) ||
-      (axis === 'y' && (dir === 'up' || dir === 'down'))) {
-    current.dispatchEvent(new CustomEvent('snav-adjust', { detail: dir }));
-    return;
-  }
-
-  const cr = current.getBoundingClientRect();
-  const cx = cr.left + cr.width / 2;
-  const cy = cr.top + cr.height / 2;
-  let best = null;
-  let bestScore = Infinity;
-
-  // Elements entirely ahead, in the innermost scroller that has some; with
-  // nothing entirely ahead (overlapping layouts) the centres decide. Sideways
-  // moves stay in the row the focused element shows on screen (a card half
-  // scrolled under the topbar only counts for its part in view): at the end
-  // of the row the focus stays put instead of reaching the topbar or the
-  // window controls.
-  const scrollers = scrollersOf(current, scope);
-  const sideways = dir === 'left' || dir === 'right';
-  let rowTop = cr.top;
-  let rowBottom = cr.bottom;
-  for (const box of scrollers) {
-    const b = box.getBoundingClientRect();
-    rowTop = Math.max(rowTop, b.top);
-    rowBottom = Math.min(rowBottom, b.bottom);
-  }
-  if (rowBottom - rowTop < 1) {
-    rowTop = cr.top;
-    rowBottom = cr.bottom;
-  }
-  const others = list.filter(el => el !== current)
-    .map(el => ({ el, r: el.getBoundingClientRect() }))
-    .filter(({ r }) => !sideways || Math.min(rowBottom, r.bottom) - Math.max(rowTop, r.top) > 1);
-  const ahead = others.filter(({ r }) => isAhead(dir, cr, r));
-  let pool = ahead;
-  for (const box of scrollers) {
-    const inside = ahead.filter(({ el }) => box.contains(el));
-    if (inside.length) {
-      pool = inside;
-      break;
-    }
-  }
-  for (const { el, r } of pool.length ? pool : others) {
-    const ex = r.left + r.width / 2;
-    const ey = r.top + r.height / 2;
-    let primary, offset;
-    if (dir === 'right') {
-      if (ex - cx <= 1) continue;
-      primary = ex - cx;
-      offset = gap(cr.top, cr.bottom, r.top, r.bottom);
-    } else if (dir === 'left') {
-      if (cx - ex <= 1) continue;
-      primary = cx - ex;
-      offset = gap(cr.top, cr.bottom, r.top, r.bottom);
-    } else if (dir === 'down') {
-      if (ey - cy <= 1) continue;
-      primary = ey - cy;
-      offset = gap(cr.left, cr.right, r.left, r.right);
-    } else if (dir === 'up') {
-      if (cy - ey <= 1) continue;
-      primary = cy - ey;
-      offset = gap(cr.left, cr.right, r.left, r.right);
-    } else {
+    if (!current || !items.includes(current)) {
+      let start = null;
+      if (scope === document.body && lastBaseFocus && items.includes(lastBaseFocus)) start = lastBaseFocus;
+      setFocus(start || pickInitial(items));
       return;
     }
-    const score = primary + offset * 3;
-    if (score < bestScore) {
-      bestScore = score;
-      best = el;
+
+    // A slider takes its own axis (seek, volume).
+    const axis = current.getAttribute('data-snav-axis');
+    if ((axis === 'x' && (dir === 'left' || dir === 'right')) ||
+        (axis === 'y' && (dir === 'up' || dir === 'down'))) {
+      current.dispatchEvent(new CustomEvent('snav-adjust', { detail: dir }));
+      return;
     }
+
+    const cr = rectOf(current);
+    const ref = { x: (cr.left + cr.right) / 2, y: (cr.top + cr.bottom) / 2 };
+    // From the innermost zone outwards, until one has something that way.
+    let from = current;
+    let zone = zoneAround(current, scope);
+    for (;;) {
+      const target = stepIn(zone, from, dir, ref, items, scope);
+      if (target) {
+        const el = enter(target.el, dir, ref, items);
+        if (el) setFocus(el, dir);
+        return;
+      }
+      if (zone === scope) return;
+      from = zone;
+      zone = zoneAround(zone.parentElement, scope);
+    }
+  } finally {
+    cache = null;
   }
-  if (best) setFocus(best, dir);
 }
 
 function activate() {
+  dpad = true;
   const scope = activeScope();
   if (!scope) return;
+  if (scope.id === 'qrOverlay') {
+    scope.hidden = true;
+    return;
+  }
   if (!current || !isVisible(current) || !scope.contains(current)) {
     move('down');
+    return;
+  }
+  // A slider: its own OK (play/pause on the time bar, mute on the volume).
+  if (current.hasAttribute('data-snav-axis')) {
+    current.dispatchEvent(new CustomEvent('snav-activate'));
+    return;
+  }
+  if (current.matches('input[type="checkbox"], input[type="radio"]')) {
+    current.click();
     return;
   }
   if (current.matches('input, textarea, select')) {
     current.focus();
     return;
   }
+  // A menu of several choices stays open and redraws its options: the
+  // selection stays on the option just ticked.
+  const menu = current.closest('[data-pick-menu]');
+  const value = current.dataset.value;
   current.click();
+  if (menu && value != null && !current.isConnected && !menu.hidden) {
+    const option = [...menu.querySelectorAll('[role="option"]')].find(o => o.dataset.value === value);
+    if (option) setFocus(option);
+  }
 }
 
+// Back inside the settings before closing them: from a section to their
+// menu. True when it did.
+function backInside() {
+  const settings = $('#settingsModal');
+  if (!settings || settings.hidden || !current) return false;
+  if (!settings.querySelector('.pane.is-active')?.contains(current)) return false;
+  const item = settings.querySelector('.settings-nav-item.is-active');
+  if (!item || !isVisible(item)) return false;
+  setFocus(item);
+  return true;
+}
+
+// Back on the page: the selection goes up to the tab of the section, the
+// page back to its top. True when it did.
+function backToTabs() {
+  const el = current && isVisible(current) ? current : lastBaseFocus;
+  if (activeScope() !== document.body || !el?.isConnected || el.closest('.topbar')) return false;
+  const tab = $('.tab.is-active');
+  if (!tab || !isVisible(tab)) return false;
+  remembered = new WeakMap();
+  setFocus(tab);
+  scrollPageTop();
+  return true;
+}
+
+// Back with the phone remote: the innermost thing open closes (a menu, the
+// QR code, a dialog, which is cancelled when it can be); the settings go
+// from a section back to their menu first; on the page the selection goes
+// back up to the tabs. False when there was nothing to go back from.
 function back() {
+  dpad = true;
   const openPickTrigger = $('.streams-pick.is-open [data-pick-trigger]');
   if (openPickTrigger) {
     openPickTrigger.click();
     return true;
   }
-  const m = topModal();
-  if (!m) return false;
-  const closer = m.querySelector('.modal-close, .dossier-close, [data-alert-ok]');
-  if (closer) closer.click();
-  else m.hidden = true;
-  clearFocus();
-  return true;
+  const genreMenu = $('#genreMenu');
+  if (genreMenu && !genreMenu.hidden) {
+    $('#genreTrigger')?.click();
+    return true;
+  }
+  const qr = $('#qrOverlay');
+  if (qr && !qr.hidden) {
+    qr.hidden = true;
+    return true;
+  }
+  const alert = $('#alertModal');
+  if (alert && !alert.hidden) {
+    (alert.querySelector('[data-alert-cancel]') || alert.querySelector('[data-alert-ok]'))?.click();
+    return true;
+  }
+  const settings = $('#settingsModal');
+  if (settings && !settings.hidden) {
+    if (!backInside()) {
+      settings.querySelector('.settings-close')?.click();
+      clearFocus();
+    }
+    return true;
+  }
+  const details = $('#detailsModal');
+  if (details && !details.hidden) {
+    details.querySelector('.dossier-close')?.click();
+    clearFocus();
+    return true;
+  }
+  return backToTabs();
 }
 
-function home() {
-  const openPickTrigger = $('.streams-pick.is-open [data-pick-trigger]');
-  if (openPickTrigger) openPickTrigger.click();
-  for (const sel of ['#alertModal', '#detailsModal', '#settingsModal']) {
-    const m = $(sel);
-    if (m && !m.hidden) {
-      const closer = m.querySelector('.modal-close, .dossier-close, [data-alert-ok]');
-      if (closer) closer.click();
-      else m.hidden = true;
-    }
-  }
-  $('.tab[data-section="movie"]')?.click();
+function scrollPageTop() {
   const scroller = $('#page-scroll') || document.scrollingElement;
   try {
     scroller?.scrollTo({ top: 0, behavior: 'smooth' });
   } catch {
     if (scroller) scroller.scrollTop = 0;
   }
-  clearFocus();
 }
 
-const detailsModal = $('#detailsModal');
-const detailsBody = $('#detailsBody');
-if (detailsModal && detailsBody) {
-  const player = $('#playerModal');
-  const obs = new MutationObserver(() => {
-    if (detailsModal.hidden || (player && !player.hidden)) return;
-    if (current && (detailsModal.contains(current) || current.closest('[data-pick-menu], #alertModal'))
-        && isVisible(current)) return;
-    const playBtn = detailsBody.querySelector('.play-btn');
-    if (playBtn && isVisible(playBtn)) setFocus(playBtn);
-  });
-  obs.observe(detailsBody, { childList: true, subtree: true });
+function home() {
+  dpad = true;
+  const openPickTrigger = $('.streams-pick.is-open [data-pick-trigger]');
+  if (openPickTrigger) openPickTrigger.click();
+  const genreMenu = $('#genreMenu');
+  if (genreMenu && !genreMenu.hidden) $('#genreTrigger')?.click();
+  const qr = $('#qrOverlay');
+  if (qr) qr.hidden = true;
+  const alert = $('#alertModal');
+  if (alert && !alert.hidden) {
+    (alert.querySelector('[data-alert-cancel]') || alert.querySelector('[data-alert-ok]'))?.click();
+  }
+  for (const sel of ['#settingsModal', '#detailsModal']) {
+    const m = $(sel);
+    if (m && !m.hidden) m.querySelector('.settings-close, .dossier-close')?.click();
+  }
+  const tab = $('.tab[data-section="movie"]');
+  tab?.click();
+  scrollPageTop();
+  remembered = new WeakMap();
+  clearFocus();
+  if (tab && isVisible(tab)) setFocus(tab);
+  homing = true;
+  setTimeout(() => { homing = false; }, 0);
 }
 
 document.addEventListener('pointerdown', () => {
+  dpad = false;
   if (current) clearFocus();
 }, true);
+
+// While the D-pad is in use, what opens starts on its current choice or its
+// first action, and what closes gives the selection back to what opened it.
+function selectOption(menu, option) {
+  const el = !menu.hidden && (menu.querySelector(`${option}.is-active`) || menu.querySelector(option));
+  if (el && isVisible(el)) setFocus(el);
+}
+
+function trackLayer(layer, { open, fallback } = {}) {
+  if (!layer) return;
+  let shown = !layer.hidden;
+  let before = null;
+  new MutationObserver(() => {
+    // The details hide under the player and come back when it closes.
+    if (layer === detailsModal && player && !player.hidden) return;
+    if (shown === !layer.hidden) return;
+    shown = !layer.hidden;
+    if (shown) {
+      before = current && current.isConnected && !layer.contains(current) ? current : null;
+      if (open && inUse()) open();
+      return;
+    }
+    const el = before?.isConnected ? before : fallback?.();
+    before = null;
+    if (!homing && inUse() && el && isVisible(el) && activeScope().contains(el)) setFocus(el);
+  }).observe(layer, { attributes: true, attributeFilter: ['hidden'] });
+}
+
+// A details page: its first action (trailer, favourite, play), once drawn;
+// what it redraws later (the streams, behind the player) leaves the
+// selection alone, and so does the menu of one of its pickers.
+const detailsModal = $('#detailsModal');
+const detailsBody = $('#detailsBody');
+const player = $('#playerModal');
+if (detailsModal && detailsBody) {
+  new MutationObserver(() => {
+    if (detailsModal.hidden || (player && !player.hidden) || !inUse()) return;
+    if (current && (detailsModal.contains(current) || current.closest('[data-pick-menu], #alertModal'))
+        && isVisible(current)) return;
+    const first = detailsBody.querySelector('.dossier-actions button, [data-rd-play]');
+    if (first && isVisible(first)) setFocus(first);
+  }).observe(detailsBody, { childList: true, subtree: true });
+}
+trackLayer(detailsModal);
+
+// The settings: the section shown, in their menu.
+const settingsModal = $('#settingsModal');
+trackLayer(settingsModal, {
+  open: () => {
+    const item = settingsModal.querySelector('.settings-nav-item.is-active');
+    if (item) setFocus(item);
+  },
+});
+
+// A dialog (a confirmation, a form, a phone asking to be the remote): the
+// button or the field it focuses once shown (modal.js, on a timer queued
+// before this one).
+const dialog = $('#alertModal');
+trackLayer(dialog, {
+  open: () => setTimeout(() => {
+    if (dialog.hidden) return;
+    const items = candidates(dialog);
+    const focused = document.activeElement;
+    const el = items.includes(focused) ? focused : pickInitial(items);
+    if (el) setFocus(el);
+  }, 0),
+});
+
+// The player gives the selection back to what started it; to the stream
+// just played if the list was redrawn meanwhile (it goes first, as watched).
+trackLayer(player, {
+  fallback: () => !detailsModal.hidden && detailsBody.querySelector('.stream.is-watched [data-rd-play]'),
+});
+
+// The player's settings: the track, subtitles or speed in use.
+const playerSettings = $('#playerSettings');
+trackLayer(playerSettings, {
+  open: () => {
+    const items = candidates(playerSettings);
+    const el = items.find(e => e.matches('.player-settings-opt.is-active'))
+      || items.find(e => e.matches('.player-settings-tabs .is-active'))
+      || items[0];
+    if (el) setFocus(el);
+  },
+});
+
+// Pickers open on their current value, once their menu shows.
+document.addEventListener('streampicker:open', (e) => {
+  const menu = e.detail?.source?.querySelector('[data-pick-menu]');
+  if (menu && inUse()) queueMicrotask(() => selectOption(menu, '.streams-pick-option'));
+});
 
 // A picker closed with the D-pad gives the selection back to its button: the
 // options are redrawn on a choice, and the selection would be lost.
@@ -310,10 +728,16 @@ document.addEventListener('streampicker:close', (e) => {
 const genreMenu = $('#genreMenu');
 if (genreMenu) {
   new MutationObserver(() => {
-    if (!genreMenu.hidden || !current || (current.isConnected && !genreMenu.contains(current))) return;
+    if (!genreMenu.hidden) {
+      if (inUse()) selectOption(genreMenu, '.genre-option');
+      return;
+    }
+    if (!current || (current.isConnected && !genreMenu.contains(current))) return;
     const trigger = $('#genreTrigger');
     if (trigger && isVisible(trigger)) setFocus(trigger);
   }).observe(genreMenu, { attributes: true, attributeFilter: ['hidden'] });
 }
 
-export const spatialNav = { move, activate, back, home, clear: clearFocus, focus: setFocus };
+export const spatialNav = {
+  move, activate, back, backInside, backToTabs, home, clear: clearFocus, focus: setFocus,
+};

@@ -2,11 +2,14 @@
 // page has history and closes the app otherwise, so every overlay pushes a
 // history entry while it is open: Back then pops it and we close the
 // overlay instead of leaving the app. With nothing open, Back exits as usual.
+// With the D-pad (Android TV) Back first goes from a section of the settings
+// to their menu, and from the page up to its tabs.
 import { $ } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_ANDROID, IS_TV } from './platform.js';
 import { closePlayer } from './player.js';
 import { closeModal } from './modal.js';
 import { closeRemoteOverlay } from './remote-client.js';
+import { spatialNav } from './spatial-nav.js';
 
 const OVERLAYS = ['#genreMenu', '#alertModal', '#playerSettings', '#playerModal', '#remoteOverlay', '#settingsModal', '#detailsModal'];
 const STATE_KEY = 'siiisOverlay';
@@ -42,6 +45,9 @@ if (IS_ANDROID) {
         tracked.add(id);
         history.pushState({ [STATE_KEY]: id }, '');
       } else if (el.hidden && tracked.has(id)) {
+        // The details hide under the player and come back when it closes:
+        // they keep their entry.
+        if (id === '#detailsModal' && !$('#playerModal').hidden) continue;
         tracked.delete(id);
         if (history.state && history.state[STATE_KEY] === id) {
           suppressPop++;
@@ -83,6 +89,25 @@ if (IS_ANDROID) {
   document.addEventListener('siiis:popup-open', e => popupOpened(e.detail.source, e.detail.close));
   document.addEventListener('siiis:popup-close', e => popupClosed(e.detail.source));
 
+  // TV: the page holds one entry while the selection is in it, below the
+  // topbar; Back then brings the selection up to the tabs, and the next Back
+  // leaves the app.
+  let pageEntry = false;
+  if (IS_TV) {
+    document.addEventListener('snav:focus', e => {
+      const where = e.detail?.where;
+      if (tracked.size || openPopup || where === 'layer') return;
+      if (where === 'page' && !pageEntry) {
+        pageEntry = true;
+        history.pushState({ [STATE_KEY]: '#page' }, '');
+      } else if (where === 'topbar' && pageEntry && history.state && history.state[STATE_KEY] === '#page') {
+        pageEntry = false;
+        suppressPop++;
+        history.back();
+      }
+    });
+  }
+
   window.addEventListener('popstate', () => {
     if (suppressPop > 0) { suppressPop--; return; }
     if (openPopup) {
@@ -93,8 +118,19 @@ if (IS_ANDROID) {
     }
     const id = topOpenOverlay();
     if (id) {
+      // From a section of the settings, their menu first: the settings keep
+      // their entry.
+      if (id === '#settingsModal' && spatialNav.backInside()) {
+        history.pushState({ [STATE_KEY]: id }, '');
+        return;
+      }
       tracked.delete(id);
       closeOverlay(id);
+      return;
+    }
+    if (pageEntry) {
+      pageEntry = false;
+      spatialNav.backToTabs();
     }
   });
 }

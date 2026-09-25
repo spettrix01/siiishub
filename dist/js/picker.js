@@ -194,8 +194,10 @@ export function setupStreamPicker(rootEl, opts = {}) {
     trigger.setAttribute('aria-expanded', 'true');
     window.addEventListener('resize', positionMenu);
     window.addEventListener('scroll', positionMenu, true);
-    // Not in popup mode: on a phone the keyboard would cover the list.
-    if (searchEl && !popup) queueMicrotask(() => searchEl.focus());
+    // Not in popup mode: on a phone the keyboard would cover the list. Nor
+    // when opened with the D-pad (a selection is shown): the remote goes
+    // through the options, the field would keep its keys.
+    if (searchEl && !popup && !document.querySelector('.snav-focus')) queueMicrotask(() => searchEl.focus());
   }
 
   function close() {
