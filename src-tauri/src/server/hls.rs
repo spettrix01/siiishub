@@ -377,7 +377,7 @@ pub async fn media_playlist(State(server): State<Server>, Path(sid): Path<String
     );
     let duration = session.probe.duration;
     for k in 0..session.count {
-        let length = (duration - k as f64 * SEGMENT).min(SEGMENT).max(0.001);
+        let length = (duration - k as f64 * SEGMENT).clamp(0.001, SEGMENT);
         body.push_str(&format!("#EXTINF:{length:.6},\nsegments/{k}\n"));
     }
     body.push_str("#EXT-X-ENDLIST\n");
@@ -899,9 +899,11 @@ pub(super) async fn read_box<R: AsyncRead + Unpin>(reader: &mut R) -> std::io::R
     Ok(Some((kind, bytes)))
 }
 
-/// The children of the box whose body spans `start..end`: (type, body start,
-/// end).
-fn children(bytes: &[u8], start: usize, end: usize) -> Vec<([u8; 4], usize, usize)> {
+/// Boxes side by side: (type, body start, end).
+type Boxes = Vec<([u8; 4], usize, usize)>;
+
+/// The children of the box whose body spans `start..end`.
+fn children(bytes: &[u8], start: usize, end: usize) -> Boxes {
     let mut out = Vec::new();
     let mut at = start;
     while at + 8 <= end {
@@ -968,7 +970,7 @@ fn parse_tracks(moov: &[u8]) -> HashMap<u32, Track> {
 }
 
 /// The `traf` boxes of a `moof`, with the track each is for.
-fn trafs<'a>(moof: &[u8], tracks: &'a HashMap<u32, Track>) -> Vec<(&'a Track, Vec<([u8; 4], usize, usize)>)> {
+fn trafs<'a>(moof: &[u8], tracks: &'a HashMap<u32, Track>) -> Vec<(&'a Track, Boxes)> {
     children(moof, 8, moof.len())
         .into_iter()
         .filter(|(kind, _, _)| kind == b"traf")
