@@ -4498,6 +4498,9 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 }
 /* Next to the delete button, which the remote's rows push right. */
 .remote-device .account-row-meta + .remote-device-btn { margin-left: 0; }
+/* Rows without the delete button (the administrator's own) as tall as the
+   others: the padding, the button and the border. */
+.account-admin .remote-device { min-height: 48px; }
 
 .remote-devices {
   list-style: none;
