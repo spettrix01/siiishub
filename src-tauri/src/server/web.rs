@@ -11,19 +11,20 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 use axum::body::Body;
-use axum::extract::{Request, State};
+use axum::extract::{Extension, Request, State};
 use axum::http::{header, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 
+use super::accounts::Viewer;
 use super::Server;
 
 /// `index.html` of the app, with what the app gets from Tauri: the initial
 /// theme (Tauri's initialization script) and the bridge standing in for
 /// `window.__TAURI__` (before any script of the app runs); then the styles
 /// and the script of the browser additions (after the app's).
-pub async fn index(State(server): State<Server>) -> Response {
+pub async fn index(State(server): State<Server>, Extension(viewer): Extension<Viewer>) -> Response {
     let path = server.files.app_dir.join("index.html");
     let html = match tokio::fs::read_to_string(&path).await {
         Ok(html) => html,
@@ -32,7 +33,11 @@ pub async fn index(State(server): State<Server>) -> Response {
             return (StatusCode::INTERNAL_SERVER_ERROR, "index.html not found").into_response();
         }
     };
-    let theme = server.app.userdata.get("siiishub-theme").unwrap_or_default();
+    // The theme of whoever is signed in.
+    let theme = match server.profiles.get(&viewer).await {
+        Ok(profile) => profile.userdata.get("siiishub-theme").unwrap_or_default(),
+        Err(_) => String::new(),
+    };
     let theme = serde_json::to_string(&theme).unwrap_or_else(|_| "\"\"".to_string());
     let dirs = [server.files.app_dir.clone(), server.files.web_dir.clone()];
     let version = tokio::task::spawn_blocking(move || version(&dirs))

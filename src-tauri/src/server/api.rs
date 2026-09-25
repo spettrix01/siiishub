@@ -5,8 +5,10 @@
 //! the app would reject with. Commands about the window, the embedded player
 //! or the remote control are the bridge's business and never reach here.
 
+use std::sync::Arc;
+
 use axum::body::Bytes;
-use axum::extract::{Path, State};
+use axum::extract::{Extension, Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -18,11 +20,14 @@ use crate::ops;
 use crate::ops::downloads::{DownloadStartArgs, DownloadStartGroupArgs};
 use crate::ops::media::ResolveArgs;
 use crate::ops::settings::SettingsPatch;
+use crate::state::AppState;
 
+use super::accounts::Viewer;
 use super::Server;
 
 pub async fn invoke(
     State(server): State<Server>,
+    Extension(viewer): Extension<Viewer>,
     Path(command): Path<String>,
     body: Bytes,
 ) -> Response {
@@ -34,7 +39,12 @@ pub async fn invoke(
             Err(e) => return failure(format!("invalid arguments: {e}")),
         }
     };
-    match dispatch(&server, &command, args).await {
+    // Whose settings and user data: the account signed in, or the server's.
+    let state = match server.profiles.get(&viewer).await {
+        Ok(state) => state,
+        Err(e) => return failure(e),
+    };
+    match dispatch(&server, &viewer, &state, &command, args).await {
         Ok(value) => Json(value).into_response(),
         Err(e) => failure(e),
     }
@@ -84,8 +94,21 @@ struct Wrapped<T> {
     args: T,
 }
 
-async fn dispatch(server: &Server, command: &str, args: Value) -> Result<Value, String> {
-    let state = &server.app;
+/// The administrator only.
+fn admin(server: &Server, viewer: &Viewer) -> Result<(), String> {
+    match viewer {
+        Viewer::Account(id) if server.accounts.get(id).is_some_and(|a| a.admin) => Ok(()),
+        _ => Err("not-admin".to_string()),
+    }
+}
+
+async fn dispatch(
+    server: &Server,
+    viewer: &Viewer,
+    state: &Arc<AppState>,
+    command: &str,
+    args: Value,
+) -> Result<Value, String> {
     match command {
         "settings_get" => reply(ops::settings::get(state)),
         "settings_save" => {
@@ -258,6 +281,60 @@ async fn dispatch(server: &Server, command: &str, args: Value) -> Result<Value, 
             }
             let Wrapped::<A> { args } = parse(args)?;
             server.app.remote.forget_device(args.id, args.key.as_deref());
+            reply(())
+        }
+
+        // Accounts (accounts.rs): who is signed in, their password, and the
+        // administrator's list. Errors are codes the page words.
+        "account_status" => reply(match viewer {
+            Viewer::Guest => json!({ "account": null }),
+            Viewer::Account(id) => json!({ "account": server.accounts.get(id) }),
+        }),
+        "account_password" => {
+            let Viewer::Account(id) = viewer else {
+                return Err("no-account".to_string());
+            };
+            #[derive(Deserialize)]
+            struct A {
+                current: String,
+                next: String,
+            }
+            let A { current, next } = parse(args)?;
+            server
+                .accounts
+                .set_password(id, &current, &next)
+                .await
+                .map_err(|e| e.code().to_string())?;
+            reply(())
+        }
+        "accounts_list" => {
+            admin(server, viewer)?;
+            reply(server.accounts.list())
+        }
+        "account_create" => {
+            admin(server, viewer)?;
+            #[derive(Deserialize)]
+            struct A {
+                username: String,
+                password: String,
+                #[serde(default)]
+                admin: bool,
+            }
+            let A { username, password, admin } = parse(args)?;
+            let account = server
+                .accounts
+                .create(&username, &password, admin)
+                .await
+                .map_err(|e| e.code().to_string())?;
+            tracing::info!("[accounts] {} made", account.username);
+            reply(account)
+        }
+        "account_delete" => {
+            admin(server, viewer)?;
+            let IdArg { id } = parse(args)?;
+            server.accounts.delete(&id).map_err(|e| e.code().to_string())?;
+            server.auth.close_account(&id);
+            server.profiles.remove(&id).await;
             reply(())
         }
 

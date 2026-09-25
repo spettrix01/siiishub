@@ -448,6 +448,74 @@
       </label>
       <p class="hint" id="remoteClientHint"></p>
     </section>
+
+    <!-- The account (account-ui.js): in the apps, the SIIISHUB server they
+         sync with; in the browser version, who is signed in and, for the
+         administrator, the server's accounts. -->
+    <section class="pane" data-pane="account">
+      <p class="pane-desc" id="accountDesc"></p>
+
+      <form class="account-form" id="accountSignInForm" hidden>
+        <label class="field">
+          <span data-i18n="settings.account.server">Server</span>
+          <input id="accountServerInput" type="text" inputmode="url" placeholder="192.168.1.10:8080" autocomplete="off" spellcheck="false" />
+        </label>
+        <label class="field">
+          <span data-i18n="settings.account.username">Utente</span>
+          <input id="accountUserInput" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" />
+        </label>
+        <label class="field">
+          <span data-i18n="settings.account.password">Password</span>
+          <div class="field-row">
+            <input id="accountPasswordInput" type="password" autocomplete="current-password" />
+            <button class="primary" id="accountSignInBtn" type="submit" data-i18n="settings.account.signIn">Accedi</button>
+          </div>
+        </label>
+      </form>
+
+      <div class="account-card" id="accountCard" hidden>
+        <div class="account-who">
+          <strong id="accountName"></strong>
+          <span class="account-where" id="accountWhere"></span>
+        </div>
+        <p class="account-sync" id="accountSyncLine"></p>
+        <div class="account-actions">
+          <button type="button" class="ghost" id="accountSignOutBtn" data-i18n="settings.account.signOut">Esci</button>
+        </div>
+      </div>
+
+      <form class="account-form" id="accountPasswordForm" hidden>
+        <h3 class="remote-group-title" data-i18n="settings.account.changePassword">Cambia password</h3>
+        <label class="field">
+          <span data-i18n="settings.account.currentPassword">Password attuale</span>
+          <input id="accountCurrentPassword" type="password" autocomplete="current-password" />
+        </label>
+        <label class="field">
+          <span data-i18n="settings.account.newPassword">Nuova password</span>
+          <div class="field-row">
+            <input id="accountNewPassword" type="password" autocomplete="new-password" />
+            <button class="primary" type="submit" data-i18n="settings.account.save">Salva</button>
+          </div>
+        </label>
+      </form>
+
+      <div class="account-admin" id="accountAdminBox" hidden>
+        <h3 class="remote-group-title" data-i18n="settings.account.accounts">Account del server</h3>
+        <ul class="remote-devices" id="accountList"></ul>
+        <form class="account-form" id="accountCreateForm">
+          <label class="field">
+            <span data-i18n="settings.account.newAccount">Nuovo account</span>
+            <input id="accountNewUser" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" data-i18n-ph="settings.account.username" placeholder="Utente" />
+          </label>
+          <div class="field-row">
+            <input id="accountNewUserPassword" type="password" autocomplete="new-password" data-i18n-ph="settings.account.password" placeholder="Password" />
+            <button class="primary" type="submit" data-i18n="settings.account.create">Crea</button>
+          </div>
+        </form>
+      </div>
+
+      <p class="hint" id="accountHint"></p>
+    </section>
   </article>
 </div>
 

@@ -21,6 +21,9 @@
     commands (`commands/`) and the web server (`server/`, see
     [WEB.md](WEB.md)).
   - `settings.rs`, `userdata.rs`: settings and library in the app data folder.
+  - `sync.rs`, `ops/sync.rs`, `account.rs`: the app signed in to an account
+    of a SIIISHUB server syncs its settings and library with it, key by key,
+    the later change winning (see [WEB.md](WEB.md), Accounts and sync).
   - `mpv.rs` and `mpv/`: one player interface with three backends. `real.rs`
     is libmpv on desktop, `android.rs` bridges to the Kotlin plugin and
     `stub.rs` is for development without libmpv.

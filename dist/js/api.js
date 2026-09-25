@@ -96,6 +96,23 @@ export function onRemotePending(handler) {
   return TAURI.event.listen('remote://pending', e => handler(e.payload));
 }
 
+// The apps' account: the SIIISHUB server they sync with (account.rs).
+export const syncStatus = () => invoke('sync_status');
+export const syncSignIn = (server, username, password, device) =>
+  invoke('sync_sign_in', { server, username, password, device });
+export const syncSignOut = () => invoke('sync_sign_out');
+
+export function onSyncChanged(handler) {
+  return TAURI.event.listen('sync://changed', e => handler(e.payload));
+}
+
+// The browser version's accounts (server/accounts.rs).
+export const accountStatus = () => invoke('account_status');
+export const accountsList = () => invoke('accounts_list');
+export const accountCreate = (username, password) => invoke('account_create', { username, password });
+export const accountDelete = (id) => invoke('account_delete', { id });
+export const accountPassword = (current, next) => invoke('account_password', { current, next });
+
 export async function openDownloadDir() {
   return invoke('open_download_dir');
 }

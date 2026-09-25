@@ -1,4 +1,5 @@
 mod shared;
+mod account;
 mod settings;
 mod userdata;
 mod addons;
@@ -9,6 +10,7 @@ mod torrents;
 mod mpv;
 mod window;
 
+pub use account::*;
 pub use addons::*;
 pub use downloads::*;
 pub use media::*;

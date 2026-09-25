@@ -6,6 +6,7 @@ pub mod addons;
 pub mod downloads;
 pub mod media;
 pub mod settings;
+pub mod sync;
 pub mod torrents;
 pub mod userdata;
 

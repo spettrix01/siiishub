@@ -3,6 +3,7 @@
 //! additions of `web/`; the backend is the app's too, through `ops`. The
 //! embedded player has no place here: the browser plays the video.
 
+mod accounts;
 mod api;
 mod auth;
 mod events;
@@ -10,6 +11,7 @@ mod hls;
 mod media;
 mod relay;
 mod remote;
+mod sync_api;
 mod transcode;
 mod web;
 
@@ -33,8 +35,14 @@ pub struct Config {
     pub app_dir: PathBuf,
     /// The browser additions (`web/`).
     pub web_dir: PathBuf,
-    /// `None`: no login.
+    /// No login at all (`SIIISHUB_AUTH=off`).
+    pub open: bool,
+    /// The server's password of the versions before accounts: the server's
+    /// profile, from anywhere.
     pub password: Option<String>,
+    /// The server's profile opens without a password from the home network
+    /// (`SIIISHUB_GUEST`, on unless `off`).
+    pub guest_home: bool,
     /// The GPU to transcode on.
     pub hwaccel: transcode::Wanted,
     /// Its render node or CUDA device, instead of the first that works.
@@ -65,21 +73,16 @@ impl Config {
         let web_dir = var("SIIISHUB_WEB_DIR")
             .map(PathBuf::from)
             .unwrap_or_else(|| PathBuf::from("web"));
-        let no_login = var("SIIISHUB_AUTH").is_some_and(|v| v.trim().eq_ignore_ascii_case("off"));
-        let password = var("SIIISHUB_PASSWORD");
-        if password.is_none() && !no_login {
-            anyhow::bail!(
-                "set SIIISHUB_PASSWORD, the password to sign in with \
-                 (SIIISHUB_AUTH=off runs without a login: only on a network you trust)"
-            );
-        }
+        let off = |name: &str| var(name).is_some_and(|v| v.trim().eq_ignore_ascii_case("off"));
         Ok(Self {
             bind: SocketAddr::new(address, port),
             data_dir,
             download_dir,
             app_dir,
             web_dir,
-            password: if no_login { None } else { password },
+            open: off("SIIISHUB_AUTH"),
+            password: var("SIIISHUB_PASSWORD"),
+            guest_home: !off("SIIISHUB_GUEST"),
             hwaccel: transcode::Wanted::parse(var("SIIISHUB_HWACCEL").as_deref())?,
             hwaccel_device: var("SIIISHUB_HWACCEL_DEVICE"),
         })
@@ -100,6 +103,9 @@ pub struct Server {
     pub media: Arc<media::Media>,
     pub hls: Arc<hls::Hls>,
     pub gpu: Arc<transcode::Gpu>,
+    pub accounts: Arc<accounts::Accounts>,
+    /// The server's profile and the accounts'.
+    pub profiles: Arc<accounts::Profiles>,
     /// For relaying streams: no overall timeout (a film lasts hours) and no
     /// compression (it would break byte ranges).
     pub streams: reqwest::Client,
@@ -122,11 +128,11 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
             anyhow::bail!("{} not found: point {var} at the right folder", file.display());
         }
     }
-    if config.password.is_none() {
+    if config.open {
         tracing::warn!("[web] no login (SIIISHUB_AUTH=off): whoever reaches the server can use it");
     }
 
-    let app = AppState::open(config.data_dir.clone(), config.download_dir.clone()).await?;
+    let app = Arc::new(AppState::open(config.data_dir.clone(), config.download_dir.clone()).await?);
     let streams = reqwest::Client::builder()
         .user_agent("siiishub/0.1")
         .connect_timeout(std::time::Duration::from_secs(15))
@@ -137,10 +143,12 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .await
         .context("starting the relay on 127.0.0.1")?;
     let server = Server {
-        app: Arc::new(app),
+        app: app.clone(),
         events: events::Events::new(),
         auth: Arc::new(auth::Auth::load(
+            config.open,
             config.password.clone(),
+            config.guest_home,
             config.data_dir.join("web-sessions.json"),
         )),
         files: Arc::new(Files {
@@ -150,6 +158,8 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         media: Arc::new(media::Media::new(relay)),
         hls: Arc::new(hls::Hls::default()),
         gpu: Arc::new(transcode::Gpu::new(config.hwaccel, config.hwaccel_device.clone())),
+        accounts: Arc::new(accounts::Accounts::load(config.data_dir.join("accounts.json"))),
+        profiles: Arc::new(accounts::Profiles::new(config.data_dir.join("accounts"), app)),
         streams,
     };
 
@@ -168,7 +178,14 @@ pub async fn run(config: Config) -> anyhow::Result<()> {
         .route("/index.html", get(web::index))
         .route("/login", get(auth::login_page))
         .route("/api/login", post(auth::login))
+        .route("/api/login/options", get(auth::options))
+        .route("/api/login/guest", post(auth::guest))
         .route("/api/logout", post(auth::logout))
+        .route("/api/account/setup", post(auth::setup))
+        .route("/api/account/token", post(sync_api::token))
+        .route("/api/account/revoke", post(sync_api::revoke))
+        .route("/api/sync", post(sync_api::sync))
+        .route("/api/sync/wait", get(sync_api::wait))
         .route("/api/invoke/{command}", post(api::invoke))
         .route("/api/events", get(events::socket))
         .route("/media/subtitle", get(media::subtitle))

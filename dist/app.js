@@ -12,6 +12,7 @@ import './js/details.js';
 import './js/player.js';
 import './js/modal.js';
 import './js/remote-approval.js';
+import './js/sync-client.js';
 import './js/android-back.js';
 import './js/bottom-nav.js';
 import './js/android-genres.js';

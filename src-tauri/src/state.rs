@@ -12,12 +12,15 @@ use crate::download::DownloadManager;
 use crate::mpv::Mpv;
 use crate::remote::RemoteController;
 use crate::settings::{PublicSettings, SettingsStore};
+use crate::sync::SyncLog;
 use crate::torrent::TorrentManager;
 use crate::userdata::UserDataStore;
 
 pub struct AppState {
     pub settings: SettingsStore,
     pub userdata: UserDataStore,
+    /// When each synced setting and user data key changed (`sync.rs`).
+    pub sync: SyncLog,
     pub http: reqwest::Client,
     pub torrents: TorrentManager,
     pub downloads: DownloadManager,
@@ -52,8 +55,7 @@ impl AppState {
     pub async fn open(data_dir: PathBuf, download_dir: PathBuf) -> Result<Self> {
         std::fs::create_dir_all(&data_dir).ok();
 
-        let settings = SettingsStore::open(data_dir.join("settings.json")).await?;
-        let userdata = UserDataStore::open(data_dir.join("userdata.json")).await?;
+        let (settings, userdata, sync) = open_profile(&data_dir).await?;
 
         let http = reqwest::Client::builder()
             .user_agent("siiishub/0.1")
@@ -87,6 +89,7 @@ impl AppState {
         Ok(Self {
             settings,
             userdata,
+            sync,
             http,
             torrents,
             downloads,
@@ -97,6 +100,30 @@ impl AppState {
             #[cfg(feature = "app")]
             main_hwnd: Mutex::new(None),
             remote,
+            resolve_cancels: Mutex::new(HashMap::new()),
+        })
+    }
+
+    /// Another profile on the same server: an account's settings and user
+    /// data, kept in `dir`, over this state's torrents, downloads and remote.
+    #[cfg(feature = "server")]
+    pub async fn profile(&self, dir: PathBuf) -> Result<Self> {
+        std::fs::create_dir_all(&dir).ok();
+        let (settings, userdata, sync) = open_profile(&dir).await?;
+        Ok(Self {
+            settings,
+            userdata,
+            sync,
+            http: self.http.clone(),
+            torrents: self.torrents.clone(),
+            downloads: self.downloads.clone(),
+            #[cfg(feature = "app")]
+            mpv: Mutex::new(None),
+            data_dir: dir,
+            download_dir: self.download_dir.clone(),
+            #[cfg(feature = "app")]
+            main_hwnd: Mutex::new(None),
+            remote: self.remote.clone(),
             resolve_cancels: Mutex::new(HashMap::new()),
         })
     }
@@ -149,6 +176,16 @@ impl AppState {
     pub fn main_hwnd(&self) -> Option<isize> {
         *self.main_hwnd.lock()
     }
+}
+
+/// A profile's stores in `dir`: its settings, its user data and when each
+/// synced key of them changed.
+async fn open_profile(dir: &std::path::Path) -> Result<(SettingsStore, UserDataStore, SyncLog)> {
+    let settings = SettingsStore::open(dir.join("settings.json")).await?;
+    let userdata = UserDataStore::open(dir.join("userdata.json")).await?;
+    let existing = crate::sync::existing_keys(&settings.read(), &userdata.snapshot());
+    let sync = SyncLog::open(dir.join("sync.json"), existing).await;
+    Ok((settings, userdata, sync))
 }
 
 /// Android keeps downloads in the shared `Download/SIIISHUB` folder so a file

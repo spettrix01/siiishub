@@ -97,6 +97,7 @@ pub struct PendingDevice {
     pub device: String,
 }
 
+#[derive(Clone)]
 pub struct RemoteController {
     inner: Arc<Inner>,
 }

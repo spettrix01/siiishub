@@ -60,11 +60,48 @@ phone page, `/remote/` on this server, which the phone opens in its browser
 or in the SIIISHUB app for Android (Settings → Remote, as for a PC). From
 the home network it needs no password, as the app's on a PC: the screen
 asks to approve the phone (and can remember it, so it is not asked again).
-From a public address, or through a reverse proxy, the phone signs in with
-the password first. The phone drives playback (pause, seek, volume,
+From a public address, or through a reverse proxy, the phone signs in
+first. The phone drives playback (pause, seek, volume,
 tracks), moves around the interface with its arrows and searches; every
 open page of the interface gets its commands. Full screen cannot be
 switched from the phone: browsers allow it only after a click on the page.
+
+## Accounts and sync
+
+The server keeps accounts, and the SIIISHUB apps for Windows, Linux,
+Android and Android TV sign in to them to share one library: Continue
+watching and resume points, favorites, the stream last watched, the addons,
+the TMDB and debrid keys, the language, the audio and subtitle languages
+and the theme. Downloads stay on the device that made them.
+
+- **The first account**, the administrator's, is made on the login page the
+  first time the server runs, from a device on the home network. The
+  administrator makes the other accounts in Settings → Account, and deletes
+  them there; each account changes its own password there too.
+- **In the browser**, signing in with an account opens its own library and
+  settings on this server.
+- **In the apps**, Settings → Account takes the server's address
+  (`192.168.1.10:8080`, or `https://...` behind a reverse proxy), the
+  username and the password. The app keeps a token for the device instead
+  of the password. Accounts are only made in the browser.
+- **Without an account**, from the home network, the login page opens the
+  server's own profile: the settings and library it had before accounts,
+  shared by whoever enters this way and not synced with the apps. From
+  outside the home network it opens with `SIIISHUB_PASSWORD` when that is
+  set (the login of the versions before accounts), and not at all
+  otherwise; `SIIISHUB_GUEST=off` closes it from the home network too.
+
+A change travels by itself, both ways: from an app a few seconds after it
+is made (every 20 seconds at most while playback saves the resume point),
+and to the apps as soon as it reaches the server, as each app keeps a
+request open for news; the account's pages open in the browser show it at
+once too. Away from the server an app works on, tries again every minute
+and catches up when it is back.
+
+When two devices change the same thing, the later change wins. The first
+time a device signs in, what the account already has replaces the device's
+own values, and what the device has on top (a favorite the account lacks,
+say) goes to the account.
 
 ## Docker
 
@@ -78,9 +115,10 @@ branch, and each release has its version (`1.2.0`), built by
 `image:` with `build: .` in `docker-compose.yml` (a Rust build: some minutes
 and a few GB of memory).
 
-Then open `http://<server>:8080` and sign in with the password set in
-`docker-compose.yml` (`SIIISHUB_PASSWORD`). The settings, the library and the
-sessions are kept in `./config`, the downloads in `./downloads`.
+Then open `http://<server>:8080` from the home network and create the
+administrator's account (see Accounts and sync), or continue without one.
+The settings, the library, the accounts and the sessions are kept in
+`./config`, the downloads in `./downloads`.
 
 The container runs as user 1000: the two folders must be writable by it
 (`sudo chown -R 1000:1000 config downloads` if they were created by root).
@@ -90,7 +128,7 @@ The container runs as user 1000: the two folders must be writable by it
 Create a dataset for it (here `pool/Siiishub`) and make the `apps` user
 (568) its owner: Datasets → the dataset → Permissions → Edit, user and
 group `apps`. Then Apps → Discover Apps → ⋮ → Install via YAML, a name
-(`siiishub`) and this configuration, with a password of your own:
+(`siiishub`) and this configuration:
 
 ```yaml
 services:
@@ -106,7 +144,6 @@ services:
     ports:
       - "30808:8080"
     environment:
-      SIIISHUB_PASSWORD: "change-me"
       SIIISHUB_DATA_DIR: /data/config
       SIIISHUB_DOWNLOAD_DIR: /data/downloads
     volumes:
@@ -123,7 +160,7 @@ The server makes `config` and `downloads` in the dataset, and answers on
 cd src-tauri
 cargo build --release --no-default-features --features server --bin siiishub-server
 cd ..
-SIIISHUB_PASSWORD=... ./src-tauri/target/release/siiishub-server
+./src-tauri/target/release/siiishub-server
 ```
 
 Run it from the repository root, or point `SIIISHUB_APP_DIR` and
@@ -163,8 +200,9 @@ the CPU by itself.
 
 | Variable | Default | |
 |---|---|---|
-| `SIIISHUB_PASSWORD` | none, required | Password to sign in with. |
-| `SIIISHUB_AUTH` | | `off` runs without a login: only on a network you trust. |
+| `SIIISHUB_PASSWORD` | none | The server's profile without an account from outside the home network, as before accounts. |
+| `SIIISHUB_GUEST` | `home` | `off`: no entering without an account, from the home network either. |
+| `SIIISHUB_AUTH` | | `off` runs without a login, everyone in the server's profile: only on a network you trust. |
 | `SIIISHUB_PORT` | `8080` | |
 | `SIIISHUB_ADDRESS` | `0.0.0.0` | Address to listen on (`127.0.0.1` behind a reverse proxy on the same machine). |
 | `SIIISHUB_DATA_DIR` | `data` (`/config` in Docker) | Settings, library, sessions, torrent state. |
@@ -178,10 +216,15 @@ the CPU by itself.
 ## Security
 
 - Every page and every API call needs a session, except the login page and
-  what it loads (the styles and the translations). A session lasts 30 days
-  and survives restarts (`web-sessions.json`, readable only by the server's
-  user). Ten wrong passwords in a minute block the login until the minute is
-  over.
+  what it loads (the styles and the translations): an account's, or the
+  server's profile's, which from the home network is checked on every
+  request. A session lasts 30 days and survives restarts
+  (`web-sessions.json`). Ten wrong passwords in a minute block every login
+  until the minute is over.
+- Passwords are kept as Argon2 hashes (`accounts.json`). An app keeps a token
+  of its own instead, stored on the server as its SHA-256; signing out of the
+  app, or deleting the account, revokes it. Both files are readable only by
+  the server's user.
 - On the internet, put the server behind a reverse proxy with HTTPS (Caddy,
   Traefik, Nginx Proxy Manager). When the proxy sends
   `X-Forwarded-Proto: https`, the session cookie is only sent encrypted.
@@ -197,6 +240,12 @@ the CPU by itself.
 - `src-tauri/src/ops/`: what the interface asks of the backend (settings,
   library, addons, resolving streams, torrents, downloads). The app's Tauri
   commands (`commands/`) and the server's API are thin layers over it.
+- `src-tauri/src/sync.rs`, `ops/sync.rs`: what a sync carries, stamped with
+  when it changed, and the exchange itself, the same in the server and the
+  apps. `server/accounts.rs` keeps the accounts and their profiles (in
+  `accounts/<id>/` of the data folder, over the server's torrents and
+  downloads); `server/sync_api.rs` answers the apps; `src-tauri/src/account.rs`
+  is the apps' side.
 - `src-tauri/src/server/`: the HTTP server (axum). `POST /api/invoke/<command>`
   runs a command with the arguments the page passes to `invoke`; the events
   (`media://progress`, ...) go to the pages over a WebSocket (`/api/events`).

@@ -10,6 +10,8 @@ use tauri::Manager;
 
 mod alldebrid;
 #[cfg(feature = "app")]
+mod account;
+#[cfg(feature = "app")]
 mod commands;
 mod download;
 mod ffprobe;
@@ -29,6 +31,7 @@ pub mod server;
 mod settings;
 mod state;
 mod stremio;
+mod sync;
 mod torrent;
 mod torrent_file;
 mod userdata;
@@ -92,6 +95,16 @@ pub fn run() {
             let _ = std::fs::remove_file(data_dir.join("_webview_relocated"));
 
             app.manage(Arc::new(state));
+
+            // The account's sync (account.rs): what comes in reaches the
+            // interface as `sync://changed`.
+            let account = Arc::new(account::Account::load(data_dir.join("account.json")));
+            app.manage(account.clone());
+            let sync_handle = app.handle().clone();
+            account::start(app.state::<Arc<AppState>>().inner().clone(), account, move |applied| {
+                use tauri::Emitter;
+                let _ = sync_handle.emit("sync://changed", applied);
+            });
 
             // The phone is the player itself: no remote-control server on an
             // Android phone. On a PC and in the TV APK the phone drives it.
@@ -206,6 +219,9 @@ pub fn run() {
             commands::userdata_load,
             commands::userdata_set,
             commands::userdata_remove,
+            commands::sync_status,
+            commands::sync_sign_in,
+            commands::sync_sign_out,
             commands::open_download_dir,
             commands::open_url,
             commands::player_mode,

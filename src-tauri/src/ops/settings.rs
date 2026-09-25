@@ -86,7 +86,14 @@ pub async fn save(state: &AppState, patch: SettingsPatch) -> CmdResult<(PublicSe
         }
     }
     let new_port = next.remote_port;
+    let before = crate::sync::setting_values(&state.settings.read());
+    let changed: Vec<String> = crate::sync::setting_values(&next)
+        .into_iter()
+        .filter(|(field, value)| before.get(field) != Some(value))
+        .map(|(field, _)| crate::sync::setting_key(field))
+        .collect();
     state.settings.write(next).await.map_err(err)?;
+    state.sync.touch(&changed).await;
 
     let port_changed = (prev_remote_port != new_port).then_some(new_port);
     Ok((state.public_settings(), port_changed))

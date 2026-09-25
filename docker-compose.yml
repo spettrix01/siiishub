@@ -1,6 +1,7 @@
 # SIIISHUB in the browser: `docker compose up -d`, then open
-# http://<server>:8080 and sign in with SIIISHUB_PASSWORD. docs/WEB.md has
-# the details (HTTPS, reverse proxy, permissions of the folders).
+# http://<server>:8080 from the home network and create the administrator's
+# account. docs/WEB.md has the details (accounts, HTTPS, reverse proxy,
+# permissions of the folders).
 services:
   siiishub:
     image: ghcr.io/spettrix01/siiishub:latest
@@ -9,10 +10,12 @@ services:
     restart: unless-stopped
     ports:
       - "8080:8080"
-    environment:
-      SIIISHUB_PASSWORD: "change-me"
+    # The server's profile without an account, from outside the home
+    # network too (docs/WEB.md, Accounts and sync):
+    # environment:
+    #   SIIISHUB_PASSWORD: "change-me"
     volumes:
-      # Settings, library and sessions.
+      # Settings, library, accounts and sessions.
       - ./config:/config
       # Downloads and the torrents being streamed.
       - ./downloads:/downloads

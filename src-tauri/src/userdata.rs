@@ -53,6 +53,23 @@ impl UserDataStore {
         self.persist().await
     }
 
+    /// Sets (`Some`) or removes (`None`) several keys, saved once.
+    pub async fn update(&self, changes: Vec<(String, Option<String>)>) -> Result<()> {
+        if changes.is_empty() {
+            return Ok(());
+        }
+        {
+            let mut data = self.inner.data.write();
+            for (key, value) in changes {
+                match value {
+                    Some(value) => data.insert(key, value),
+                    None => data.remove(&key),
+                };
+            }
+        }
+        self.persist().await
+    }
+
     async fn persist(&self) -> Result<()> {
         let _write = self.inner.write_lock.lock().await;
         let bytes = serde_json::to_vec_pretty(&self.snapshot())?;

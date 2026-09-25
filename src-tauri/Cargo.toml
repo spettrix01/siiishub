@@ -41,6 +41,8 @@ axum = { version = "0.8", features = ["ws"] }
 # siiishub-server: static files, and media files served with byte ranges.
 tower-http = { version = "0.6", features = ["fs"], optional = true }
 tower = { version = "0.5", features = ["util"], optional = true }
+# siiishub-server: account passwords, kept as Argon2 hashes.
+argon2 = { version = "0.5", optional = true, default-features = false, features = ["alloc", "password-hash"] }
 local-ip-address = "0.6"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 
@@ -160,7 +162,7 @@ devtools = ["app", "tauri/devtools"]
 # phone remote's server, as on a PC. scripts/android-build.sh builds it.
 tv = ["app"]
 # siiishub-server: the interface in the browser, without Tauri or libmpv.
-server = ["dep:tower-http", "dep:tower"]
+server = ["dep:tower-http", "dep:tower", "dep:argon2"]
 
 # librqbit's SHA-1 wrapper links OpenSSL or aws-lc; the local copy hashes in
 # pure Rust so the Android cross-build needs no native crypto toolchain.

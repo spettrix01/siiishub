@@ -17,19 +17,25 @@
   box-shadow: var(--shadow-2);
 }
 
+/* The app's wordmark (.brand-name in style.css), larger: HUB glows. */
 .login-brand {
   margin: 0 0 28px;
   font-family: var(--display);
   font-size: 2.1rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   text-align: center;
   color: var(--text);
 }
 .login-brand em {
   font-style: normal;
   color: var(--violet);
+  text-shadow: 0 0 26px var(--violet-glow);
 }
+
+/* The forms and boxes the page does not offer this browser. */
+.login-card [hidden] { display: none; }
 
 .login-form {
   display: flex;
@@ -75,3 +81,44 @@
 }
 .login-submit:hover { background: var(--violet-2); }
 .login-submit:disabled { opacity: 0.6; cursor: default; }
+
+.login-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.login-note {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--text-2);
+}
+
+#setupAtHome { margin: 0; text-align: center; }
+
+/* The server's profile without an account, from the home network. */
+.login-guest {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+.login-or {
+  font-size: 0.8rem;
+  color: var(--text-3);
+}
+.login-guest-btn {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  cursor: pointer;
+}
+.login-guest-btn:hover { color: var(--text); border-color: var(--violet); }
+.login-guest-btn:disabled { opacity: 0.6; cursor: default; }

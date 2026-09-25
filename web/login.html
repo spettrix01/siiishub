@@ -28,14 +28,34 @@
 <body class="login-page">
 <main class="login-card">
   <h1 class="login-brand">SIIIS<em>HUB</em></h1>
-  <form class="login-form" id="loginForm">
-    <!-- Lets password managers save and fill the password. -->
-    <input type="text" name="username" value="siiishub" autocomplete="username" hidden />
+
+  <!-- The first start: the administrator's account, from the home network. -->
+  <form class="login-form" id="setupForm" hidden>
+    <h2 class="login-title" data-i18n="web.login.setupTitle">Create the administrator account</h2>
+    <p class="login-note" data-i18n="web.login.setupHint">It manages this server and makes the other accounts.</p>
+    <label class="login-label" for="setupUser" data-i18n="web.login.username">Username</label>
+    <input class="login-input" id="setupUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+    <label class="login-label" for="setupPassword" data-i18n="web.login.password">Password</label>
+    <input class="login-input" id="setupPassword" name="password" type="password" autocomplete="new-password" required />
+    <p class="login-error" id="setupError" role="alert" hidden></p>
+    <button class="login-submit" type="submit" data-i18n="web.login.setupSubmit">Create and sign in</button>
+  </form>
+
+  <form class="login-form" id="loginForm" hidden>
+    <label class="login-label" for="loginUser" data-i18n="web.login.username">Username</label>
+    <input class="login-input" id="loginUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" />
     <label class="login-label" for="loginPassword" data-i18n="web.login.password">Password</label>
-    <input class="login-input" id="loginPassword" name="password" type="password" autocomplete="current-password" required autofocus />
+    <input class="login-input" id="loginPassword" name="password" type="password" autocomplete="current-password" required />
     <p class="login-error" id="loginError" role="alert" hidden></p>
     <button class="login-submit" id="loginSubmit" type="submit" data-i18n="web.login.submit">Sign in</button>
   </form>
+
+  <p class="login-note" id="setupAtHome" data-i18n="web.login.setupAtHome" hidden>Create the first account from a device on the server's home network.</p>
+
+  <div class="login-guest" id="guestBox" hidden>
+    <span class="login-or" data-i18n="web.login.or">or</span>
+    <button class="login-guest-btn" id="guestBtn" type="button" data-i18n="web.login.guest">Continue without an account</button>
+  </div>
 </main>
 <script type="module" src="/web/login.js"></script>
 </body>

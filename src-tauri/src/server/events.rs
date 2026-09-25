@@ -1,18 +1,25 @@
 //! Backend events for the pages open in the browser, over one WebSocket per
 //! page: what the app sends as Tauri events (`media://progress`, ...) arrives
 //! as `{"event": name, "payload": value}` and `web/bridge.js` hands it to
-//! the listeners registered with `event.listen`.
+//! the listeners registered with `event.listen`. An event goes to every page,
+//! or only to the pages of one profile (an account's, or the server's own).
+
+use std::sync::Arc;
 
 use axum::extract::ws::{Message, WebSocket, WebSocketUpgrade};
-use axum::extract::State;
+use axum::extract::{Extension, State};
 use axum::response::Response;
 use tokio::sync::broadcast;
 
+use super::accounts::Viewer;
 use super::Server;
+
+/// An event on its way, and whose pages it is for (none: every page's).
+type Outgoing = Arc<(Option<Viewer>, String)>;
 
 #[derive(Clone)]
 pub struct Events {
-    tx: broadcast::Sender<String>,
+    tx: broadcast::Sender<Outgoing>,
 }
 
 impl Events {
@@ -21,11 +28,20 @@ impl Events {
         Self { tx }
     }
 
-    /// Sends `payload` to every open page as the event `name`.
-    pub fn emit(&self, name: &str, payload: serde_json::Value) {
+    fn send(&self, to: Option<Viewer>, name: &str, payload: serde_json::Value) {
         let msg = serde_json::json!({ "event": name, "payload": payload }).to_string();
         // No page listening is not an error.
-        let _ = self.tx.send(msg);
+        let _ = self.tx.send(Arc::new((to, msg)));
+    }
+
+    /// Sends `payload` to every open page as the event `name`.
+    pub fn emit(&self, name: &str, payload: serde_json::Value) {
+        self.send(None, name, payload);
+    }
+
+    /// Sends `payload` to the pages of `viewer`'s profile only.
+    pub fn emit_to(&self, viewer: Viewer, name: &str, payload: serde_json::Value) {
+        self.send(Some(viewer), name, payload);
     }
 
     /// The resolve steps for the loading screen (`media://progress`).
@@ -35,17 +51,25 @@ impl Events {
     }
 }
 
-pub async fn socket(ws: WebSocketUpgrade, State(server): State<Server>) -> Response {
+pub async fn socket(
+    ws: WebSocketUpgrade,
+    State(server): State<Server>,
+    Extension(viewer): Extension<Viewer>,
+) -> Response {
     let rx = server.events.tx.subscribe();
-    ws.on_upgrade(move |socket| pump(socket, rx))
+    ws.on_upgrade(move |socket| pump(socket, rx, viewer))
 }
 
-async fn pump(mut socket: WebSocket, mut rx: broadcast::Receiver<String>) {
+async fn pump(mut socket: WebSocket, mut rx: broadcast::Receiver<Outgoing>, viewer: Viewer) {
     loop {
         tokio::select! {
             msg = rx.recv() => match msg {
-                Ok(text) => {
-                    if socket.send(Message::Text(text.into())).await.is_err() {
+                Ok(msg) => {
+                    let (to, text) = &*msg;
+                    if to.as_ref().is_some_and(|to| *to != viewer) {
+                        continue;
+                    }
+                    if socket.send(Message::Text(text.clone().into())).await.is_err() {
                         break;
                     }
                 }

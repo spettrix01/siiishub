@@ -10,11 +10,13 @@ import { t, locMsg, setLang, APP_LANGUAGES, onLangChange } from './i18n.js';
 import { setTheme, currentTheme } from './theme.js';
 import { IS_ANDROID, IS_PHONE, IS_TV } from './platform.js';
 import { parseRemoteAddress, canScanQr, scanRemoteQr, connectRemote } from './remote-client.js';
+import { setupAccountSection } from './account-ui.js';
 
 const settingsModal = $('#settingsModal');
 
 function settingsPanes() {
   const panes = [
+    { value: 'account', label: t('settings.pane.account') },
     { value: 'language', label: t('settings.pane.language') },
     { value: 'appearance', label: t('settings.pane.appearance') },
     { value: 'tmdb', label: t('settings.pane.tmdb') },
@@ -60,6 +62,7 @@ function applyActivePane(pane) {
   if (title) title.textContent = paneLabel(settingsPanes(), pane);
   if (pane === 'trackers') autoSizeTracker();
   if (pane === 'remote') refreshRemoteInfo();
+  if (pane === 'account') setupAccountSection();
 }
 
 function setupAppearanceSection() {

@@ -19,6 +19,16 @@ export async function init() {
   initialized = true;
 }
 
+/** The user data again from the backend, after a sync brought changes. */
+export async function reload() {
+  if (!invoke) return;
+  const data = await invoke('userdata_load');
+  cache.clear();
+  if (data && typeof data === 'object') {
+    for (const [k, v] of Object.entries(data)) cache.set(k, String(v));
+  }
+}
+
 export const userStore = {
   getItem(key) {
     return cache.has(key) ? cache.get(key) : null;
