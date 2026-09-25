@@ -899,8 +899,15 @@ $('#trackerSaveBtn').addEventListener('click', saveTrackers);
 function autoSizeTracker() {
   const el = $('#trackerList');
   if (!el) return;
+  // Shrinking the field to measure it would pull the section's scroll up:
+  // every scrolled parent goes back where it was.
+  const scrolled = [];
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    if (p.scrollTop) scrolled.push([p, p.scrollTop]);
+  }
   el.style.height = 'auto';
   el.style.height = `${el.scrollHeight}px`;
+  for (const [p, top] of scrolled) p.scrollTop = top;
 }
 $('#trackerList').addEventListener('input', autoSizeTracker);
 
