@@ -145,10 +145,12 @@ services:
     ports:
       - "30808:8080"
     environment:
-      SIIISHUB_DATA_DIR: /data/config
-      SIIISHUB_DOWNLOAD_DIR: /data/downloads
+      SIIISHUB_DATA_DIR: /mnt/pool/Siiishub/config
+      SIIISHUB_DOWNLOAD_DIR: /mnt/pool/Siiishub/downloads
+    # The dataset at its own path, so the app names its folders as TrueNAS
+    # does (Settings → Download).
     volumes:
-      - /mnt/pool/Siiishub:/data
+      - /mnt/pool/Siiishub:/mnt/pool/Siiishub
 ```
 
 The server makes `config` and `downloads` in the dataset, and answers on
