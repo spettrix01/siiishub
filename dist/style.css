@@ -3266,7 +3266,7 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .player-volume input[type="range"] { position: relative; z-index: 1; }
 .player-volume:hover .player-volume-bar,
 .player-volume:focus-within .player-volume-bar,
-.player-volume:has(.snav-focus) .player-volume-bar {
+.player-volume.snav-within .player-volume-bar {
   width: 92px;
   padding-right: 0.55rem;
 }
@@ -3296,6 +3296,18 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   border-radius: 50%;
   cursor: pointer;
 }
+/* Selected with a remote, the volume shows a larger thumb and its level
+   instead of a frame, which its bar would cut. */
+.player-volume input[type="range"].snav-focus {
+  height: 5px;
+  outline: none !important;
+  box-shadow: none !important;
+}
+.player-volume input[type="range"].snav-focus::-webkit-slider-thumb {
+  width: 15px; height: 15px;
+  box-shadow: 0 0 0 4px rgba(var(--violet-rgb), 0.45);
+}
+.player-volume-bar.snav-within ~ .player-vol-pct { opacity: 1; }
 .player-vol-pct {
   position: absolute;
   bottom: calc(100% + 3px);

@@ -12,6 +12,9 @@ import { $, $$ } from './dom.js';
 import { IS_TV } from './platform.js';
 
 const FOCUS_CLASS = 'snav-focus';
+// On the ancestors of the selection, as :focus-within (without :has, which
+// older Fire TV and Android TV WebViews lack).
+const WITHIN_CLASS = 'snav-within';
 
 const FOCUSABLE = [
   'a.card:not(.skeleton)',
@@ -344,14 +347,29 @@ function enter(el, dir, ref, items, fromTop = false) {
   if (top) unit = rows[0][0];
   else if (dir === 'down') unit = nearestX(rows[0], ref.x);
   else if (dir === 'up') unit = nearestX(rows[rows.length - 1], ref.x);
-  else if (zoneType(el) === 'row') unit = dir === 'right' ? rows.flat()[0] : rows.flat().at(-1);
+  else if (zoneType(el) === 'row') {
+    const order = rows.flat();
+    unit = order[dir === 'right' ? 0 : order.length - 1];
+  }
   else unit = nearestSide(units, dir === 'right' ? 'left' : 'right', ref.y);
   return unit ? enter(unit.el, dir, ref, items, top) : null;
+}
+
+let within = [];
+
+function markWithin(el) {
+  for (const p of within) p.classList.remove(WITHIN_CLASS);
+  within = [];
+  for (let p = el?.parentElement; p && p !== document.body; p = p.parentElement) {
+    p.classList.add(WITHIN_CLASS);
+    within.push(p);
+  }
 }
 
 function clearFocus() {
   if (current) current.classList.remove(FOCUS_CLASS);
   current = null;
+  markWithin(null);
 }
 
 // How far a scroller has to go to show `a`-`b` within `lo`-`hi`: centred,
@@ -405,6 +423,7 @@ function reveal(el, dir) {
 function setFocus(el, dir = null) {
   if (current && current !== el) current.classList.remove(FOCUS_CLASS);
   current = el || null;
+  markWithin(current);
   if (!current) return;
   current.classList.add(FOCUS_CLASS);
   const scope = activeScope();

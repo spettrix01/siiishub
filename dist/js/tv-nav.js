@@ -10,6 +10,9 @@ import { spatialNav } from './spatial-nav.js';
 import { isPlayerOpen, playerRemoteKey, playerMediaKey } from './player.js';
 
 const DIRS = { ArrowUp: 'up', ArrowDown: 'down', ArrowLeft: 'left', ArrowRight: 'right', Enter: 'ok' };
+// The same by key code, for a WebView that names them "Unidentified" (the
+// D-pad centre is 23 on Android).
+const DIR_CODES = { 38: 'up', 40: 'down', 37: 'left', 39: 'right', 13: 'ok', 23: 'ok' };
 
 if (IS_TV) {
   // The popup editing a text field (android-inputs.js) gives the selection
@@ -33,7 +36,7 @@ if (IS_TV) {
       }
       return;
     }
-    const dir = DIRS[e.key];
+    const dir = DIRS[e.key] || DIR_CODES[e.keyCode];
     if (!dir) return;
     const field = FORM_TAGS.includes(document.activeElement?.tagName) ? document.activeElement : null;
     if (field) {
