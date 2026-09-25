@@ -71,8 +71,9 @@ switched from the phone: browsers allow it only after a click on the page.
 The server keeps accounts, and the SIIISHUB apps for Windows, Linux,
 Android and Android TV sign in to them to share one library: Continue
 watching and resume points, favorites, the stream last watched, the addons,
-the TMDB and debrid keys, the language, the audio and subtitle languages
-and the theme. Downloads stay on the device that made them.
+the TMDB and debrid keys, the tracker list, the language, the audio and
+subtitle languages and the theme. Downloads stay on the device that made
+them.
 
 - **The first account**, the administrator's, is made on the login page the
   first time the server runs, from a device on the home network. The
