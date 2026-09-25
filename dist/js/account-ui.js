@@ -63,7 +63,7 @@ async function renderApp() {
   show({
     '#accountSignInForm': !signedIn,
     '#accountCard': signedIn,
-    '#accountPasswordBox': false,
+    '#accountPasswordBtn': false,
     '#accountAdminBox': false,
   });
   if (signedIn) {
@@ -117,7 +117,7 @@ async function renderWeb() {
   show({
     '#accountSignInForm': false,
     '#accountCard': true,
-    '#accountPasswordBox': !!account,
+    '#accountPasswordBtn': !!account,
     '#accountAdminBox': !!account?.admin,
   });
   if (!account) {
@@ -128,6 +128,32 @@ async function renderWeb() {
   $('#accountDesc').textContent = t('settings.account.descWeb');
   card(account.username, account.admin ? t('settings.account.admin') : '');
   if (account.admin) await renderAccounts();
+}
+
+// The head of the popup for a new password: a key.
+const PASSWORD_ICON = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M10.7 12.3 20 3M16.5 6.5 19 9M18.5 4.5l2 2M12 15.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"/></svg>';
+
+// A popup asks the current password and the new one; it stays open on an
+// error.
+async function changePassword() {
+  const changed = await showForm({
+    title: t('settings.account.changePassword'),
+    icon: PASSWORD_ICON,
+    fields: [
+      { name: 'current', label: t('settings.account.currentPassword'), type: 'password', autocomplete: 'current-password' },
+      { name: 'next', label: t('settings.account.newPassword'), type: 'password', autocomplete: 'new-password' },
+    ],
+    okLabel: t('settings.account.save'),
+    submit: async ({ current, next }) => {
+      try {
+        await accountPassword(current || '', next || '');
+      } catch (err) {
+        return errorText(err);
+      }
+      return null;
+    },
+  });
+  if (changed) hint(t('settings.account.passwordChanged'), 'success');
 }
 
 // The head of the popup for a new account: a person with a +.
@@ -176,18 +202,7 @@ function wireWeb() {
     await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
     location.replace('/login');
   });
-  $('#accountPasswordForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    try {
-      await accountPassword($('#accountCurrentPassword').value, $('#accountNewPassword').value);
-      $('#accountCurrentPassword').value = '';
-      $('#accountNewPassword').value = '';
-      $('#accountPasswordBox').open = false;
-      hint(t('settings.account.passwordChanged'), 'success');
-    } catch (err) {
-      hint(errorText(err), 'error');
-    }
-  });
+  $('#accountPasswordBtn').addEventListener('click', changePassword);
   $('#accountCreateBtn').addEventListener('click', createAccount);
   $('#accountList').addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-account-delete]');
