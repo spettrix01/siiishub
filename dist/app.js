@@ -2,7 +2,7 @@ import './js/platform.js';
 import { state } from './js/state.js';
 import { init as initUserStore, migrateFromLocalStorage } from './js/userstore.js';
 import { applyTheme, currentTheme } from './js/theme.js';
-import { loadSettings, loadGenres } from './js/api.js';
+import { loadSettings, loadGenres, appVersion } from './js/api.js';
 import { setLang, onLangChange, t } from './js/i18n.js';
 import { renderGenres } from './js/topbar.js';
 import { loadMore, showEmpty, clearGrid } from './js/grid.js';
@@ -35,6 +35,12 @@ await initUserStore();
 await migrateFromLocalStorage();
 
 applyTheme(currentTheme());
+
+// The version, in the bottom right corner.
+appVersion().then((v) => {
+  const el = document.getElementById('appVersion');
+  if (el && v) el.textContent = `v${v}`;
+});
 
 await loadSettings();
 setLang(state.settings.language, { rerender: false });

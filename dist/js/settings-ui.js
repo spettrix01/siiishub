@@ -11,6 +11,7 @@ import { setTheme, currentTheme, setBackdrop, currentBackdrop } from './theme.js
 import { IS_ANDROID, IS_PHONE, IS_TV } from './platform.js';
 import { parseRemoteAddress, canScanQr, scanRemoteQr, connectRemote } from './remote-client.js';
 import { setupAccountSection } from './account-ui.js';
+import { showConfirm } from './modal.js';
 
 const settingsModal = $('#settingsModal');
 
@@ -50,7 +51,34 @@ function paneLabel(panes, value) {
   return panes.find(p => p.value === value)?.label || '';
 }
 
+// What was typed or chosen in a section and not saved with its Save button
+// goes back to what is saved: when the section changes, and when the
+// settings open again. Nothing is saved by leaving a field.
+function resetFields() {
+  appLanguagePicker?.setValue(state.settings.language || 'eng', false);
+  audioLangsPicker?.setValues(state.settings.playerAudioLangs || []);
+  subLangsPicker?.setValues(state.settings.playerSubLangs || []);
+  const tmdb = $('#tmdbKeyInput');
+  if (tmdb) {
+    tmdb.value = state.settings.tmdbKey || '';
+    tmdb.type = 'password';
+  }
+  const addon = $('#addonUrl');
+  if (addon) addon.value = '';
+  const trackers = $('#trackerList');
+  if (trackers) {
+    trackers.value = (state.settings.tracker_fallbacks || []).join('\n');
+    autoSizeTracker();
+  }
+  debridProviderValue = state.settings.debridProvider || '';
+  debridProviderPicker?.setValue(debridProviderValue, false);
+  refreshDebridTokenField(debridProviderValue);
+  const port = $('#remotePortInput');
+  if (port) port.value = state.settings.remotePort ? String(state.settings.remotePort) : '9871';
+}
+
 function applyActivePane(pane) {
+  if (pane !== activePane) resetFields();
   activePane = pane;
   $$('.pane', settingsModal).forEach(p => p.classList.toggle('is-active', p.dataset.pane === pane));
   $$('.settings-nav-item', settingsModal).forEach(btn => {
@@ -161,6 +189,7 @@ export function openSettings(pane = 'language') {
   resetHint('#playerLangsHint');
   resetHint('#remoteHint');
   resetHint('#remoteClientHint');
+  resetFields();
   renderAddons();
 }
 
@@ -185,16 +214,8 @@ function setupAppLanguageSection() {
       items: appLanguageItems(),
       value: current,
       popup: IS_PHONE,
-      onChange: async (code) => {
-        setHint('#appLanguageHint', t('common.saving'));
-        try {
-          await saveSettings({ language: code });
-          setLang(code);
-          setHint('#appLanguageHint', t('settings.language.uiSaved', { lang: nativeLangName(code) }), 'success');
-        } catch (e) {
-          setHint('#appLanguageHint', errText(e), 'error');
-        }
-      },
+      // Applied with the section's Save button.
+      onChange: () => setHint('#appLanguageHint', ''),
     });
   } else if (appLanguagePicker) {
     appLanguagePicker.setValue(current, false);
@@ -280,7 +301,6 @@ function setupDebridSection() {
       onChange: v => {
         debridProviderValue = v || '';
         refreshDebridTokenField(debridProviderValue);
-        saveDebrid();
       },
     });
   } else if (debridProviderPicker) {
@@ -350,7 +370,7 @@ async function saveDebrid() {
     setHint('#debridHint', errText(e), 'error');
   }
 }
-$('#debridTokenInput')?.addEventListener('change', saveDebrid);
+$('#debridSaveBtn')?.addEventListener('click', saveDebrid);
 
 const HINT_ICONS = {
   success: `<svg class="hint-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.18"/><path d="m7 12.5 3.2 3.2L17 9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
@@ -426,7 +446,7 @@ async function saveTmdbKey() {
     setHint('#tmdbHint', t('settings.tmdb.invalid', { error: e.message }), 'error');
   }
 }
-$('#tmdbKeyInput').addEventListener('change', saveTmdbKey);
+$('#tmdbSaveBtn').addEventListener('click', saveTmdbKey);
 
 function addonHasResource(a, name) {
   const res = a.resources || [];
@@ -533,6 +553,12 @@ function addonRow(a) {
   del.title = t('common.remove');
   del.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" d="M5 7h14M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>`;
   del.onclick = async () => {
+    const ok = await showConfirm(t('settings.addons.removeConfirm', { name: a.name || t('settings.addons.unnamed') }), {
+      title: t('common.remove'),
+      variant: 'warn',
+      okLabel: t('common.remove'),
+    });
+    if (!ok) return;
     const next = (state.settings.addons || []).filter(x => x.url !== a.url);
     await saveSettings({ addons: next });
     renderAddons();
@@ -547,7 +573,6 @@ function addonRow(a) {
 
 let audioLangsPicker = null;
 let subLangsPicker = null;
-let playerLangsDirty = false;
 
 function setupPlayerLangsSection() {
   const audioSlot = $('#playerAudioLangsSlot');
@@ -563,8 +588,6 @@ function setupPlayerLangsSection() {
     audioLangsPicker = setupLangPicker(audioSlot.querySelector('[data-stream-pick="player-audio"]'), {
       popup: IS_PHONE,
       values: savedAudio,
-      onChange: () => { playerLangsDirty = true; },
-      onClose: savePlayerLangs,
     });
   } else if (audioLangsPicker) {
     audioLangsPicker.setValues(savedAudio);
@@ -576,8 +599,6 @@ function setupPlayerLangsSection() {
     subLangsPicker = setupLangPicker(subSlot.querySelector('[data-stream-pick="player-sub"]'), {
       popup: IS_PHONE,
       values: savedSubs,
-      onChange: () => { playerLangsDirty = true; },
-      onClose: savePlayerLangs,
     });
   } else if (subLangsPicker) {
     subLangsPicker.setValues(savedSubs);
@@ -758,7 +779,7 @@ async function saveRemote() {
     setHint('#remoteHint', errText(e), 'error');
   }
 }
-$('#remotePortInput')?.addEventListener('change', saveRemote);
+$('#remotePortSaveBtn')?.addEventListener('click', saveRemote);
 
 // Android: the phone as the remote of a PC (remote-client.js). The PC is
 // reached by framing the QR code of its Remote section, or by its address.
@@ -814,19 +835,25 @@ $('#remoteConnectBtn')?.addEventListener('click', () => {
   openRemoteClient(entry);
 });
 
-async function savePlayerLangs() {
-  if (!playerLangsDirty) return;
-  playerLangsDirty = false;
+// Language: the interface's and the player's, saved together.
+async function saveLanguage() {
+  const code = appLanguagePicker?.getValue() || state.settings.language || 'eng';
   const audio = audioLangsPicker ? audioLangsPicker.getValues() : [];
   const subs = subLangsPicker ? subLangsPicker.getValues() : [];
+  const changed = code !== (state.settings.language || 'eng');
   setHint('#playerLangsHint', t('common.saving'));
   try {
-    await saveSettings({ playerAudioLangs: audio, playerSubLangs: subs });
+    await saveSettings({ language: code, playerAudioLangs: audio, playerSubLangs: subs });
+    if (changed) {
+      setLang(code);
+      setHint('#appLanguageHint', t('settings.language.uiSaved', { lang: nativeLangName(code) }), 'success');
+    }
     setHint('#playerLangsHint', t('settings.language.tracksSaved'), 'success');
   } catch (e) {
     setHint('#playerLangsHint', errText(e), 'error');
   }
 }
+$('#languageSaveBtn').addEventListener('click', saveLanguage);
 
 async function saveTrackers() {
   const lines = $('#trackerList').value
@@ -847,7 +874,7 @@ async function saveTrackers() {
     setHint('#trackerHint', errText(e), 'error');
   }
 }
-$('#trackerList').addEventListener('change', saveTrackers);
+$('#trackerSaveBtn').addEventListener('click', saveTrackers);
 
 function autoSizeTracker() {
   const el = $('#trackerList');

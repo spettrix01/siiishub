@@ -46,6 +46,15 @@ export async function saveSettings(patch) {
   return applyPublicSettings(await invoke('settings_save', { patch: out }));
 }
 
+/** The version of SIIISHUB, empty if the backend does not tell it. */
+export async function appVersion() {
+  try {
+    return (await invoke('app_version')) || '';
+  } catch {
+    return '';
+  }
+}
+
 export async function remoteInfo() {
   try {
     return await invoke('remote_info');

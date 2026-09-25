@@ -2130,7 +2130,8 @@ html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > :not(.winctl)
   margin-top: 6px;
 }
 .pane[data-pane="trackers"] .actions { justify-content: flex-end; }
-.pane[data-pane="language"] .actions { justify-content: flex-end; margin-top: 0; }
+.pane[data-pane="language"] .actions { justify-content: flex-end; }
+.pane[data-pane="download"] .actions { justify-content: flex-end; }
 .pane[data-pane="language"] .player-langs-row { margin-bottom: 18px; }
 .pane[data-pane="language"] .player-langs-row .field { margin-bottom: 0; }
 .pane[data-pane="language"] .hint:empty { margin: 0; }
@@ -4052,9 +4053,14 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .theme-swatch--light-teal .theme-swatch-accent { background: #0d9488; }
 .theme-option-label { font-weight: 500; }
 
-/* Settings → Appearance: its two groups, Theme and Background. */
-.appearance-subtitle { margin: 20px 0 0; }
-.appearance-subtitle:first-of-type { margin-top: 4px; }
+/* Settings → Appearance: its two groups, Theme and Background, each a
+   title over its choices (as the server's accounts in Settings → Account). */
+.appearance-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.appearance-group .theme-grid { margin-top: 0; }
 
 /* The pattern behind the interface (Settings → Appearance → Background):
    an SVG of lines (img/backdrops) as the mask of the theme's line colour. */
@@ -4075,6 +4081,24 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   mask-repeat: no-repeat;
 }
 [data-backdrop] .backdrop { display: block; }
+
+/* The version of SIIISHUB in the bottom right corner: not on phones,
+   where the bottom bar is, nor over a video. */
+.app-version {
+  position: fixed;
+  right: calc(14px + var(--scrollbar-w));
+  bottom: 10px;
+  z-index: 5;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--text-3);
+  pointer-events: none;
+  user-select: none;
+}
+.app-version:empty,
+html.is-phone .app-version,
+body.is-player-open .app-version { display: none; }
 /* Windows, Linux and the browser version only. */
 html.is-android .backdrop-group { display: none; }
 /* The video plays behind the window's transparent page. */

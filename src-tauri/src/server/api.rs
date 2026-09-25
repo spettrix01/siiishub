@@ -286,6 +286,7 @@ async fn dispatch(
 
         // Accounts (accounts.rs): who is signed in, their password, and the
         // administrator's list. Errors are codes the page words.
+        "app_version" => reply(env!("CARGO_PKG_VERSION")),
         "account_status" => reply(match viewer {
             // Without a login at all (SIIISHUB_AUTH=off) there is nowhere
             // to sign in.

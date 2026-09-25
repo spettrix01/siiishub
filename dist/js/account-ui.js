@@ -54,6 +54,15 @@ function card(name, sub = '') {
   $('#accountSub').textContent = sub;
 }
 
+// Asked before signing out, with the account's name.
+function confirmSignOut(key) {
+  return showConfirm(t(key, { user: $('#accountName').textContent }), {
+    title: t('settings.account.signOut'),
+    variant: 'warn',
+    okLabel: t('settings.account.signOut'),
+  });
+}
+
 // ---------- Apps ----------
 
 async function renderApp() {
@@ -102,6 +111,7 @@ function wireApp() {
     }
   });
   $('#accountSignOutBtn').addEventListener('click', async () => {
+    if (!(await confirmSignOut('settings.account.signOutConfirmApp'))) return;
     await syncSignOut().catch(() => {});
     hint('');
     await renderApp();
@@ -206,7 +216,9 @@ async function toLogin() {
 }
 
 function wireWeb() {
-  $('#accountSignOutBtn').addEventListener('click', toLogin);
+  $('#accountSignOutBtn').addEventListener('click', async () => {
+    if (await confirmSignOut('settings.account.signOutConfirmWeb')) await toLogin();
+  });
   $('#accountGuestSignInBtn').addEventListener('click', toLogin);
   $('#accountPasswordBtn').addEventListener('click', changePassword);
   $('#accountCreateBtn').addEventListener('click', createAccount);

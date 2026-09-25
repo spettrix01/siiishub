@@ -9,6 +9,12 @@ use crate::state::AppState;
 
 use super::shared::{err, CmdResult};
 
+/// The version of SIIISHUB (Cargo.toml), shown in a corner of the interface.
+#[tauri::command]
+pub fn app_version() -> &'static str {
+    env!("CARGO_PKG_VERSION")
+}
+
 #[tauri::command]
 pub async fn settings_get(state: State<'_, Arc<AppState>>) -> CmdResult<PublicSettings> {
     Ok(crate::ops::settings::get(&state))

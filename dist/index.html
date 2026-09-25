@@ -22,6 +22,8 @@
 <body>
 <!-- The pattern behind the interface, if one is chosen (Settings → Appearance). -->
 <div class="backdrop" aria-hidden="true"></div>
+<!-- The version of SIIISHUB, in the bottom right corner (app.js). -->
+<div class="app-version" id="appVersion"></div>
 
 <header class="topbar" data-tauri-drag-region>
   <button class="brand" type="button" data-go-movies aria-label="Vai a Film">
@@ -301,12 +303,14 @@
         </label>
       </div>
 
+      <div class="actions"><button class="primary" type="button" id="languageSaveBtn" data-i18n="common.save">Salva</button></div>
       <p class="hint" id="playerLangsHint"></p>
     </section>
 
     <section class="pane" data-pane="appearance">
       <p class="pane-desc" data-i18n="settings.appearance.desc">Scegli l'aspetto dell'interfaccia.</p>
-      <h3 class="remote-group-title appearance-subtitle" data-i18n="settings.appearance.title">Tema</h3>
+      <div class="appearance-group">
+      <h3 class="remote-group-title" data-i18n="settings.appearance.title">Tema</h3>
       <div class="theme-grid" id="themeGrid" role="radiogroup" data-i18n-aria="settings.appearance.title" aria-label="Tema">
         <button class="theme-option" type="button" role="radio" data-theme-value="dark-orange" aria-checked="false">
           <span class="theme-swatch theme-swatch--dark-orange" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
@@ -333,8 +337,9 @@
           <span class="theme-option-label" data-i18n="settings.appearance.lightTeal">Bianco verde acqua</span>
         </button>
       </div>
-      <div class="backdrop-group">
-      <h3 class="remote-group-title appearance-subtitle" data-i18n="settings.appearance.backdrop">Sfondo</h3>
+      </div>
+      <div class="appearance-group backdrop-group">
+      <h3 class="remote-group-title" data-i18n="settings.appearance.backdrop">Sfondo</h3>
       <div class="theme-grid" id="backdropGrid" role="radiogroup" data-i18n-aria="settings.appearance.backdrop" aria-label="Sfondo">
         <button class="theme-option" type="button" role="radio" data-backdrop-value="none" aria-checked="false">
           <span class="backdrop-swatch backdrop-swatch--none" aria-hidden="true"></span>
@@ -377,6 +382,7 @@
       </label>
       <div class="actions">
         <a class="link" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener" data-i18n="settings.tmdb.findKey">Crea / trova la tua key →</a>
+        <button class="primary" type="button" id="tmdbSaveBtn" data-i18n="common.save">Salva</button>
       </div>
       <p class="hint" id="tmdbHint"></p>
       <div class="tmdb-attribution">
@@ -405,6 +411,7 @@
         <span data-i18n="settings.trackers.label">Lista tracker (uno per riga)</span>
         <textarea id="trackerList" rows="3" spellcheck="false" placeholder="udp://tracker.opentrackr.org:1337/announce&#10;udp://open.stealth.si:80/announce&#10;…"></textarea>
       </label>
+      <div class="actions"><button class="primary" type="button" id="trackerSaveBtn" data-i18n="common.save">Salva</button></div>
       <p class="hint" id="trackerHint"></p>
     </section>
 
@@ -436,6 +443,7 @@
           <a class="debrid-key-link" id="debridGetKeyLink" href="#" hidden></a>
         </label>
 
+        <div class="actions"><button class="primary" type="button" id="debridSaveBtn" data-i18n="common.save">Salva</button></div>
         <p class="hint" id="debridHint"></p>
       </div>
     </section>
@@ -447,6 +455,7 @@
         <span data-i18n="settings.remote.port">Porta</span>
         <div class="field-row">
           <input id="remotePortInput" type="number" min="1024" max="65535" step="1" placeholder="9871" />
+          <button class="primary" type="button" id="remotePortSaveBtn" data-i18n="common.save">Salva</button>
         </div>
       </label>
 
