@@ -821,9 +821,8 @@ async function openRemoteClient(entry) {
   const result = await connectRemote(entry);
   if (request !== remoteClientRequest) return;
   if (result === 'ok') {
-    // The address stays in the field: connecting again is one tap.
-    const input = $('#remoteAddressInput');
-    if (input) input.value = entry.host;
+    // The field keeps only what was typed in it, not an address framed in
+    // a QR code.
     setHint('#remoteClientHint', '');
   } else if (result === 'unreachable') {
     setHint('#remoteClientHint', t('settings.remoteClient.unreachable', { host: entry.host }), 'error');
