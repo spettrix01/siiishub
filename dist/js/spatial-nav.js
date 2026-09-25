@@ -35,10 +35,9 @@ const FOCUSABLE = [
 ].join(',');
 
 // Never selected: the side pane of the player; the arrows of the rail, which
-// the selection scrolls itself; the window buttons; the close buttons of the
-// details and of the settings, which Back closes; the checkbox of a line in
+// the selection scrolls itself; the window buttons; the checkbox of a line in
 // a list, the whole line being selected instead.
-const EXCLUDED = '#playerSidePane, .trending-nav, .winctl, .dossier-close, .settings-close, .alert-select-item input';
+const EXCLUDED = '#playerSidePane, .trending-nav, .winctl, .alert-select-item input';
 
 // Zones and how their parts are laid out.
 const ZONES = [
