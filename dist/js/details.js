@@ -3,6 +3,7 @@ import { $, escapeHTML, DOTS_HTML, CHECK_SVG, COPY_SVG, copyToClipboard, openExt
 import { state, tmdbType, TMDB_IMG } from './state.js';
 import { tmdb, fetchStreams, fetchTvSeason, rdPlay, onMediaProgress, downloadStart, downloadPlay, downloadFiles, downloadList, destroyTorrentSession } from './api.js';
 import { fmtFullDate, fmtMoney, fmtRuntime, fmtVote } from './format.js';
+import { sha256 } from './hash.js';
 import { streamPickerHtml, setupStreamPicker } from './picker.js';
 import { openPlayerWithUrl, openPlayerLoading, attachToOpenPlayer, pushPlayerLog, showPlayerError, setPlayerAbortController } from './player.js';
 import { closeModal } from './modal.js';
@@ -31,8 +32,8 @@ const DOWNLOAD_ICON = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidd
 async function streamDownloadId(s) {
   if (s.infoHash) return String(s.infoHash).toLowerCase();
   if (!s.url) return null;
-  const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s.url));
-  return [...new Uint8Array(bytes).slice(0, 20)]
+  const bytes = await sha256(new TextEncoder().encode(s.url));
+  return [...bytes.slice(0, 20)]
     .map(b => b.toString(16).padStart(2, '0'))
     .join('');
 }
