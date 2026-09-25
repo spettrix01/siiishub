@@ -436,7 +436,6 @@ export const DA = {
   "settings.account.descApp": "Log ind på din SIIISHUB-server for at have det samme bibliotek, de samme favoritter, tilføjelser, nøgler og indstillinger på alle dine enheder. Konti oprettes i serverversionen, i browseren. Downloads bliver på hver enhed.",
   "settings.account.descWeb": "Din konto på denne server. Log ind med den i SIIISHUB-apperne for at holde dem synkroniseret.",
   "settings.account.descGuest": "Du bruger serverens egen profil uden konto: intet her synkroniseres med apperne.",
-  "settings.account.guest": "Uden konto",
   "settings.account.server": "Server",
   "settings.account.username": "Brugernavn",
   "settings.account.password": "Adgangskode",

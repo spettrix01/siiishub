@@ -4461,6 +4461,12 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .account-who strong { font-size: 15px; font-weight: 600; }
 .account-sub { font-size: 12px; color: var(--text-3); }
 .account-sub:empty { display: none; }
+/* Sign in, for the browser without an account. */
+.account-signin {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
 /* Change password and Sign out, on the right; under the name when the
    card is too narrow for both. */
 .account-actions {

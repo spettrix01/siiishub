@@ -436,7 +436,6 @@ export const HU = {
   "settings.account.descApp": "Jelentkezz be a SIIISHUB-szerveredre, hogy a könyvtár, a kedvencek, a bővítmények, a kulcsok és a beállítások minden eszközödön ugyanazok legyenek. A fiókokat a szerververzióban, a böngészőben lehet létrehozni. A letöltések az egyes eszközökön maradnak.",
   "settings.account.descWeb": "A fiókod ezen a szerveren. Ezzel jelentkezz be a SIIISHUB-alkalmazásokba, hogy szinkronban maradjanak.",
   "settings.account.descGuest": "A szerver saját profilját használod fiók nélkül: itt semmi sem szinkronizálódik az alkalmazásokkal.",
-  "settings.account.guest": "Fiók nélkül",
   "settings.account.server": "Szerver",
   "settings.account.username": "Felhasználónév",
   "settings.account.password": "Jelszó",

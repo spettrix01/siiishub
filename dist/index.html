@@ -483,11 +483,17 @@
             <span data-i18n="settings.account.changePassword">Cambia password</span>
           </button>
           <button type="button" class="remote-device-btn" id="accountSignOutBtn">
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M9 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h3M16 17l5-5-5-5M21 12H9"/></svg>
             <span data-i18n="settings.account.signOut">Esci</span>
           </button>
         </div>
       </div>
+
+      <!-- In the browser without an account: to the login page. -->
+      <button type="button" class="primary account-signin" id="accountGuestSignInBtn" hidden>
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>
+        <span data-i18n="settings.account.signIn">Accedi</span>
+      </button>
 
       <div class="account-admin" id="accountAdminBox" hidden>
         <h3 class="remote-group-title" data-i18n="settings.account.accounts">Account del server</h3>

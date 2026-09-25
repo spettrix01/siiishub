@@ -436,7 +436,6 @@ export const KO = {
   "settings.account.descApp": "SIIISHUB 서버에 로그인하면 모든 기기에서 라이브러리, 즐겨찾기, 애드온, 키, 환경설정이 똑같이 유지됩니다. 계정은 브라우저의 서버 버전에서 만듭니다. 다운로드는 각 기기에 그대로 남습니다.",
   "settings.account.descWeb": "이 서버의 내 계정입니다. SIIISHUB 앱에서 이 계정으로 로그인하면 동기화됩니다.",
   "settings.account.descGuest": "계정 없이 이 서버 자체의 프로필을 사용하고 있습니다. 여기의 내용은 앱과 동기화되지 않습니다.",
-  "settings.account.guest": "계정 없음",
   "settings.account.server": "서버",
   "settings.account.username": "사용자 이름",
   "settings.account.password": "비밀번호",

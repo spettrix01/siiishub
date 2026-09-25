@@ -436,7 +436,6 @@ export const FI = {
   "settings.account.descApp": "Kirjaudu SIIISHUB-palvelimellesi, niin kirjasto, suosikit, lisäosat, avaimet ja asetukset ovat samat kaikilla laitteillasi. Tilit luodaan palvelinversiossa selaimessa. Lataukset jäävät kuhunkin laitteeseen.",
   "settings.account.descWeb": "Tilisi tällä palvelimella. Kirjaudu sillä SIIISHUB-sovelluksiin, niin ne pysyvät synkronoituina.",
   "settings.account.descGuest": "Käytät tämän palvelimen omaa profiilia ilman tiliä: mikään täällä ei synkronoidu sovellusten kanssa.",
-  "settings.account.guest": "Ilman tiliä",
   "settings.account.server": "Palvelin",
   "settings.account.username": "Käyttäjänimi",
   "settings.account.password": "Salasana",

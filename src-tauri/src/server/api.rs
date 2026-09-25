@@ -287,7 +287,9 @@ async fn dispatch(
         // Accounts (accounts.rs): who is signed in, their password, and the
         // administrator's list. Errors are codes the page words.
         "account_status" => reply(match viewer {
-            Viewer::Guest => json!({ "account": null }),
+            // Without a login at all (SIIISHUB_AUTH=off) there is nowhere
+            // to sign in.
+            Viewer::Guest => json!({ "account": null, "login": server.auth.enabled() }),
             Viewer::Account(id) => json!({ "account": server.accounts.get(id) }),
         }),
         "account_password" => {

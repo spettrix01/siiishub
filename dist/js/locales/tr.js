@@ -436,7 +436,6 @@ export const TR = {
   "settings.account.descApp": "Kitaplığınız, favorileriniz, eklentileriniz, anahtarlarınız ve tercihleriniz tüm cihazlarınızda aynı olsun diye SIIISHUB sunucunuzda oturum açın. Hesaplar sunucu sürümünde, tarayıcıda oluşturulur. İndirmeler her cihazda kalır.",
   "settings.account.descWeb": "Bu sunucudaki hesabınız. Senkronize kalmaları için SIIISHUB uygulamalarında bu hesapla oturum açın.",
   "settings.account.descGuest": "Bu sunucunun kendi profilini hesapsız kullanıyorsunuz: buradaki hiçbir şey uygulamalarla senkronize edilmez.",
-  "settings.account.guest": "Hesapsız",
   "settings.account.server": "Sunucu",
   "settings.account.username": "Kullanıcı adı",
   "settings.account.password": "Parola",

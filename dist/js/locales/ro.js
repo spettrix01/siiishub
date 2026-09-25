@@ -436,7 +436,6 @@ export const RO = {
   "settings.account.descApp": "Conectează-te la serverul tău SIIISHUB ca să ai aceeași bibliotecă, aceleași favorite, addon-uri, chei și preferințe pe toate dispozitivele. Conturile se creează în versiunea server, în browser. Descărcările rămân pe fiecare dispozitiv.",
   "settings.account.descWeb": "Contul tău pe acest server. Conectează-te cu el în aplicațiile SIIISHUB ca să rămână sincronizate.",
   "settings.account.descGuest": "Folosești profilul propriu al acestui server, fără cont: nimic de aici nu se sincronizează cu aplicațiile.",
-  "settings.account.guest": "Fără cont",
   "settings.account.server": "Server",
   "settings.account.username": "Nume de utilizator",
   "settings.account.password": "Parolă",

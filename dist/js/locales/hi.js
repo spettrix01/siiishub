@@ -436,7 +436,6 @@ export const HI = {
   "settings.account.descApp": "अपने SIIISHUB सर्वर में साइन इन करें ताकि आपके सभी डिवाइसों पर लाइब्रेरी, पसंदीदा, ऐडऑन, कुंजियाँ और प्राथमिकताएँ एक जैसी रहें। खाते सर्वर संस्करण में, ब्राउज़र में बनाए जाते हैं। डाउनलोड हर डिवाइस पर ही रहते हैं।",
   "settings.account.descWeb": "इस सर्वर पर आपका खाता। SIIISHUB ऐप्स में इसी से साइन इन करें ताकि वे सिंक रहें।",
   "settings.account.descGuest": "आप बिना खाते के इस सर्वर की अपनी प्रोफ़ाइल इस्तेमाल कर रहे हैं: यहाँ कुछ भी ऐप्स के साथ सिंक नहीं होता।",
-  "settings.account.guest": "बिना खाते के",
   "settings.account.server": "सर्वर",
   "settings.account.username": "उपयोगकर्ता नाम",
   "settings.account.password": "पासवर्ड",

@@ -436,7 +436,6 @@ export const DE = {
   "settings.account.descApp": "Melde dich bei deinem SIIISHUB-Server an, damit Bibliothek, Favoriten, Addons, Schlüssel und Einstellungen auf all deinen Geräten gleich sind. Konten werden in der Serverversion im Browser angelegt. Downloads bleiben auf dem jeweiligen Gerät.",
   "settings.account.descWeb": "Dein Konto auf diesem Server. Melde dich damit in den SIIISHUB-Apps an, um sie synchron zu halten.",
   "settings.account.descGuest": "Du nutzt das eigene Profil dieses Servers ohne Konto: Hier wird nichts mit den Apps synchronisiert.",
-  "settings.account.guest": "Ohne Konto",
   "settings.account.server": "Server",
   "settings.account.username": "Benutzername",
   "settings.account.password": "Passwort",

@@ -436,7 +436,6 @@ export const NL = {
   "settings.account.descApp": "Meld je aan bij je SIIISHUB-server om bibliotheek, favorieten, addons, sleutels en voorkeuren op al je apparaten gelijk te houden. Accounts maak je in de serverversie, in de browser. Downloads blijven op elk apparaat.",
   "settings.account.descWeb": "Je account op deze server. Meld je ermee aan in de SIIISHUB-apps om ze gesynchroniseerd te houden.",
   "settings.account.descGuest": "Je gebruikt het eigen profiel van deze server, zonder account: hier wordt niets met de apps gesynchroniseerd.",
-  "settings.account.guest": "Zonder account",
   "settings.account.server": "Server",
   "settings.account.username": "Gebruikersnaam",
   "settings.account.password": "Wachtwoord",

@@ -436,7 +436,6 @@ export const EN = {
   "settings.account.descApp": "Sign in to your SIIISHUB server to keep your library, favorites, addons, keys and preferences the same on all your devices. Accounts are created in the server version, in the browser. Downloads stay on each device.",
   "settings.account.descWeb": "Your account on this server. Sign in with it in the SIIISHUB apps to keep them in sync.",
   "settings.account.descGuest": "You are using this server’s own profile, without an account: nothing here syncs with the apps.",
-  "settings.account.guest": "Without an account",
   "settings.account.server": "Server",
   "settings.account.username": "Username",
   "settings.account.password": "Password",

@@ -63,6 +63,7 @@ async function renderApp() {
   show({
     '#accountSignInForm': !signedIn,
     '#accountCard': signedIn,
+    '#accountGuestSignInBtn': false,
     '#accountPasswordBtn': false,
     '#accountAdminBox': false,
   });
@@ -112,17 +113,17 @@ function wireApp() {
 let selfId = null;
 
 async function renderWeb() {
-  const { account } = await accountStatus().catch(() => ({ account: null }));
+  const { account, login } = await accountStatus().catch(() => ({ account: null }));
   selfId = account?.id || null;
   show({
     '#accountSignInForm': false,
-    '#accountCard': true,
+    '#accountCard': !!account,
+    '#accountGuestSignInBtn': !account && login !== false,
     '#accountPasswordBtn': !!account,
     '#accountAdminBox': !!account?.admin,
   });
   if (!account) {
     $('#accountDesc').textContent = t('settings.account.descGuest');
-    card(t('settings.account.guest'));
     return;
   }
   $('#accountDesc').textContent = t('settings.account.descWeb');
@@ -197,11 +198,16 @@ async function renderAccounts() {
     </li>`).join('');
 }
 
+// Closes this browser's session, for the login page: an account's
+// sign-out, and signing in from the server's profile.
+async function toLogin() {
+  await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+  location.replace('/login');
+}
+
 function wireWeb() {
-  $('#accountSignOutBtn').addEventListener('click', async () => {
-    await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
-    location.replace('/login');
-  });
+  $('#accountSignOutBtn').addEventListener('click', toLogin);
+  $('#accountGuestSignInBtn').addEventListener('click', toLogin);
   $('#accountPasswordBtn').addEventListener('click', changePassword);
   $('#accountCreateBtn').addEventListener('click', createAccount);
   $('#accountList').addEventListener('click', async (e) => {

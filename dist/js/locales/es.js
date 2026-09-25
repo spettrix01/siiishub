@@ -436,7 +436,6 @@ export const ES = {
   "settings.account.descApp": "Inicia sesión en tu servidor SIIISHUB para tener la misma biblioteca, favoritos, addons, claves y preferencias en todos tus dispositivos. Las cuentas se crean en la versión servidor, en el navegador. Las descargas se quedan en cada dispositivo.",
   "settings.account.descWeb": "Tu cuenta en este servidor. Inicia sesión con ella en las apps de SIIISHUB para mantenerlas sincronizadas.",
   "settings.account.descGuest": "Estás usando el perfil propio de este servidor, sin cuenta: aquí nada se sincroniza con las apps.",
-  "settings.account.guest": "Sin cuenta",
   "settings.account.server": "Servidor",
   "settings.account.username": "Usuario",
   "settings.account.password": "Contraseña",

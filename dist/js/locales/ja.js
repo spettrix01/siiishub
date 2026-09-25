@@ -436,7 +436,6 @@ export const JA = {
   "settings.account.descApp": "SIIISHUB サーバーにサインインすると、ライブラリ、お気に入り、アドオン、キー、設定がすべてのデバイスで同じになります。アカウントはブラウザーのサーバー版で作成します。ダウンロードは各デバイスに残ります。",
   "settings.account.descWeb": "このサーバーのあなたのアカウントです。SIIISHUB アプリでこのアカウントにサインインすると同期されます。",
   "settings.account.descGuest": "アカウントなしでこのサーバー自体のプロフィールを使用しています。ここでの内容はアプリと同期されません。",
-  "settings.account.guest": "アカウントなし",
   "settings.account.server": "サーバー",
   "settings.account.username": "ユーザー名",
   "settings.account.password": "パスワード",

@@ -436,7 +436,6 @@ export const ZH = {
   "settings.account.descApp": "登录你的 SIIISHUB 服务器，让媒体库、收藏、插件、密钥和偏好设置在你的所有设备上保持一致。账户在浏览器中的服务器版里创建。下载内容保留在各自的设备上。",
   "settings.account.descWeb": "你在此服务器上的账户。在 SIIISHUB 应用中登录这个账户即可保持同步。",
   "settings.account.descGuest": "你正在使用此服务器自身的配置，没有账户：这里的内容不会与应用同步。",
-  "settings.account.guest": "无账户",
   "settings.account.server": "服务器",
   "settings.account.username": "用户名",
   "settings.account.password": "密码",

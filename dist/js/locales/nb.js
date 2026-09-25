@@ -436,7 +436,6 @@ export const NB = {
   "settings.account.descApp": "Logg inn på SIIISHUB-serveren din for å ha samme bibliotek, favoritter, tillegg, nøkler og innstillinger på alle enhetene dine. Kontoer opprettes i serverversjonen, i nettleseren. Nedlastinger blir liggende på hver enhet.",
   "settings.account.descWeb": "Kontoen din på denne serveren. Logg inn med den i SIIISHUB-appene for å holde dem synkronisert.",
   "settings.account.descGuest": "Du bruker serverens egen profil uten konto: ingenting her synkroniseres med appene.",
-  "settings.account.guest": "Uten konto",
   "settings.account.server": "Server",
   "settings.account.username": "Brukernavn",
   "settings.account.password": "Passord",

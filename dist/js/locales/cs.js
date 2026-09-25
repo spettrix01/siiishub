@@ -436,7 +436,6 @@ export const CS = {
   "settings.account.descApp": "Přihlaste se ke svému serveru SIIISHUB, abyste měli knihovnu, oblíbené, doplňky, klíče a předvolby stejné na všech zařízeních. Účty se vytvářejí v serverové verzi, v prohlížeči. Stažené soubory zůstávají v každém zařízení.",
   "settings.account.descWeb": "Váš účet na tomto serveru. Přihlaste se jím v aplikacích SIIISHUB, aby zůstaly synchronizované.",
   "settings.account.descGuest": "Používáte vlastní profil tohoto serveru bez účtu: nic zde se s aplikacemi nesynchronizuje.",
-  "settings.account.guest": "Bez účtu",
   "settings.account.server": "Server",
   "settings.account.username": "Uživatelské jméno",
   "settings.account.password": "Heslo",
