@@ -466,52 +466,55 @@
         </label>
         <label class="field">
           <span data-i18n="settings.account.password">Password</span>
-          <div class="field-row">
-            <input id="accountPasswordInput" type="password" autocomplete="current-password" />
-            <button class="primary" id="accountSignInBtn" type="submit" data-i18n="settings.account.signIn">Accedi</button>
-          </div>
+          <input id="accountPasswordInput" type="password" autocomplete="current-password" />
         </label>
+        <button class="primary" id="accountSignInBtn" type="submit" data-i18n="settings.account.signIn">Accedi</button>
       </form>
 
       <div class="account-card" id="accountCard" hidden>
+        <span class="account-avatar" id="accountAvatar" aria-hidden="true"></span>
         <div class="account-who">
           <strong id="accountName"></strong>
-          <span class="account-where" id="accountWhere"></span>
+          <span class="account-sub" id="accountSub"></span>
         </div>
-        <p class="account-sync" id="accountSyncLine"></p>
-        <div class="account-actions">
-          <button type="button" class="ghost" id="accountSignOutBtn" data-i18n="settings.account.signOut">Esci</button>
-        </div>
+        <button type="button" class="remote-device-btn" id="accountSignOutBtn">
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>
+          <span data-i18n="settings.account.signOut">Esci</span>
+        </button>
       </div>
 
-      <form class="account-form" id="accountPasswordForm" hidden>
-        <h3 class="remote-group-title" data-i18n="settings.account.changePassword">Cambia password</h3>
-        <label class="field">
-          <span data-i18n="settings.account.currentPassword">Password attuale</span>
-          <input id="accountCurrentPassword" type="password" autocomplete="current-password" />
-        </label>
-        <label class="field">
-          <span data-i18n="settings.account.newPassword">Nuova password</span>
-          <div class="field-row">
+      <details class="account-fold" id="accountPasswordBox" hidden>
+        <summary data-i18n="settings.account.changePassword">Cambia password</summary>
+        <form class="account-form" id="accountPasswordForm">
+          <label class="field">
+            <span data-i18n="settings.account.currentPassword">Password attuale</span>
+            <input id="accountCurrentPassword" type="password" autocomplete="current-password" />
+          </label>
+          <label class="field">
+            <span data-i18n="settings.account.newPassword">Nuova password</span>
             <input id="accountNewPassword" type="password" autocomplete="new-password" />
-            <button class="primary" type="submit" data-i18n="settings.account.save">Salva</button>
-          </div>
-        </label>
-      </form>
+          </label>
+          <button class="primary" type="submit" data-i18n="settings.account.save">Salva</button>
+        </form>
+      </details>
 
       <div class="account-admin" id="accountAdminBox" hidden>
         <h3 class="remote-group-title" data-i18n="settings.account.accounts">Account del server</h3>
         <ul class="remote-devices" id="accountList"></ul>
-        <form class="account-form" id="accountCreateForm">
-          <label class="field">
-            <span data-i18n="settings.account.newAccount">Nuovo account</span>
-            <input id="accountNewUser" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" data-i18n-ph="settings.account.username" placeholder="Utente" />
-          </label>
-          <div class="field-row">
-            <input id="accountNewUserPassword" type="password" autocomplete="new-password" data-i18n-ph="settings.account.password" placeholder="Password" />
+        <details class="account-fold" id="accountCreateBox">
+          <summary data-i18n="settings.account.newAccount">Nuovo account</summary>
+          <form class="account-form" id="accountCreateForm">
+            <label class="field">
+              <span data-i18n="settings.account.username">Utente</span>
+              <input id="accountNewUser" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" />
+            </label>
+            <label class="field">
+              <span data-i18n="settings.account.password">Password</span>
+              <input id="accountNewUserPassword" type="password" autocomplete="new-password" />
+            </label>
             <button class="primary" type="submit" data-i18n="settings.account.create">Crea</button>
-          </div>
-        </form>
+          </form>
+        </details>
       </div>
 
       <p class="hint" id="accountHint"></p>

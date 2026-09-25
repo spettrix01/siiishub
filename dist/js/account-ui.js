@@ -47,6 +47,13 @@ function show(parts) {
   }
 }
 
+// The card on top: an initial, a name, a line under it.
+function card(name, sub = '') {
+  $('#accountAvatar').textContent = (name || '?').trim().charAt(0).toUpperCase();
+  $('#accountName').textContent = name;
+  $('#accountSub').textContent = sub;
+}
+
 // ---------- Apps ----------
 
 async function renderApp() {
@@ -56,19 +63,17 @@ async function renderApp() {
   show({
     '#accountSignInForm': !signedIn,
     '#accountCard': signedIn,
-    '#accountPasswordForm': false,
+    '#accountPasswordBox': false,
     '#accountAdminBox': false,
   });
   if (signedIn) {
-    $('#accountName').textContent = status.username;
-    $('#accountWhere').textContent = status.server.replace(/^https?:\/\//, '');
-    $('#accountSyncLine').textContent = status.last_sync
+    const when = status.last_sync
       ? t('settings.account.lastSync', { time: syncTime(status.last_sync) })
       : t('settings.account.never');
+    card(status.username, `${status.server.replace(/^https?:\/\//, '')} · ${when}`);
   }
   if (status?.error) hint(errorText(status.error), 'error');
 }
-
 
 function wireApp() {
   $('#accountSignInForm').addEventListener('submit', async (e) => {
@@ -112,19 +117,16 @@ async function renderWeb() {
   show({
     '#accountSignInForm': false,
     '#accountCard': true,
-    '#accountPasswordForm': !!account,
+    '#accountPasswordBox': !!account,
     '#accountAdminBox': !!account?.admin,
   });
-  $('#accountSyncLine').textContent = '';
   if (!account) {
     $('#accountDesc').textContent = t('settings.account.descGuest');
-    $('#accountName').textContent = t('settings.account.guest');
-    $('#accountWhere').textContent = '';
+    card(t('settings.account.guest'));
     return;
   }
   $('#accountDesc').textContent = t('settings.account.descWeb');
-  $('#accountName').textContent = account.username;
-  $('#accountWhere').textContent = account.admin ? t('settings.account.admin') : '';
+  card(account.username, account.admin ? t('settings.account.admin') : '');
   if (account.admin) await renderAccounts();
 }
 
@@ -134,7 +136,7 @@ async function renderAccounts() {
     <li class="remote-device">
       <span class="remote-device-name">${escapeHTML(a.username)}</span>
       ${a.admin ? `<span class="remote-iface-badge">${escapeHTML(t('settings.account.admin'))}</span>` : ''}
-      <span class="remote-device-ip">${escapeHTML(t('settings.account.devices', { n: a.devices }))}</span>
+      <span class="account-row-meta">${escapeHTML(t('settings.account.devices', { n: a.devices }))}</span>
       ${a.id === selfId ? '' : `<button type="button" class="remote-device-btn is-forget" data-account-delete="${escapeHTML(a.id)}" data-name="${escapeHTML(a.username)}">${escapeHTML(t('settings.account.delete'))}</button>`}
     </li>`).join('');
 }
@@ -150,6 +152,7 @@ function wireWeb() {
       await accountPassword($('#accountCurrentPassword').value, $('#accountNewPassword').value);
       $('#accountCurrentPassword').value = '';
       $('#accountNewPassword').value = '';
+      $('#accountPasswordBox').open = false;
       hint(t('settings.account.passwordChanged'), 'success');
     } catch (err) {
       hint(errorText(err), 'error');
@@ -162,6 +165,7 @@ function wireWeb() {
       await accountCreate(user, $('#accountNewUserPassword').value);
       $('#accountNewUser').value = '';
       $('#accountNewUserPassword').value = '';
+      $('#accountCreateBox').open = false;
       hint(t('settings.account.created', { user }), 'success');
       await renderAccounts();
     } catch (err) {

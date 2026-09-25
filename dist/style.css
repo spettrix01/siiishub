@@ -4406,52 +4406,98 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   color: var(--text-3);
 }
 /* Settings → Account (account-ui.js). */
+.pane[data-pane="account"] [hidden] { display: none; }
 .account-form {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
-.account-card + .account-form,
-.account-form + .account-admin,
-.account-card + .account-admin { margin-top: 18px; }
+.account-form .field input { width: 100%; }
+.account-form > .primary { align-self: flex-start; }
 .account-card {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 12px;
+  align-items: center;
+  gap: 14px;
   padding: 14px 16px;
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: 12px;
 }
+.account-avatar {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 700;
+}
 .account-who {
+  flex: 1;
+  min-width: 0;
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 10px;
+  flex-direction: column;
+  gap: 2px;
 }
-.account-who strong { font-size: 15px; }
-.account-where {
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-3);
+.account-who strong,
+.account-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.account-sync {
-  margin: 0;
+.account-who strong { font-size: 15px; font-weight: 600; }
+.account-sub { font-size: 12px; color: var(--text-3); }
+.account-sub:empty { display: none; }
+/* Change password, New account: closed until wanted. */
+.account-fold {
+  margin-top: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.account-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
   font-size: 13px;
+  font-weight: 500;
   color: var(--text-2);
+  cursor: pointer;
+  list-style: none;
 }
-.account-sync:empty { display: none; }
-.account-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.account-fold > summary::-webkit-details-marker { display: none; }
+.account-fold > summary::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  margin-right: 3px;
+  border-right: 1.6px solid currentColor;
+  border-bottom: 1.6px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .15s;
 }
+.account-fold[open] > summary::after { transform: rotate(-135deg); }
+.account-fold > summary:hover { color: var(--text); }
+.account-fold > form { padding: 4px 16px 16px; }
 .account-admin {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-top: 24px;
 }
+.account-admin .account-fold { margin-top: 2px; }
+.account-row-meta {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+/* Next to the delete button, which the remote's rows push right. */
+.remote-device .account-row-meta + .remote-device-btn { margin-left: 0; }
 
 .remote-devices {
   list-style: none;
