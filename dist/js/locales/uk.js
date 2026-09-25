@@ -99,6 +99,13 @@ export const UK = {
   'settings.appearance.lightPurple': "Світла фіолетова",
   "settings.appearance.darkTeal": "Чорний бірюзовий",
   "settings.appearance.lightTeal": "Білий бірюзовий",
+  "settings.appearance.backdrop": "Фон",
+  "settings.appearance.backdropNone": "Немає",
+  "settings.appearance.backdropMaze": "Лабіринт",
+  "settings.appearance.backdropRings": "Кільця",
+  "settings.appearance.backdropCurves": "Криві",
+  "settings.appearance.backdropDrops": "Краплі",
+  "settings.appearance.backdropLiquid": "Рідина",
 
   'settings.language.uiDesc': "Виберіть мову інтерфейсу та контенту, що завантажується з TMDB.",
   'settings.language.uiSearch': "Пошук мови…",

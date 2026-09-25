@@ -99,6 +99,13 @@ export const FI = {
   'settings.appearance.lightPurple': "Vaalea violetti",
   "settings.appearance.darkTeal": "Musta turkoosi",
   "settings.appearance.lightTeal": "Valkoinen turkoosi",
+  "settings.appearance.backdrop": "Tausta",
+  "settings.appearance.backdropNone": "Ei mitään",
+  "settings.appearance.backdropMaze": "Labyrintti",
+  "settings.appearance.backdropRings": "Renkaat",
+  "settings.appearance.backdropCurves": "Kaaret",
+  "settings.appearance.backdropDrops": "Pisarat",
+  "settings.appearance.backdropLiquid": "Neste",
 
   'settings.language.uiDesc': "Valitse käyttöliittymän ja TMDB:stä ladatun sisällön kieli.",
   'settings.language.uiSearch': "Hae kieltä…",

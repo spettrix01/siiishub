@@ -99,6 +99,13 @@ export const DA = {
   'settings.appearance.lightPurple': "Lys lilla",
   "settings.appearance.darkTeal": "Sort turkis",
   "settings.appearance.lightTeal": "Hvid turkis",
+  "settings.appearance.backdrop": "Baggrund",
+  "settings.appearance.backdropNone": "Ingen",
+  "settings.appearance.backdropMaze": "Labyrint",
+  "settings.appearance.backdropRings": "Ringe",
+  "settings.appearance.backdropCurves": "Kurver",
+  "settings.appearance.backdropDrops": "Dråber",
+  "settings.appearance.backdropLiquid": "Flydende",
 
   'settings.language.uiDesc': "Vælg sproget til grænsefladen og indholdet, der indlæses fra TMDB.",
   'settings.language.uiSearch': "Søg sprog…",

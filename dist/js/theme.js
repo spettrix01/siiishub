@@ -5,6 +5,9 @@ const DEFAULT_THEME = 'dark-orange';
 
 const ACCENTS = ['orange', 'purple', 'teal'];
 
+// The pattern of lines behind the interface (img/backdrops), or none.
+const BACKDROPS = ['maze', 'rings', 'curves', 'drops', 'liquid'];
+
 function parse(theme) {
   const value = THEMES.includes(theme) ? theme : DEFAULT_THEME;
   const [mode, accent] = value.split('-');
@@ -25,6 +28,25 @@ export function applyTheme(theme) {
   else root.removeAttribute('data-theme');
   if (accent !== 'orange') root.setAttribute('data-accent', accent);
   else root.removeAttribute('data-accent');
+  applyBackdrop(currentBackdrop());
+}
+
+export function currentBackdrop() {
+  const saved = userStore.getItem('siiishub-backdrop');
+  return BACKDROPS.includes(saved) ? saved : 'none';
+}
+
+function applyBackdrop(backdrop) {
+  const root = document.documentElement;
+  if (BACKDROPS.includes(backdrop)) root.setAttribute('data-backdrop', backdrop);
+  else root.removeAttribute('data-backdrop');
+}
+
+export function setBackdrop(backdrop) {
+  const value = BACKDROPS.includes(backdrop) ? backdrop : 'none';
+  userStore.setItem('siiishub-backdrop', value);
+  applyBackdrop(value);
+  return value;
 }
 
 export function setTheme(theme) {

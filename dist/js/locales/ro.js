@@ -99,6 +99,13 @@ export const RO = {
   'settings.appearance.lightPurple': "Mov deschis",
   "settings.appearance.darkTeal": "Negru turcoaz",
   "settings.appearance.lightTeal": "Alb turcoaz",
+  "settings.appearance.backdrop": "Fundal",
+  "settings.appearance.backdropNone": "Niciunul",
+  "settings.appearance.backdropMaze": "Labirint",
+  "settings.appearance.backdropRings": "Inele",
+  "settings.appearance.backdropCurves": "Curbe",
+  "settings.appearance.backdropDrops": "Picături",
+  "settings.appearance.backdropLiquid": "Lichid",
 
   'settings.language.uiDesc': "Alege limba interfeței și a conținutului încărcat din TMDB.",
   'settings.language.uiSearch': "Caută limba…",

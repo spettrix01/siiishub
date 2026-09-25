@@ -99,6 +99,13 @@ export const KO = {
   'settings.appearance.lightPurple': "라이트 퍼플",
   "settings.appearance.darkTeal": "블랙 청록",
   "settings.appearance.lightTeal": "화이트 청록",
+  "settings.appearance.backdrop": "배경",
+  "settings.appearance.backdropNone": "없음",
+  "settings.appearance.backdropMaze": "미로",
+  "settings.appearance.backdropRings": "고리",
+  "settings.appearance.backdropCurves": "곡선",
+  "settings.appearance.backdropDrops": "물방울",
+  "settings.appearance.backdropLiquid": "액체",
 
   'settings.language.uiDesc': "인터페이스와 TMDB에서 불러오는 콘텐츠의 언어를 선택하세요.",
   'settings.language.uiSearch': "언어 검색…",

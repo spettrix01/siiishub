@@ -99,6 +99,13 @@ export const DE = {
   'settings.appearance.lightPurple': "Hell Violett",
   "settings.appearance.darkTeal": "Schwarz Türkis",
   "settings.appearance.lightTeal": "Weiß Türkis",
+  "settings.appearance.backdrop": "Hintergrund",
+  "settings.appearance.backdropNone": "Keiner",
+  "settings.appearance.backdropMaze": "Labyrinth",
+  "settings.appearance.backdropRings": "Ringe",
+  "settings.appearance.backdropCurves": "Kurven",
+  "settings.appearance.backdropDrops": "Tropfen",
+  "settings.appearance.backdropLiquid": "Flüssig",
 
   'settings.language.uiDesc': "Wähle die Sprache für die Oberfläche und die von TMDB geladenen Inhalte.",
   'settings.language.uiSearch': "Sprache suchen…",

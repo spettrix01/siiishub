@@ -99,6 +99,13 @@ export const PT = {
   'settings.appearance.lightPurple': "Roxo claro",
   "settings.appearance.darkTeal": "Preto turquesa",
   "settings.appearance.lightTeal": "Branco turquesa",
+  "settings.appearance.backdrop": "Fundo",
+  "settings.appearance.backdropNone": "Nenhum",
+  "settings.appearance.backdropMaze": "Labirinto",
+  "settings.appearance.backdropRings": "Anéis",
+  "settings.appearance.backdropCurves": "Curvas",
+  "settings.appearance.backdropDrops": "Gotas",
+  "settings.appearance.backdropLiquid": "Líquido",
 
   'settings.language.uiDesc': "Escolha o idioma da interface e do conteúdo carregado do TMDB.",
   'settings.language.uiSearch': "Procurar idioma…",

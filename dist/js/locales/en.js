@@ -99,6 +99,13 @@ export const EN = {
   'settings.appearance.lightPurple': 'Light purple',
   "settings.appearance.darkTeal": "Black teal",
   "settings.appearance.lightTeal": "White teal",
+  "settings.appearance.backdrop": "Background",
+  "settings.appearance.backdropNone": "None",
+  "settings.appearance.backdropMaze": "Maze",
+  "settings.appearance.backdropRings": "Rings",
+  "settings.appearance.backdropCurves": "Curves",
+  "settings.appearance.backdropDrops": "Drops",
+  "settings.appearance.backdropLiquid": "Liquid",
 
   'settings.language.uiDesc': 'Choose the language for the interface and the content loaded from TMDB.',
   'settings.language.uiSearch': 'Search language…',

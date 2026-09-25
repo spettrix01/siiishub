@@ -99,6 +99,13 @@ export const NB = {
   'settings.appearance.lightPurple': "Lys lilla",
   "settings.appearance.darkTeal": "Svart turkis",
   "settings.appearance.lightTeal": "Hvit turkis",
+  "settings.appearance.backdrop": "Bakgrunn",
+  "settings.appearance.backdropNone": "Ingen",
+  "settings.appearance.backdropMaze": "Labyrint",
+  "settings.appearance.backdropRings": "Ringer",
+  "settings.appearance.backdropCurves": "Kurver",
+  "settings.appearance.backdropDrops": "Dråper",
+  "settings.appearance.backdropLiquid": "Flytende",
 
   'settings.language.uiDesc': "Velg språk for grensesnittet og innholdet som lastes fra TMDB.",
   'settings.language.uiSearch': "Søk språk…",

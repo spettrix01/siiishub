@@ -99,6 +99,13 @@ export const NL = {
   'settings.appearance.lightPurple': "Licht paars",
   "settings.appearance.darkTeal": "Zwart turquoise",
   "settings.appearance.lightTeal": "Wit turquoise",
+  "settings.appearance.backdrop": "Achtergrond",
+  "settings.appearance.backdropNone": "Geen",
+  "settings.appearance.backdropMaze": "Doolhof",
+  "settings.appearance.backdropRings": "Ringen",
+  "settings.appearance.backdropCurves": "Bochten",
+  "settings.appearance.backdropDrops": "Druppels",
+  "settings.appearance.backdropLiquid": "Vloeibaar",
 
   'settings.language.uiDesc': "Kies de taal voor de interface en de inhoud die van TMDB wordt geladen.",
   'settings.language.uiSearch': "Zoek taal…",

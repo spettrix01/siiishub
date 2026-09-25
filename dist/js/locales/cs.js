@@ -99,6 +99,13 @@ export const CS = {
   'settings.appearance.lightPurple': "Světlá fialová",
   "settings.appearance.darkTeal": "Černá tyrkysová",
   "settings.appearance.lightTeal": "Bílá tyrkysová",
+  "settings.appearance.backdrop": "Pozadí",
+  "settings.appearance.backdropNone": "Žádné",
+  "settings.appearance.backdropMaze": "Bludiště",
+  "settings.appearance.backdropRings": "Kroužky",
+  "settings.appearance.backdropCurves": "Křivky",
+  "settings.appearance.backdropDrops": "Kapky",
+  "settings.appearance.backdropLiquid": "Tekutina",
 
   'settings.language.uiDesc': "Vyberte jazyk rozhraní a obsahu načítaného z TMDB.",
   'settings.language.uiSearch': "Hledat jazyk…",

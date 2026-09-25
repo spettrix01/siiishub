@@ -99,6 +99,13 @@ export const HU = {
   'settings.appearance.lightPurple': "Világos lila",
   "settings.appearance.darkTeal": "Fekete türkiz",
   "settings.appearance.lightTeal": "Fehér türkiz",
+  "settings.appearance.backdrop": "Háttér",
+  "settings.appearance.backdropNone": "Nincs",
+  "settings.appearance.backdropMaze": "Labirintus",
+  "settings.appearance.backdropRings": "Gyűrűk",
+  "settings.appearance.backdropCurves": "Görbék",
+  "settings.appearance.backdropDrops": "Cseppek",
+  "settings.appearance.backdropLiquid": "Folyékony",
 
   'settings.language.uiDesc': "Válaszd ki a felület és a TMDB-ből betöltött tartalom nyelvét.",
   'settings.language.uiSearch': "Nyelv keresése…",

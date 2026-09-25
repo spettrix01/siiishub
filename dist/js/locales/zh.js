@@ -99,6 +99,13 @@ export const ZH = {
   'settings.appearance.lightPurple': "浅色紫色",
   "settings.appearance.darkTeal": "黑色青绿",
   "settings.appearance.lightTeal": "白色青绿",
+  "settings.appearance.backdrop": "背景",
+  "settings.appearance.backdropNone": "无",
+  "settings.appearance.backdropMaze": "迷宫",
+  "settings.appearance.backdropRings": "圆环",
+  "settings.appearance.backdropCurves": "曲线",
+  "settings.appearance.backdropDrops": "水滴",
+  "settings.appearance.backdropLiquid": "液体",
 
   'settings.language.uiDesc': "选择界面以及从 TMDB 加载内容所用的语言。",
   'settings.language.uiSearch': "搜索语言…",

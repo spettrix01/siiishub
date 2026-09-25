@@ -99,6 +99,13 @@ export const JA = {
   'settings.appearance.lightPurple': "ライトパープル",
   "settings.appearance.darkTeal": "ブラック・ターコイズ",
   "settings.appearance.lightTeal": "ホワイト・ターコイズ",
+  "settings.appearance.backdrop": "背景",
+  "settings.appearance.backdropNone": "なし",
+  "settings.appearance.backdropMaze": "迷路",
+  "settings.appearance.backdropRings": "リング",
+  "settings.appearance.backdropCurves": "曲線",
+  "settings.appearance.backdropDrops": "しずく",
+  "settings.appearance.backdropLiquid": "リキッド",
 
   'settings.language.uiDesc': "インターフェースとTMDBから読み込まれるコンテンツの言語を選択します。",
   'settings.language.uiSearch': "言語を検索…",

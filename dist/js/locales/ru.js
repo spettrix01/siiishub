@@ -99,6 +99,13 @@ export const RU = {
   'settings.appearance.lightPurple': "Светлая фиолетовая",
   "settings.appearance.darkTeal": "Чёрный бирюзовый",
   "settings.appearance.lightTeal": "Белый бирюзовый",
+  "settings.appearance.backdrop": "Фон",
+  "settings.appearance.backdropNone": "Нет",
+  "settings.appearance.backdropMaze": "Лабиринт",
+  "settings.appearance.backdropRings": "Кольца",
+  "settings.appearance.backdropCurves": "Кривые",
+  "settings.appearance.backdropDrops": "Капли",
+  "settings.appearance.backdropLiquid": "Жидкость",
 
   'settings.language.uiDesc': "Выберите язык интерфейса и контента, загружаемого из TMDB.",
   'settings.language.uiSearch': "Поиск языка…",

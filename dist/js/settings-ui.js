@@ -7,7 +7,7 @@ import { refreshDlMagnetBarVisibility } from './library.js';
 import { streamPickerHtml, setupStreamPicker } from './picker.js';
 import { langPickerHtml, setupLangPicker, buildLangItems, localizedLangName } from './lang-picker.js';
 import { t, locMsg, setLang, APP_LANGUAGES, onLangChange } from './i18n.js';
-import { setTheme, currentTheme } from './theme.js';
+import { setTheme, currentTheme, setBackdrop, currentBackdrop } from './theme.js';
 import { IS_ANDROID, IS_PHONE, IS_TV } from './platform.js';
 import { parseRemoteAddress, canScanQr, scanRemoteQr, connectRemote } from './remote-client.js';
 import { setupAccountSection } from './account-ui.js';
@@ -84,6 +84,25 @@ function setupAppearanceSection() {
     });
   }
   reflect();
+
+  const backdrops = $('#backdropGrid');
+  if (!backdrops) return;
+  const reflectBackdrop = () => {
+    const cur = currentBackdrop();
+    $$('.theme-option', backdrops).forEach(btn =>
+      btn.setAttribute('aria-checked', btn.dataset.backdropValue === cur ? 'true' : 'false'),
+    );
+  };
+  if (!backdrops.dataset.ready) {
+    backdrops.dataset.ready = '1';
+    backdrops.addEventListener('click', e => {
+      const btn = e.target.closest('.theme-option');
+      if (!btn) return;
+      setBackdrop(btn.dataset.backdropValue);
+      reflectBackdrop();
+    });
+  }
+  reflectBackdrop();
 }
 
 // Left sidebar listing the sections; built once, labels refreshed on language change.

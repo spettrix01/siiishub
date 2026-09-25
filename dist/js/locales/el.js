@@ -99,6 +99,13 @@ export const EL = {
   'settings.appearance.lightPurple': "Ανοιχτό μοβ",
   "settings.appearance.darkTeal": "Μαύρο τιρκουάζ",
   "settings.appearance.lightTeal": "Λευκό τιρκουάζ",
+  "settings.appearance.backdrop": "Φόντο",
+  "settings.appearance.backdropNone": "Κανένα",
+  "settings.appearance.backdropMaze": "Λαβύρινθος",
+  "settings.appearance.backdropRings": "Δακτύλιοι",
+  "settings.appearance.backdropCurves": "Καμπύλες",
+  "settings.appearance.backdropDrops": "Σταγόνες",
+  "settings.appearance.backdropLiquid": "Υγρό",
 
   'settings.language.uiDesc': "Επιλέξτε τη γλώσσα για τη διεπαφή και το περιεχόμενο που φορτώνεται από το TMDB.",
   'settings.language.uiSearch': "Αναζήτηση γλώσσας…",

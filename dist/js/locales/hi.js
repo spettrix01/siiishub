@@ -99,6 +99,13 @@ export const HI = {
   'settings.appearance.lightPurple': "हल्का बैंगनी",
   "settings.appearance.darkTeal": "काला फ़िरोज़ा",
   "settings.appearance.lightTeal": "सफ़ेद फ़िरोज़ा",
+  "settings.appearance.backdrop": "पृष्ठभूमि",
+  "settings.appearance.backdropNone": "कोई नहीं",
+  "settings.appearance.backdropMaze": "भूलभुलैया",
+  "settings.appearance.backdropRings": "छल्ले",
+  "settings.appearance.backdropCurves": "वक्र",
+  "settings.appearance.backdropDrops": "बूँदें",
+  "settings.appearance.backdropLiquid": "तरल",
 
   'settings.language.uiDesc': "इंटरफ़ेस और TMDB से लोड होने वाली सामग्री के लिए भाषा चुनें।",
   'settings.language.uiSearch': "भाषा खोजें…",

@@ -20,6 +20,8 @@
 <link rel="apple-touch-icon" href="img/icon-256.png" />
 </head>
 <body>
+<!-- The pattern behind the interface, if one is chosen (Settings → Appearance). -->
+<div class="backdrop" aria-hidden="true"></div>
 
 <header class="topbar" data-tauri-drag-region>
   <button class="brand" type="button" data-go-movies aria-label="Vai a Film">
@@ -304,6 +306,7 @@
 
     <section class="pane" data-pane="appearance">
       <p class="pane-desc" data-i18n="settings.appearance.desc">Scegli l'aspetto dell'interfaccia.</p>
+      <h3 class="remote-group-title appearance-subtitle" data-i18n="settings.appearance.title">Tema</h3>
       <div class="theme-grid" id="themeGrid" role="radiogroup" data-i18n-aria="settings.appearance.title" aria-label="Tema">
         <button class="theme-option" type="button" role="radio" data-theme-value="dark-orange" aria-checked="false">
           <span class="theme-swatch theme-swatch--dark-orange" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
@@ -328,6 +331,33 @@
         <button class="theme-option" type="button" role="radio" data-theme-value="light-teal" aria-checked="false">
           <span class="theme-swatch theme-swatch--light-teal" aria-hidden="true"><span class="theme-swatch-accent"></span></span>
           <span class="theme-option-label" data-i18n="settings.appearance.lightTeal">Bianco verde acqua</span>
+        </button>
+      </div>
+      <h3 class="remote-group-title appearance-subtitle" data-i18n="settings.appearance.backdrop">Sfondo</h3>
+      <div class="theme-grid" id="backdropGrid" role="radiogroup" data-i18n-aria="settings.appearance.backdrop" aria-label="Sfondo">
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="none" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--none" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropNone">Nessuno</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="maze" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--maze" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropMaze">Labirinto</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="rings" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--rings" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropRings">Anelli</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="curves" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--curves" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropCurves">Curve</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="drops" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--drops" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropDrops">Gocce</span>
+        </button>
+        <button class="theme-option" type="button" role="radio" data-backdrop-value="liquid" aria-checked="false">
+          <span class="backdrop-swatch backdrop-swatch--liquid" aria-hidden="true"></span>
+          <span class="theme-option-label" data-i18n="settings.appearance.backdropLiquid">Liquido</span>
         </button>
       </div>
     </section>

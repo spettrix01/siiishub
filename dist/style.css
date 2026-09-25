@@ -4052,6 +4052,80 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .theme-swatch--light-teal .theme-swatch-accent { background: #0d9488; }
 .theme-option-label { font-weight: 500; }
 
+/* Settings → Appearance: its two groups, Theme and Background. */
+.appearance-subtitle { margin: 20px 0 0; }
+.appearance-subtitle:first-of-type { margin-top: 4px; }
+
+/* The pattern behind the interface (Settings → Appearance → Background):
+   an SVG of lines (img/backdrops) as the mask of the theme's line colour. */
+:root { --backdrop-line: #3b3b42; }
+[data-theme="light"] { --backdrop-line: #d4d5db; }
+.backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--backdrop-line);
+  -webkit-mask-position: center;
+  -webkit-mask-size: cover;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: cover;
+  mask-repeat: no-repeat;
+}
+[data-backdrop] .backdrop { display: block; }
+/* The video plays behind the window's transparent page. */
+body.is-player-open .backdrop { display: none; }
+.backdrop-swatch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 42px; height: 42px;
+  border-radius: 12px;
+  border: 1px solid var(--line-2);
+  background: var(--bg);
+  overflow: hidden;
+}
+/* A close-up of the pattern. */
+.backdrop-swatch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--text-2);
+  -webkit-mask-position: center;
+  -webkit-mask-size: 460px auto;
+  -webkit-mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: 460px auto;
+  mask-repeat: no-repeat;
+}
+.backdrop-swatch--none::before { content: none; }
+[data-backdrop="maze"] .backdrop,
+.backdrop-swatch--maze::before {
+  -webkit-mask-image: url(img/backdrops/maze.svg);
+  mask-image: url(img/backdrops/maze.svg);
+}
+[data-backdrop="rings"] .backdrop,
+.backdrop-swatch--rings::before {
+  -webkit-mask-image: url(img/backdrops/rings.svg);
+  mask-image: url(img/backdrops/rings.svg);
+}
+[data-backdrop="curves"] .backdrop,
+.backdrop-swatch--curves::before {
+  -webkit-mask-image: url(img/backdrops/curves.svg);
+  mask-image: url(img/backdrops/curves.svg);
+}
+[data-backdrop="drops"] .backdrop,
+.backdrop-swatch--drops::before {
+  -webkit-mask-image: url(img/backdrops/drops.svg);
+  mask-image: url(img/backdrops/drops.svg);
+}
+[data-backdrop="liquid"] .backdrop,
+.backdrop-swatch--liquid::before {
+  -webkit-mask-image: url(img/backdrops/liquid.svg);
+  mask-image: url(img/backdrops/liquid.svg);
+}
+
 [data-theme="light"] {
   --bg: #f7f7f9;
   --bg-2: #eeeff2;

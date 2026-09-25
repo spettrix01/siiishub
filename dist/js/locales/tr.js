@@ -99,6 +99,13 @@ export const TR = {
   'settings.appearance.lightPurple': "Açık mor",
   "settings.appearance.darkTeal": "Siyah turkuaz",
   "settings.appearance.lightTeal": "Beyaz turkuaz",
+  "settings.appearance.backdrop": "Arka plan",
+  "settings.appearance.backdropNone": "Yok",
+  "settings.appearance.backdropMaze": "Labirent",
+  "settings.appearance.backdropRings": "Halkalar",
+  "settings.appearance.backdropCurves": "Eğriler",
+  "settings.appearance.backdropDrops": "Damlalar",
+  "settings.appearance.backdropLiquid": "Sıvı",
 
   'settings.language.uiDesc': "Arayüz ve TMDB'den yüklenen içerik için dili seçin.",
   'settings.language.uiSearch': "Dil ara…",

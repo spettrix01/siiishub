@@ -99,6 +99,13 @@ export const SV = {
   'settings.appearance.lightPurple': "Ljus lila",
   "settings.appearance.darkTeal": "Svart turkos",
   "settings.appearance.lightTeal": "Vit turkos",
+  "settings.appearance.backdrop": "Bakgrund",
+  "settings.appearance.backdropNone": "Ingen",
+  "settings.appearance.backdropMaze": "Labyrint",
+  "settings.appearance.backdropRings": "Ringar",
+  "settings.appearance.backdropCurves": "Kurvor",
+  "settings.appearance.backdropDrops": "Droppar",
+  "settings.appearance.backdropLiquid": "Flytande",
 
   'settings.language.uiDesc': "Välj språk för gränssnittet och innehållet som laddas från TMDB.",
   'settings.language.uiSearch': "Sök språk…",
