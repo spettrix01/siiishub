@@ -7,6 +7,7 @@ export const FI = {
   'common.error': "Virhe",
   'common.saving': "Tallennetaan…",
   "common.save": "Tallenna",
+  "common.copy": "Kopioi",
   'common.loading': "Ladataan…",
   'common.none': "Ei mitään",
   'common.revealToggle': "Näytä/Piilota",

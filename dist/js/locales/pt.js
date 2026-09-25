@@ -7,6 +7,7 @@ export const PT = {
   'common.error': "Erro",
   'common.saving': "A guardar…",
   "common.save": "Guardar",
+  "common.copy": "Copiar",
   'common.loading': "A carregar…",
   'common.none': "Nenhum",
   'common.revealToggle': "Mostrar/Ocultar",

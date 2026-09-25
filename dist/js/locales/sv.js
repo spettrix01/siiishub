@@ -7,6 +7,7 @@ export const SV = {
   'common.error': "Fel",
   'common.saving': "Sparar…",
   "common.save": "Spara",
+  "common.copy": "Kopiera",
   'common.loading': "Laddar…",
   'common.none': "Ingen",
   'common.revealToggle': "Visa/Dölj",

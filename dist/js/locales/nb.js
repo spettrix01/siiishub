@@ -7,6 +7,7 @@ export const NB = {
   'common.error': "Feil",
   'common.saving': "Lagrer…",
   "common.save": "Lagre",
+  "common.copy": "Kopier",
   'common.loading': "Laster…",
   'common.none': "Ingen",
   'common.revealToggle': "Vis/Skjul",

@@ -7,6 +7,7 @@ export const UK = {
   'common.error': "Помилка",
   'common.saving': "Збереження…",
   "common.save": "Зберегти",
+  "common.copy": "Копіювати",
   'common.loading': "Завантаження…",
   'common.none': "Немає",
   'common.revealToggle': "Показати/Сховати",

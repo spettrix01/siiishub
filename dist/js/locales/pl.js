@@ -7,6 +7,7 @@ export const PL = {
   'common.error': "Błąd",
   'common.saving': "Zapisywanie…",
   "common.save": "Zapisz",
+  "common.copy": "Kopiuj",
   'common.loading': "Ładowanie…",
   'common.none': "Brak",
   'common.revealToggle': "Pokaż/Ukryj",

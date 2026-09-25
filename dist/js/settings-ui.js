@@ -62,6 +62,7 @@ function resetFields() {
   if (tmdb) {
     tmdb.value = state.settings.tmdbKey || '';
     tmdb.type = 'password';
+    $('#tmdbReveal')?.classList.remove('is-on');
   }
   const addon = $('#addonUrl');
   if (addon) addon.value = '';
@@ -426,7 +427,27 @@ $('#openSettings').addEventListener('click', () => openSettings());
 $('#tmdbReveal').addEventListener('click', () => {
   const inp = $('#tmdbKeyInput');
   inp.type = inp.type === 'password' ? 'text' : 'password';
+  $('#tmdbReveal').classList.toggle('is-on', inp.type === 'text');
 });
+
+// The copy buttons of the API keys: the key in the field, as an addon's URL.
+function wireKeyCopy(buttonSel, inputSel) {
+  const btn = $(buttonSel);
+  if (!btn) return;
+  btn.innerHTML = COPY_SVG;
+  btn.addEventListener('click', async () => {
+    const value = $(inputSel)?.value.trim();
+    if (!value || !(await copyToClipboard(value))) return;
+    btn.classList.add('is-ok');
+    btn.innerHTML = CHECK_SVG;
+    setTimeout(() => {
+      btn.classList.remove('is-ok');
+      btn.innerHTML = COPY_SVG;
+    }, 1100);
+  });
+}
+wireKeyCopy('#tmdbCopy', '#tmdbKeyInput');
+wireKeyCopy('#debridCopy', '#debridTokenInput');
 
 async function saveTmdbKey() {
   const key = $('#tmdbKeyInput').value.trim();

@@ -7,6 +7,7 @@ export const HI = {
   'common.error': "त्रुटि",
   'common.saving': "सहेजा जा रहा है…",
   "common.save": "सहेजें",
+  "common.copy": "कॉपी करें",
   'common.loading': "लोड हो रहा है…",
   'common.none': "कोई नहीं",
   'common.revealToggle': "दिखाएँ/छिपाएँ",

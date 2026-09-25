@@ -7,6 +7,7 @@ export const EL = {
   'common.error': "Σφάλμα",
   'common.saving': "Αποθήκευση…",
   "common.save": "Αποθήκευση",
+  "common.copy": "Αντιγραφή",
   'common.loading': "Φόρτωση…",
   'common.none': "Κανένα",
   'common.revealToggle': "Εμφάνιση/Απόκρυψη",

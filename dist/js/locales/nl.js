@@ -7,6 +7,7 @@ export const NL = {
   'common.error': "Fout",
   'common.saving': "Opslaan…",
   "common.save": "Opslaan",
+  "common.copy": "Kopiëren",
   'common.loading': "Laden…",
   'common.none': "Geen",
   'common.revealToggle': "Tonen/Verbergen",

@@ -7,6 +7,7 @@ export const HU = {
   'common.error': "Hiba",
   'common.saving': "Mentés…",
   "common.save": "Mentés",
+  "common.copy": "Másolás",
   'common.loading': "Betöltés…",
   'common.none': "Nincs",
   'common.revealToggle': "Megjelenítés/Elrejtés",

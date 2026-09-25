@@ -7,6 +7,7 @@ export const DA = {
   'common.error': "Fejl",
   'common.saving': "Gemmer…",
   "common.save": "Gem",
+  "common.copy": "Kopiér",
   'common.loading': "Indlæser…",
   'common.none': "Ingen",
   'common.revealToggle': "Vis/skjul",

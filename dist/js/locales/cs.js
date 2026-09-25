@@ -7,6 +7,7 @@ export const CS = {
   'common.error': "Chyba",
   'common.saving': "Ukládání…",
   "common.save": "Uložit",
+  "common.copy": "Kopírovat",
   'common.loading': "Načítání…",
   'common.none': "Žádný",
   'common.revealToggle': "Zobrazit/Skrýt",

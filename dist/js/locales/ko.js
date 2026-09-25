@@ -7,6 +7,7 @@ export const KO = {
   'common.error': "오류",
   'common.saving': "저장 중…",
   "common.save": "저장",
+  "common.copy": "복사",
   'common.loading': "불러오는 중…",
   'common.none': "없음",
   'common.revealToggle': "표시/숨기기",

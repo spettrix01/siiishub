@@ -7,6 +7,7 @@ export const ZH = {
   'common.error': "错误",
   'common.saving': "保存中…",
   "common.save": "保存",
+  "common.copy": "复制",
   'common.loading': "加载中…",
   'common.none': "无",
   'common.revealToggle': "显示/隐藏",

@@ -373,11 +373,12 @@
       <p class="pane-desc" data-i18n="settings.tmdb.desc">Inserisci la tua API key TMDB v3 per caricare film e serie.</p>
       <label class="field">
         <span data-i18n="settings.tmdb.label">API key TMDB</span>
-        <div class="field-row">
+        <div class="field-row key-box">
           <input id="tmdbKeyInput" type="password" placeholder="es. 0a1b2c3d4e5f…" autocomplete="off" spellcheck="false" />
-          <button class="ghost" id="tmdbReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
-            <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+          <button class="copybtn" id="tmdbReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
           </button>
+          <button class="copybtn" id="tmdbCopy" type="button" data-i18n-title="common.copy" title="Copia"></button>
         </div>
       </label>
       <div class="actions">
@@ -434,11 +435,12 @@
 
         <label class="field" id="debridTokenField" hidden>
           <span data-i18n="settings.debrid.apikey">API key</span>
-          <div class="field-row">
+          <div class="field-row key-box">
             <input id="debridTokenInput" type="password" data-i18n-ph="settings.debrid.keyPlaceholder" placeholder="Incolla la tua API key" autocomplete="off" spellcheck="false" />
-            <button class="ghost" id="debridReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
-              <svg viewBox="0 0 24 24" width="18" height="18"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+            <button class="copybtn" id="debridReveal" type="button" data-i18n-aria="common.revealToggle" aria-label="Mostra/Nascondi">
+              <svg viewBox="0 0 24 24" width="16" height="16"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
             </button>
+            <button class="copybtn" id="debridCopy" type="button" data-i18n-title="common.copy" title="Copia"></button>
           </div>
           <a class="debrid-key-link" id="debridGetKeyLink" href="#" hidden></a>
         </label>

@@ -7,6 +7,7 @@ export const ES = {
   'common.error': "Error",
   'common.saving': "Guardando…",
   "common.save": "Guardar",
+  "common.copy": "Copiar",
   'common.loading': "Cargando…",
   'common.none': "Ninguno",
   'common.revealToggle': "Mostrar/Ocultar",

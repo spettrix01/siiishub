@@ -7,6 +7,7 @@ export const DE = {
   'common.error': "Fehler",
   'common.saving': "Wird gespeichert…",
   "common.save": "Speichern",
+  "common.copy": "Kopieren",
   'common.loading': "Wird geladen…",
   'common.none': "Keine",
   'common.revealToggle': "Anzeigen/Verbergen",

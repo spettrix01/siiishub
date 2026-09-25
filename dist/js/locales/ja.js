@@ -7,6 +7,7 @@ export const JA = {
   'common.error': "エラー",
   'common.saving': "保存中…",
   "common.save": "保存",
+  "common.copy": "コピー",
   'common.loading': "読み込み中…",
   'common.none': "なし",
   'common.revealToggle': "表示/非表示",

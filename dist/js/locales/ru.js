@@ -7,6 +7,7 @@ export const RU = {
   'common.error': "Ошибка",
   'common.saving': "Сохранение…",
   "common.save": "Сохранить",
+  "common.copy": "Копировать",
   'common.loading': "Загрузка…",
   'common.none': "Нет",
   'common.revealToggle': "Показать/Скрыть",

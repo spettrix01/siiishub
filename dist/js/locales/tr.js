@@ -7,6 +7,7 @@ export const TR = {
   'common.error': "Hata",
   'common.saving': "Kaydediliyor…",
   "common.save": "Kaydet",
+  "common.copy": "Kopyala",
   'common.loading': "Yükleniyor…",
   'common.none': "Yok",
   'common.revealToggle': "Göster/Gizle",

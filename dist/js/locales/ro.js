@@ -7,6 +7,7 @@ export const RO = {
   'common.error': "Eroare",
   'common.saving': "Se salvează…",
   "common.save": "Salvează",
+  "common.copy": "Copiază",
   'common.loading': "Se încarcă…",
   'common.none': "Niciunul",
   'common.revealToggle': "Arată/Ascunde",

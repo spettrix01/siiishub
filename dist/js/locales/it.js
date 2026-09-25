@@ -7,6 +7,7 @@ export const IT = {
   'common.error': 'Errore',
   'common.saving': 'Salvataggio…',
   "common.save": "Salva",
+  "common.copy": "Copia",
   'common.loading': 'Caricamento…',
   'common.none': 'Nessuno',
   'common.revealToggle': 'Mostra/Nascondi',
