@@ -572,10 +572,23 @@ function setupRemoteSection() {
   }
   refreshRemoteInfo();
   if (!remoteClientsListener) {
-    onRemoteClientCount(devices => renderDevices(devices))
+    onRemoteClientCount(devices => {
+      if (phoneJoined(devices)) closeQrOverlay();
+      renderDevices(devices);
+    })
       .then(unlisten => { remoteClientsListener = unlisten; })
       .catch(() => {});
   }
+}
+
+// A phone connected and approved that was not before: the enlarged QR code
+// has done its job. A new phone closes it with its approval dialog; a
+// remembered one comes in without any.
+function phoneJoined(devices) {
+  if (!Array.isArray(devices)) return false;
+  const inside = d => d.online !== false && d.approved;
+  const before = new Set(lastDevices.filter(inside).map(d => d.id));
+  return devices.some(d => inside(d) && !before.has(d.id));
 }
 
 const QR_ICON_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path fill="currentColor" d="M14 14h2.6v2.6H14zM17.4 17.4H20V20h-2.6zM14 17.4h2.6V20H14zM17.4 14H20v2.6h-2.6z"/></svg>`;
