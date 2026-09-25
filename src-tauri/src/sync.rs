@@ -181,6 +181,29 @@ impl SyncLog {
         self.inner.seq.send_replace(last);
     }
 
+    /// Makes everything here this side's own again, for an account it has
+    /// not synced with yet (another one, or the same after its server started
+    /// over): what came from the previous one is sent too, and so are the
+    /// `existing` keys that never got a stamp, as from before syncing.
+    pub async fn claim(&self, existing: impl IntoIterator<Item = String>) {
+        let last = {
+            let mut log = self.inner.log.lock();
+            for stamp in log.stamps.values_mut() {
+                stamp.remote = false;
+            }
+            for key in existing {
+                if !log.stamps.contains_key(&key) {
+                    log.seq += 1;
+                    let seq = log.seq;
+                    log.stamps.insert(key, Stamp { ts: 0, seq, remote: false });
+                }
+            }
+            log.seq
+        };
+        self.persist().await;
+        self.inner.seq.send_replace(last);
+    }
+
     /// Keys taken from the other side, with the times they were changed.
     pub async fn record(&self, changes: &[(String, u64)], remote: bool) {
         if changes.is_empty() {

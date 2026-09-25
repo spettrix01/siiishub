@@ -60,6 +60,13 @@ pub fn changes_since(stores: Stores<'_>, seq: u64, own: bool) -> (Vec<Change>, u
     (changes, cursor)
 }
 
+/// Before the first sync with an account: everything this profile has is
+/// offered to it (`SyncLog::claim`).
+pub async fn claim(stores: Stores<'_>) {
+    let existing = sync::existing_keys(&stores.settings.read(), &stores.userdata.snapshot());
+    stores.log.claim(existing).await;
+}
+
 /// What `apply` changed.
 #[derive(Debug, Default, Clone, Copy, Serialize)]
 pub struct Applied {

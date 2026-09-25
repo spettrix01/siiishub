@@ -169,6 +169,10 @@ impl Account {
             _ => return Err("not-siiishub".into()),
         }
         let TokenReply { token, username } = reply.json().await.map_err(|_| "not-siiishub")?;
+        // Another account, or the same after its server started over: what
+        // this device has goes to it too, not only what changed here since
+        // the last sync (the rest came from the previous account).
+        sync::claim(stores).await;
         let link = Link { server: base, username, token, ..Link::default() };
         self.save(Some(&link));
         *self.link.lock() = Some(link);
@@ -416,6 +420,51 @@ mod tests {
         a.account.sign_out().await;
         b.account.sign_out().await;
         assert!(!a.account.signed_in());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// A device that synced with an account has its values marked as taken
+    /// from the server; signing in to another account offers them all again,
+    /// with the keys the log never stamped.
+    #[tokio::test]
+    async fn claimed_for_a_new_account() {
+        let dir = std::env::temp_dir().join(format!("siiishub-claim-test-{}", crate::sync::now_ms()));
+        let d = Device::open(dir.clone(), &[("siiis:favorite:movie:1", "mine")]).await;
+        d.userdata.set("siiis:favorite:movie:2".into(), "from the account".into()).await.unwrap();
+        d.log.record(&[("siiis:favorite:movie:1".into(), 0), ("siiis:favorite:movie:2".into(), 5)], true).await;
+        d.userdata.set("siiis:resume:movie:3".into(), "{}".into()).await.unwrap();
+        assert!(sync::changes_since(d.stores(), 0, true).0.is_empty());
+
+        sync::claim(d.stores()).await;
+        let (sent, _) = sync::changes_since(d.stores(), 0, true);
+        let mut keys: Vec<_> = sent.iter().map(|c| c.key.as_str()).collect();
+        keys.sort();
+        assert_eq!(keys, ["siiis:favorite:movie:1", "siiis:favorite:movie:2", "siiis:resume:movie:3"]);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// A device moves to another account (or to its server started over):
+    /// the new account gets what the device had, though it came from the
+    /// first one. Needs a second account on the test server, besides the one
+    /// of `two_devices`: SIIISHUB_TEST_USER2, SIIISHUB_TEST_PASSWORD2.
+    #[tokio::test]
+    #[ignore]
+    async fn new_account() {
+        let var = |name: &str| std::env::var(name).unwrap_or_else(|_| panic!("{name} not set"));
+        let server = var("SIIISHUB_TEST_SERVER");
+        let dir = std::env::temp_dir().join(format!("siiishub-move-test-{}", crate::sync::now_ms()));
+        let a = Device::open(dir.join("a"), &[("siiis:favorite:movie:7", "from A")]).await;
+        a.account.sign_in(a.stores(), &server, &var("SIIISHUB_TEST_USER"), &var("SIIISHUB_TEST_PASSWORD"), "Test A").await.unwrap();
+        a.sync().await;
+        a.account.sign_out().await;
+
+        a.account.sign_in(a.stores(), &server, &var("SIIISHUB_TEST_USER2"), &var("SIIISHUB_TEST_PASSWORD2"), "Test A").await.unwrap();
+        let c = Device::open(dir.join("c"), &[]).await;
+        c.account.sign_in(c.stores(), &server, &var("SIIISHUB_TEST_USER2"), &var("SIIISHUB_TEST_PASSWORD2"), "Test C").await.unwrap();
+        assert_eq!(c.userdata.get("siiis:favorite:movie:7").as_deref(), Some("from A"));
+
+        a.account.sign_out().await;
+        c.account.sign_out().await;
         let _ = std::fs::remove_dir_all(&dir);
     }
 
