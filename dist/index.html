@@ -501,20 +501,10 @@
       <div class="account-admin" id="accountAdminBox" hidden>
         <h3 class="remote-group-title" data-i18n="settings.account.accounts">Account del server</h3>
         <ul class="remote-devices" id="accountList"></ul>
-        <details class="account-fold" id="accountCreateBox">
-          <summary data-i18n="settings.account.newAccount">Nuovo account</summary>
-          <form class="account-form" id="accountCreateForm">
-            <label class="field">
-              <span data-i18n="settings.account.username">Utente</span>
-              <input id="accountNewUser" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" />
-            </label>
-            <label class="field">
-              <span data-i18n="settings.account.password">Password</span>
-              <input id="accountNewUserPassword" type="password" autocomplete="new-password" />
-            </label>
-            <button class="primary" type="submit" data-i18n="settings.account.create">Crea</button>
-          </form>
-        </details>
+        <button type="button" class="account-add" id="accountCreateBtn">
+          <span data-i18n="settings.account.newAccount">Nuovo account</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+        </button>
       </div>
 
       <p class="hint" id="accountHint"></p>

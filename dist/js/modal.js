@@ -10,6 +10,13 @@ const alertCard = alertModal.querySelector('.alert-card');
 const alertTitle = $('#alertTitle');
 const alertBody = $('#alertBody');
 const alertOk = alertModal.querySelector('[data-alert-ok]');
+const alertIcon = alertModal.querySelector('[data-alert-icon]');
+const defaultIcon = alertIcon.innerHTML;
+
+function setVariant(variant) {
+  alertCard.classList.remove('is-error', 'is-warn', 'is-info', 'is-accent');
+  alertCard.classList.add(`is-${variant}`);
+}
 
 export function closeModal(sel) {
   $(sel).hidden = true;
@@ -43,8 +50,7 @@ export function showConfirm(message, {
   okLabel = t('modal.confirm'),
   cancelLabel = t('common.cancel'),
 } = {}) {
-  alertCard.classList.remove('is-error', 'is-warn', 'is-info');
-  alertCard.classList.add(`is-${variant}`);
+  setVariant(variant);
   alertTitle.textContent = title;
   alertBody.textContent = message;
   setAlertButtons(okLabel, cancelLabel);
@@ -68,7 +74,7 @@ export function showConfirm(message, {
       onKey: (e) => {
         if (alertModal.hidden) { cleanup(); return; }
         if (e.key === 'Enter') { e.preventDefault(); settle(true); }
-        else if (e.key === 'Escape') { e.preventDefault(); settle(false); }
+        else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); }
       },
       onOverlay: (e) => {
         if (e.target.matches('[data-close]')) settle(false);
@@ -84,8 +90,7 @@ export function showMultiSelectConfirm(items, {
   okLabel = t('modal.delete'),
   cancelLabel = t('common.cancel'),
 } = {}) {
-  alertCard.classList.remove('is-error', 'is-warn', 'is-info');
-  alertCard.classList.add(`is-${variant}`);
+  setVariant(variant);
   alertTitle.textContent = title;
 
   const descHtml = description
@@ -144,12 +149,103 @@ export function showMultiSelectConfirm(items, {
       onKey: (e) => {
         if (alertModal.hidden) { cleanup(); return; }
         if (e.key === 'Enter' && !alertOk.disabled) { e.preventDefault(); onOk(); }
-        else if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
+        else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onCancel(); }
       },
       onOverlay: (e) => {
         if (e.target.matches('[data-close]')) onCancel();
       },
     });
+  });
+}
+
+/**
+ * A popup with a form, like the confirmations. `fields` are
+ * { name, label, type, autocomplete }; `submit(values)` runs on OK and
+ * returns an error, shown under the fields with the popup still open, or
+ * nothing to close it. Resolves true once submitted, false if cancelled.
+ */
+export function showForm({
+  title,
+  fields,
+  icon = '',
+  variant = 'accent',
+  okLabel = t('common.ok'),
+  cancelLabel = t('common.cancel'),
+  submit,
+}) {
+  setVariant(variant);
+  if (icon) alertIcon.innerHTML = icon;
+  alertTitle.textContent = title;
+  alertBody.innerHTML =
+    `<form class="alert-form" novalidate>`
+    + fields.map(f =>
+      `<label class="field">`
+      + `<span>${escapeHTML(f.label)}</span>`
+      + `<input name="${escapeHTML(f.name)}" type="${escapeHTML(f.type || 'text')}"`
+      + ` autocomplete="${escapeHTML(f.autocomplete || 'off')}" autocapitalize="none" spellcheck="false" />`
+      + `</label>`
+    ).join('')
+    + `<p class="hint error" role="alert" data-alert-error></p>`
+    + `</form>`;
+  const form = alertBody.querySelector('form');
+  const errorEl = alertBody.querySelector('[data-alert-error]');
+  setAlertButtons(okLabel, cancelLabel);
+  alertModal.hidden = false;
+  document.body.style.overflow = 'hidden';
+
+  return new Promise(resolve => {
+    let settled = false;
+    let busy = false;
+    let cleanup;
+    const settle = (ok) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      closeModal('#alertModal');
+      setAlertButtons(t('common.ok'), null);
+      alertOk.disabled = false;
+      alertIcon.innerHTML = defaultIcon;
+      alertBody.innerHTML = '';
+      resolve(ok);
+    };
+    const onOk = async () => {
+      if (busy || settled) return;
+      busy = true;
+      alertOk.disabled = true;
+      const values = Object.fromEntries(new FormData(form));
+      const error = await Promise.resolve()
+        .then(() => submit(values))
+        .catch(e => e?.message || String(e));
+      busy = false;
+      alertOk.disabled = false;
+      if (!error) {
+        settle(true);
+        return;
+      }
+      errorEl.textContent = error;
+      form.querySelector('input')?.focus();
+    };
+    const onCancel = () => settle(false);
+    // Never a real submit, which would put the fields in the address.
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      onOk();
+    });
+    cleanup = attachAlertHandlers({
+      onOk,
+      onCancel,
+      onKey: (e) => {
+        if (alertModal.hidden) { cleanup(); return; }
+        // Enter on Cancel cancels.
+        if (e.key === 'Enter' && !e.target.closest?.('[data-alert-cancel]')) { e.preventDefault(); onOk(); }
+        else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); onCancel(); }
+      },
+      onOverlay: (e) => {
+        if (e.target.matches('[data-close]')) onCancel();
+      },
+    });
+    // After attachAlertHandlers has focused OK: the first field instead.
+    setTimeout(() => form.querySelector('input')?.focus(), 0);
   });
 }
 
@@ -170,8 +266,11 @@ function setAlertButtons(okLabel, cancelLabel) {
   }
 }
 
+// OK closes the plain alerts; the others close themselves, and a form
+// stays open on an error.
 alertOk.addEventListener('click', () => {
-  if (!alertModal.hidden) closeModal('#alertModal');
+  if (alertModal.hidden || alertModal.querySelector('[data-alert-cancel]')) return;
+  closeModal('#alertModal');
 });
 document.addEventListener('keydown', e => {
   if (alertModal.hidden) return;

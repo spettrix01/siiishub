@@ -897,6 +897,15 @@ input, select { font: inherit; color: inherit; }
   color: #7eb6ff;
   border-color: rgba(94, 174, 255, 0.3);
 }
+.alert-card.is-accent .alert-icon {
+  background: var(--violet-soft);
+  color: var(--violet);
+  border-color: rgba(var(--violet-rgb), 0.35);
+}
+/* A popup with fields (showForm in modal.js). */
+.alert-form { white-space: normal; }
+.alert-form .field input { width: 100%; }
+.alert-form .field:last-of-type { margin-bottom: 0; }
 .alert-title {
   font-family: var(--display);
   font-size: 1.15rem;
@@ -4489,7 +4498,28 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   gap: 10px;
   margin-top: 24px;
 }
-.account-admin .account-fold { margin-top: 2px; }
+/* New account: a + that opens its popup (account-ui.js). */
+.account-add {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 2px;
+  padding: 12px 16px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: color .14s, border-color .14s;
+}
+.account-add svg { color: var(--violet); flex-shrink: 0; }
+.account-add:hover { color: var(--text); border-color: var(--line-2); }
 .account-row-meta {
   margin-left: auto;
   font-size: 12px;

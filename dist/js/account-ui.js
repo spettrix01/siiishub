@@ -6,7 +6,7 @@
 import { $, escapeHTML } from './dom.js';
 import { t, intlLocale } from './i18n.js';
 import { IS_WEB, IS_ANDROID, IS_TV } from './platform.js';
-import { showConfirm } from './modal.js';
+import { showConfirm, showForm } from './modal.js';
 import {
   syncStatus, syncSignIn, syncSignOut,
   accountStatus, accountsList, accountCreate, accountDelete, accountPassword,
@@ -130,6 +130,36 @@ async function renderWeb() {
   if (account.admin) await renderAccounts();
 }
 
+// The head of the popup for a new account: a person with a +.
+const NEW_ACCOUNT_ICON = '<svg viewBox="0 0 24 24" width="22" height="22"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 19a6 6 0 0 0-12 0M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM19 8v6M16 11h6"/></svg>';
+
+// A popup asks the username and the password; it stays open on an error.
+async function createAccount() {
+  let user = '';
+  const created = await showForm({
+    title: t('settings.account.newAccount'),
+    icon: NEW_ACCOUNT_ICON,
+    fields: [
+      { name: 'username', label: t('settings.account.username') },
+      { name: 'password', label: t('settings.account.password'), type: 'password', autocomplete: 'new-password' },
+    ],
+    okLabel: t('settings.account.create'),
+    // The server says what is wrong with an empty or short field.
+    submit: async ({ username, password }) => {
+      user = String(username || '').trim();
+      try {
+        await accountCreate(user, password || '');
+      } catch (err) {
+        return errorText(err);
+      }
+      return null;
+    },
+  });
+  if (!created) return;
+  hint(t('settings.account.created', { user }), 'success');
+  await renderAccounts();
+}
+
 async function renderAccounts() {
   const list = await accountsList().catch(() => []);
   $('#accountList').innerHTML = list.map(a => `
@@ -158,20 +188,7 @@ function wireWeb() {
       hint(errorText(err), 'error');
     }
   });
-  $('#accountCreateForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const user = $('#accountNewUser').value.trim();
-    try {
-      await accountCreate(user, $('#accountNewUserPassword').value);
-      $('#accountNewUser').value = '';
-      $('#accountNewUserPassword').value = '';
-      $('#accountCreateBox').open = false;
-      hint(t('settings.account.created', { user }), 'success');
-      await renderAccounts();
-    } catch (err) {
-      hint(errorText(err), 'error');
-    }
-  });
+  $('#accountCreateBtn').addEventListener('click', createAccount);
   $('#accountList').addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-account-delete]');
     if (!btn) return;
