@@ -29,7 +29,8 @@
 <main class="login-card">
   <h1 class="login-brand">SIIIS<em>HUB</em></h1>
 
-  <!-- The first start: the administrator's account, from the home network. -->
+  <!-- The first start: the administrator's account, from the home network.
+       Only one of the two forms shows. -->
   <form class="login-form" id="setupForm" hidden>
     <h2 class="login-title" data-i18n="web.login.setupTitle">Create the administrator account</h2>
     <p class="login-note" data-i18n="web.login.setupHint">It manages this server and makes the other accounts.</p>
@@ -42,7 +43,7 @@
   </form>
 
   <form class="login-form" id="loginForm" hidden>
-    <label class="login-label" for="loginUser" data-i18n="web.login.username">Username</label>
+    <label class="login-label" id="loginUserLabel" for="loginUser" data-i18n="web.login.username">Username</label>
     <input class="login-input" id="loginUser" name="username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" />
     <label class="login-label" for="loginPassword" data-i18n="web.login.password">Password</label>
     <input class="login-input" id="loginPassword" name="password" type="password" autocomplete="current-password" required />
@@ -55,6 +56,7 @@
   <div class="login-guest" id="guestBox" hidden>
     <span class="login-or" data-i18n="web.login.or">or</span>
     <button class="login-guest-btn" id="guestBtn" type="button" data-i18n="web.login.guest">Continue without an account</button>
+    <p class="login-error" id="guestError" role="alert" hidden></p>
   </div>
 </main>
 <script type="module" src="/web/login.js"></script>

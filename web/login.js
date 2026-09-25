@@ -60,10 +60,12 @@ function message(code) {
   return t(key, fallback);
 }
 
-// Posts `body` to `url`: signed in, the app opens; else `errorEl` says why.
+// Posts `body` to `url`: signed in, the app opens; else `errorEl` says why
+// and the error's code comes back.
 async function submit(url, body, errorEl, button) {
   errorEl.hidden = true;
   if (button) button.disabled = true;
+  let code = '';
   try {
     const res = await fetch(url, {
       method: 'POST',
@@ -73,16 +75,17 @@ async function submit(url, body, errorEl, button) {
     });
     if (res.ok) {
       enter();
-      return;
+      return null;
     }
-    const reply = await res.json().catch(() => ({}));
-    errorEl.textContent = message(reply.error);
+    code = (await res.json().catch(() => ({}))).error || '';
   } catch {
-    errorEl.textContent = message('');
+    // Unreachable: the message says so.
   } finally {
     if (button) button.disabled = false;
   }
+  errorEl.textContent = message(code);
   errorEl.hidden = false;
+  return code;
 }
 
 $('loginForm').addEventListener('submit', (e) => {
@@ -91,30 +94,45 @@ $('loginForm').addEventListener('submit', (e) => {
     $('loginError'), $('loginSubmit'));
 });
 
-$('setupForm').addEventListener('submit', (e) => {
+$('setupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  submit('/api/account/setup', { username: $('setupUser').value.trim(), password: $('setupPassword').value },
+  const code = await submit('/api/account/setup',
+    { username: $('setupUser').value.trim(), password: $('setupPassword').value },
     $('setupError'), e.submitter);
+  // Made meanwhile from another browser: this one signs in now.
+  if (code === 'setup-done') {
+    $('setupError').hidden = true;
+    show();
+  }
 });
 
 $('guestBtn').addEventListener('click', () => {
-  submit('/api/login/guest', {}, $('loginError'), $('guestBtn'));
+  submit('/api/login/guest', {}, $('guestError'), $('guestBtn'));
 });
 
-async function start() {
-  await translate();
+// One form at a time. No account yet: from the home network the
+// administrator's is made, and that is all; from outside only the password
+// of the versions before accounts signs in, when the server has one.
+async function show() {
   const options = await fetch('/api/login/options', { credentials: 'same-origin' })
     .then(r => r.json())
     .catch(() => ({}));
-  // No account yet: the administrator's is made here, from the home network.
-  // Signing in stays for the password of the versions before accounts.
   const setup = !!options.setup;
-  $('setupForm').hidden = !(setup && options.home);
-  $('loginForm').hidden = setup && !options.password;
+  const setupHere = setup && !!options.home;
+  const passwordOnly = setup && !options.home && !!options.password;
+  $('setupForm').hidden = !setupHere;
+  $('loginForm').hidden = setupHere || (setup && !options.password);
+  $('loginUserLabel').hidden = $('loginUser').hidden = passwordOnly;
   $('setupAtHome').hidden = !(setup && !options.home && !options.password);
   $('guestBox').hidden = !options.guest;
-  const first = [$('setupUser'), $('loginUser')].find(el => !el.closest('form').hidden);
+  const first = [$('setupUser'), $('loginUser'), $('loginPassword')]
+    .find(el => !el.hidden && !el.closest('form').hidden);
   first?.focus();
+}
+
+async function start() {
+  await translate();
+  await show();
 }
 
 start();
