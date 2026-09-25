@@ -1,14 +1,11 @@
 import { userStore } from './userstore.js';
-import { IS_ANDROID } from './platform.js';
 
 const THEMES = ['dark-orange', 'light-orange', 'dark-purple', 'light-purple', 'dark-teal', 'light-teal'];
 const DEFAULT_THEME = 'dark-orange';
 
 const ACCENTS = ['orange', 'purple', 'teal'];
 
-// The pattern of lines behind the interface (img/backdrops), or none: on
-// Windows, Linux and in the browser version, not in the Android apps, which
-// ignore one synced from another device.
+// The pattern of lines behind the interface (img/backdrops), or none.
 const BACKDROPS = ['maze', 'rings', 'curves', 'drops', 'liquid'];
 
 function parse(theme) {
@@ -41,7 +38,7 @@ export function currentBackdrop() {
 
 function applyBackdrop(backdrop) {
   const root = document.documentElement;
-  if (!IS_ANDROID && BACKDROPS.includes(backdrop)) root.setAttribute('data-backdrop', backdrop);
+  if (BACKDROPS.includes(backdrop)) root.setAttribute('data-backdrop', backdrop);
   else root.removeAttribute('data-backdrop');
 }
 

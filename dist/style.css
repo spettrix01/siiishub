@@ -4125,8 +4125,6 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .app-version:empty,
 html.is-phone .app-version,
 body.is-player-open .app-version { display: none; }
-/* Windows, Linux and the browser version only. */
-html.is-android .backdrop-group { display: none; }
 /* The video plays behind the window's transparent page. */
 body.is-player-open .backdrop { display: none; }
 .backdrop-swatch {
