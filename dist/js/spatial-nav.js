@@ -158,22 +158,58 @@ function activeScope() {
   return document.body;
 }
 
-function isVisible(el) {
-  if (!el || !el.isConnected) return false;
-  if (el.closest('[hidden]')) return false;
-  const r = el.getBoundingClientRect();
-  if (r.width < 3 || r.height < 3) return false;
-  const cs = getComputedStyle(el);
-  if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+// Geometry of one move, measured once.
+let cache = null;
+
+// Whether `el`, not inside anything hidden, is laid out and visible.
+function shows(el) {
+  const box = el.getBoundingClientRect();
+  if (box.width < 3 || box.height < 3) return false;
+  if (el.checkVisibility) {
+    if (!el.checkVisibility({ visibilityProperty: true, checkVisibilityCSS: true })) return false;
+  } else {
+    const cs = getComputedStyle(el);
+    if (cs.visibility === 'hidden' || cs.display === 'none') return false;
+  }
+  // A move measures each item once: on a TV stick every measure counts.
+  cache?.box.set(el, box);
   return true;
 }
 
-function candidates(scope) {
-  return $$(FOCUSABLE, scope).filter(el => isVisible(el) && !el.closest(EXCLUDED));
+function isVisible(el) {
+  if (!el || !el.isConnected) return false;
+  if (el.closest('[hidden]')) return false;
+  return shows(el);
 }
 
-// Geometry of one move, measured once.
-let cache = null;
+const usable = el => isVisible(el) && !el.closest(EXCLUDED);
+
+function candidates(scope) {
+  return $$(FOCUSABLE, scope).filter(usable);
+}
+
+// The items a move from the selection can reach, measured. A long box
+// around it (the streams of a details page, a grid of titles, a list of
+// languages) keeps only the items near it in the page's order, which is the
+// order its rows are laid out in: a move never goes further than the next
+// row, and measuring hundreds of items took a TV stick tens of milliseconds
+// a move.
+const NEAR = 60;
+
+function reachable(listed, scope) {
+  // What is hidden (the options of a closed menu) or left to the pointer
+  // does not count: it would push what is near out of reach.
+  let pool = listed.filter(el => !el.closest('[hidden]') && !el.closest(EXCLUDED));
+  for (let zone = zoneAround(current, scope); zone !== scope; zone = zoneAround(zone.parentElement, scope)) {
+    if (zoneType(zone) !== 'box') continue;
+    const inside = pool.filter(el => zone.contains(el));
+    const i = inside.indexOf(current);
+    if (inside.length <= 2 * NEAR + 1 || i < 0) continue;
+    const near = new Set(inside.slice(Math.max(0, i - NEAR), i + NEAR + 1));
+    pool = pool.filter(el => near.has(el) || !zone.contains(el));
+  }
+  return pool.filter(shows);
+}
 
 function isZone(el) {
   let zone = cache.zone.get(el);
@@ -209,7 +245,7 @@ function scrolledBy(el) {
 function rectOf(el) {
   let r = cache.rect.get(el);
   if (!r) {
-    const b = el.getBoundingClientRect();
+    const b = cache.box.get(el) || el.getBoundingClientRect();
     const dy = scrolledBy(el);
     r = { left: b.left, right: b.right, top: b.top + dy, bottom: b.bottom + dy };
     cache.rect.set(el, r);
@@ -357,12 +393,13 @@ function enter(el, dir, ref, items, fromTop = false) {
 let within = [];
 
 function markWithin(el) {
-  for (const p of within) p.classList.remove(WITHIN_CLASS);
-  within = [];
-  for (let p = el?.parentElement; p && p !== document.body; p = p.parentElement) {
-    p.classList.add(WITHIN_CLASS);
-    within.push(p);
-  }
+  const next = [];
+  for (let p = el?.parentElement; p && p !== document.body; p = p.parentElement) next.push(p);
+  // Only the ancestors that change are touched: the page's big containers,
+  // around the old selection and the new one alike, keep their mark.
+  for (const p of within) if (!next.includes(p)) p.classList.remove(WITHIN_CLASS);
+  for (const p of next) if (!p.classList.contains(WITHIN_CLASS)) p.classList.add(WITHIN_CLASS);
+  within = next;
 }
 
 function clearFocus() {
@@ -379,6 +416,38 @@ function scrollDelta(a, b, lo, hi, centre) {
   if (a < lo + margin) return a - lo - margin;
   if (b > hi - margin) return Math.min(b - hi + margin, a - lo - margin);
   return 0;
+}
+
+// On a TV a scroller glides to where the selection wants it in a short,
+// fixed time, fast at first: the WebView's own smooth scroll starts slowly
+// and takes half a second over a long way, which reads as the remote
+// lagging. A new move takes over from wherever the glide has got to; a
+// scroller moved meanwhile by something else (a page drawn again) is left
+// where that put it.
+const GLIDE_MS = 220;
+const glides = new WeakMap();
+
+function glide(scroller, dx, dy) {
+  cancelAnimationFrame(glides.get(scroller));
+  const x0 = scroller.scrollLeft;
+  const y0 = scroller.scrollTop;
+  const t0 = performance.now();
+  let x = x0;
+  let y = y0;
+  const step = () => {
+    if (Math.abs(scroller.scrollLeft - x) > 1 || Math.abs(scroller.scrollTop - y) > 1) {
+      glides.delete(scroller);
+      return;
+    }
+    const k = Math.min(1, (performance.now() - t0) / GLIDE_MS);
+    const e = 1 - (1 - k) ** 3;
+    scroller.scrollTo(x0 + dx * e, y0 + dy * e);
+    x = scroller.scrollLeft;
+    y = scroller.scrollTop;
+    if (k < 1) glides.set(scroller, requestAnimationFrame(step));
+    else glides.delete(scroller);
+  };
+  glides.set(scroller, requestAnimationFrame(step));
 }
 
 // A move keeps the selection in the middle of its scrollers along the
@@ -411,7 +480,8 @@ function reveal(el, dir) {
       dx = Math.max(-p.scrollLeft, Math.min(p.scrollWidth - p.clientWidth - p.scrollLeft, dx));
     }
     if (Math.abs(dy) < 1 && Math.abs(dx) < 1) continue;
-    p.scrollBy({ top: dy, left: dx, behavior: 'smooth' });
+    if (IS_TV) glide(p, dx, dy);
+    else p.scrollBy({ top: dy, left: dx, behavior: 'smooth' });
     top -= dy;
     bottom -= dy;
     left -= dx;
@@ -419,13 +489,13 @@ function reveal(el, dir) {
   }
 }
 
-function setFocus(el, dir = null) {
+function setFocus(el, dir = null, scope = null) {
   if (current && current !== el) current.classList.remove(FOCUS_CLASS);
   current = el || null;
   markWithin(current);
   if (!current) return;
   current.classList.add(FOCUS_CLASS);
-  const scope = activeScope();
+  scope = scope || activeScope();
   if (scope === document.body) lastBaseFocus = current;
   for (let p = current.parentElement; p && p !== scope; p = p.parentElement) {
     if (p.matches(REMEMBER)) remembered.set(p, current);
@@ -459,6 +529,22 @@ function pickInitial(list) {
     || null;
 }
 
+// A callback run at most once a frame, just before the frame is drawn: what
+// it measures is laid out once, with the frame, instead of after every step
+// of a page drawn in many (most of a second on a TV stick for a details page
+// with a long list of streams).
+function onceAFrame(fn) {
+  let queued = false;
+  return () => {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      fn();
+    });
+  };
+}
+
 // Where a TV starts: the selection shows at once, on the welcome page's
 // button or on the first title. Until the titles have loaded it waits on the
 // tab of the section, and moves to the first one as it shows, unless the
@@ -471,14 +557,14 @@ function begin() {
   if (!start) return;
   setFocus(start);
   if (!start.matches('.tab')) return;
-  const titles = new MutationObserver(() => {
+  const titles = new MutationObserver(onceAFrame(() => {
     if (current !== start) { titles.disconnect(); return; }
     const first = pickInitial(candidates(activeScope()));
     if (first && !first.matches('.tab')) {
       titles.disconnect();
       setFocus(first);
     }
-  });
+  }));
   titles.observe($('#page-scroll') || document.body, { childList: true, subtree: true });
   setTimeout(() => titles.disconnect(), 30000);
 }
@@ -487,17 +573,18 @@ function move(dir) {
   dpad = true;
   const scope = activeScope();
   if (!scope) return;
-  cache = { zone: new Map(), shift: new Map(), rect: new Map() };
+  cache = { zone: new Map(), shift: new Map(), rect: new Map(), box: new Map() };
   try {
-    const items = candidates(scope);
-    if (!items.length) return;
-
-    if (!current || !items.includes(current)) {
+    const listed = $$(FOCUSABLE, scope);
+    if (!current || !listed.includes(current) || !usable(current)) {
+      const items = listed.filter(usable);
+      if (!items.length) return;
       let start = null;
       if (scope === document.body && lastBaseFocus && items.includes(lastBaseFocus)) start = lastBaseFocus;
-      setFocus(start || pickInitial(items));
+      setFocus(start || pickInitial(items), null, scope);
       return;
     }
+    const items = reachable(listed, scope);
 
     // A slider takes its own axis (seek, volume).
     const axis = current.getAttribute('data-snav-axis');
@@ -516,7 +603,7 @@ function move(dir) {
       const target = stepIn(zone, from, dir, ref, items, scope);
       if (target) {
         const el = enter(target.el, dir, ref, items);
-        if (el) setFocus(el, dir);
+        if (el) setFocus(el, dir, scope);
         return;
       }
       if (zone === scope) return;
@@ -634,6 +721,10 @@ function back() {
 
 function scrollPageTop() {
   const scroller = $('#page-scroll') || document.scrollingElement;
+  if (IS_TV && scroller) {
+    glide(scroller, 0, -scroller.scrollTop);
+    return;
+  }
   try {
     scroller?.scrollTo({ top: 0, behavior: 'smooth' });
   } catch {
@@ -706,13 +797,13 @@ const detailsModal = $('#detailsModal');
 const detailsBody = $('#detailsBody');
 const player = $('#playerModal');
 if (detailsModal && detailsBody) {
-  new MutationObserver(() => {
+  new MutationObserver(onceAFrame(() => {
     if (detailsModal.hidden || (player && !player.hidden) || !inUse()) return;
     if (current && (detailsModal.contains(current) || current.closest('[data-pick-menu], #alertModal'))
         && isVisible(current)) return;
     const first = detailsBody.querySelector('.dossier-actions button, [data-rd-play]');
     if (first && isVisible(first)) setFocus(first);
-  }).observe(detailsBody, { childList: true, subtree: true });
+  })).observe(detailsBody, { childList: true, subtree: true });
 }
 trackLayer(detailsModal);
 

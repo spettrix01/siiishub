@@ -67,8 +67,11 @@ function resetFields() {
   const addon = $('#addonUrl');
   if (addon) addon.value = '';
   const trackers = $('#trackerList');
-  if (trackers) {
-    trackers.value = (state.settings.tracker_fallbacks || []).join('\n');
+  const savedTrackers = (state.settings.tracker_fallbacks || []).join('\n');
+  // Sized again only when its text changes (measuring it lays the whole
+  // page out again); its section sizes it when it shows (applyActivePane).
+  if (trackers && trackers.value !== savedTrackers) {
+    trackers.value = savedTrackers;
     autoSizeTracker();
   }
   debridProviderValue = state.settings.debridProvider || '';

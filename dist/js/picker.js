@@ -263,18 +263,25 @@ export function setupStreamPicker(rootEl, opts = {}) {
 
   paint();
 
+  // Setting what is already chosen redraws nothing: the settings set every
+  // picker back to what is saved each time their section changes, and a
+  // list of languages takes long to draw on a TV.
+  const shown = () => (multi ? order.join('\n') : String(currentValue));
+
   return {
     getValue: () => multi ? null : currentValue,
     setValue: (v, fire = false) => {
+      const before = shown();
       currentValue = v;
-      paint();
+      if (shown() !== before) paint();
       if (fire) onChange?.(v);
     },
     getValues: () => multi ? order.slice() : (currentValue == null ? [] : [currentValue]),
     setValues: (arr) => {
+      const before = shown();
       if (multi) order = normalizeMulti(arr);
       else currentValue = Array.isArray(arr) ? arr[0] : arr;
-      paint();
+      if (shown() !== before) paint();
     },
     setItems: (newItems) => {
       currentItems = newItems.slice();

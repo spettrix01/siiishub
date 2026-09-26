@@ -4863,15 +4863,38 @@ html.is-android .topbar { padding-right: var(--layout-gutter); }
 /* ---------- Android TV ---------- */
 /* The big-screen layout (the desktop one, without window controls) driven
    with the remote's D-pad (tv-nav.js): margins inside the TV safe area, and
-   the selected card lifts as it does under the mouse on the desktop. */
+   the selected card lifts as it does under the mouse on the desktop, quickly
+   and without the shadow growing under it or the picture zooming, which the
+   graphics chip of a TV stick would redraw on every frame. */
 html.is-tv { --layout-gutter: 48px; }
+html.is-tv .poster,
+html.is-tv .trending-poster { transition: transform .15s ease; }
 html.is-tv .card.snav-focus .poster,
-html.is-tv .trending-card.snav-focus .trending-poster {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 36px -16px var(--violet-glow);
+html.is-tv .trending-card.snav-focus .trending-poster { transform: translateY(-3px); }
+/* Nothing is blurred behind anything: a TV redraws every blurred backdrop on
+   every frame, and on a Fire TV Stick the one behind the rating of each
+   poster alone took the page down to a few frames a second as it scrolled.
+   The layer behind a dialog or a details page is darker instead. */
+html.is-tv *,
+html.is-tv *::before,
+html.is-tv *::after {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
 }
-html.is-tv .card.snav-focus .poster img,
-html.is-tv .trending-card.snav-focus .trending-poster img { transform: scale(1.04); }
+/* Only what the graphics chip moves by itself changes gradually (a card
+   lifting, the player's controls fading): the colours, borders and shadows a
+   selection changes would be drawn again by the page on every frame of every
+   move, which cost a Fire TV Stick most of its frames in a details page. */
+html.is-tv *,
+html.is-tv *::before,
+html.is-tv *::after { transition-property: transform, opacity !important; }
+html.is-tv .modal-overlay { background: rgba(6, 4, 12, 0.86); }
+html.is-tv .dossier-scrim { background: rgba(6, 4, 12, 0.9); }
+html.is-tv[data-theme="light"] .modal-overlay,
+html.is-tv[data-theme="light"] .dossier-scrim { background: rgba(100, 100, 110, 0.6); }
+/* The rail glides to the card selected (spatial-nav.js) without snapping,
+   which would stop the glide at every step. */
+html.is-tv .trending-rail { scroll-snap-type: none; }
 
 
 /* Bottom navigation (Android): replaces the top tabs and the settings gear. */

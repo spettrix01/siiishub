@@ -15,6 +15,8 @@ import { t, locMsg, tmdbLang } from './i18n.js';
 const detailsModal = $('#detailsModal');
 // What the TV's hardware video decoders take, asked once (android-player).
 const videoCaps = IS_TV ? deviceVideoCaps() : Promise.resolve(null);
+// Streams a TV lists at a time (renderList).
+const STREAM_BATCH = 20;
 
 const STATUS_KEYS = {
   'Released': 'details.status.released',
@@ -896,6 +898,7 @@ async function loadStreams(root, type, id) {
     body.innerHTML = `<ul class="stream-list" data-stream-list></ul>`;
     const listEl = body.querySelector('[data-stream-list]');
 
+    let listGen = 0;
     const renderList = () => {
       const items = enriched
         .map((e, i) => ({ e, i }))
@@ -906,7 +909,23 @@ async function loadStreams(root, type, id) {
       }
       // The stream last played from leads the list.
       items.sort((a, b) => Number(!!b.e.s._watched) - Number(!!a.e.s._watched));
-      listEl.innerHTML = items.map(({ e, i }) => streamItemHtml(e.s, e.meta, i)).join('');
+      const html = items.map(({ e, i }) => streamItemHtml(e.s, e.meta, i));
+      // A TV lays a long list out slowly (a Fire TV Stick takes half a second
+      // over ninety streams, with the remote waiting): the first streams show
+      // at once and the others follow a batch at a time, each once the frame
+      // before it is drawn.
+      const batch = IS_TV ? STREAM_BATCH : html.length;
+      const gen = ++listGen;
+      listEl.innerHTML = html.slice(0, batch).join('');
+      const more = (from) => {
+        if (from >= html.length) return;
+        requestAnimationFrame(() => setTimeout(() => {
+          if (gen !== listGen || myGen !== state.detailGen || !listEl.isConnected) return;
+          listEl.insertAdjacentHTML('beforeend', html.slice(from, from + batch).join(''));
+          more(from + batch);
+        }, 0));
+      };
+      more(batch);
     };
 
     const refreshFilters = () => {

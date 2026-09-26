@@ -180,6 +180,12 @@ margins inside the TV safe area, and is driven with its remote (`tv-nav.js`):
   540 dp would otherwise lock like a phone. The manifest carries the 320×180
   launcher banner, and `android-build.sh` adds the `LEANBACK_LAUNCHER`
   category to the TV APK.
+- A TV stick sets what the TV interface may cost (a Fire TV Stick has four
+  slow cores and a weak graphics chip). Nothing is blurred behind anything,
+  as a blurred backdrop is redrawn on every frame; the selected card only
+  lifts. Scrollers glide in 220 ms (`spatial-nav.js`) instead of the
+  WebView's smooth scroll, which starts slowly and takes up to half a
+  second. A details page lists its streams 20 at a time, one batch a frame.
 
 Android WebView details worth knowing:
 
@@ -191,6 +197,10 @@ Android WebView details worth knowing:
   with the `open_url` command.
 - R8 minification stays off: the wry ProGuard template does not keep
   `WryActivity.getId()`, which tao calls through JNI at startup.
+- A rule under `:has()` whose last part can match almost anything (such as
+  `:not(.winctl)`) makes Chromium restyle the whole page after any change
+  anywhere in it, a counter or the player's clock: about 170 ms each time on a
+  Fire TV Stick. Such rules name the elements they style.
 
 ## Build configuration
 
