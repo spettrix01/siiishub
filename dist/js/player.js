@@ -308,7 +308,9 @@ function stopIdle() {
 function paintPosition() {
   if (IS_TV && playerFrame.classList.contains('is-idle')) return;
   const t = mpvState.timePos;
-  playerCurTime.textContent = fmtTime(t);
+  // The clock's text changes once a second, the position several times.
+  const clock = fmtTime(t);
+  if (playerCurTime.textContent !== clock) playerCurTime.textContent = clock;
   playerProgress.setAttribute('aria-valuenow', String(Math.round(t)));
   const pct = mpvState.duration > 0 ? (t / mpvState.duration) * 100 : 0;
   playerProgressPlayed.style.width = pct + '%';

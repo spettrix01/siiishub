@@ -64,11 +64,13 @@ function applyDownloadBadges() {
   }
   if (seenChanged) writeSeen(seen);
 
+  // Polled every few seconds: the page is only touched when a badge changes.
   if (downloadBadge) {
-    downloadBadge.textContent = String(active);
-    downloadBadge.hidden = active === 0;
+    if (downloadBadge.textContent !== String(active)) downloadBadge.textContent = String(active);
+    if (downloadBadge.hidden !== (active === 0)) downloadBadge.hidden = active === 0;
   }
-  if (libraryBadge) libraryBadge.hidden = !hasNew && active === 0;
+  const libraryHidden = !hasNew && active === 0;
+  if (libraryBadge && libraryBadge.hidden !== libraryHidden) libraryBadge.hidden = libraryHidden;
 }
 
 async function refreshBadges() {

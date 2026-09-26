@@ -1103,7 +1103,13 @@ html:not(.is-android) .dossier,
 html:not(.is-android) .dossier-scrim {
   top: var(--topbar-h, 72px);
 }
-html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > :not(.winctl) {
+/* Its parts by name, not as "all but the window controls": a rule ending in
+   :not() under :has() made the browser style the whole page again after any
+   change anywhere in it (a counter, the player's clock), which took a Fire
+   TV Stick about 170 ms each time. */
+html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > .brand,
+html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > .tabs,
+html:not(.is-android) body:has(> .dossier:not([hidden])) .topbar > .searchbox {
   visibility: hidden;
 }
 
