@@ -4895,6 +4895,10 @@ html.is-tv[data-theme="light"] .dossier-scrim { background: rgba(100, 100, 110, 
 /* The rail glides to the card selected (spatial-nav.js) without snapping,
    which would stop the glide at every step. */
 html.is-tv .trending-rail { scroll-snap-type: none; }
+/* The TV's own remote sets the volume: the player keeps only the button
+   that mutes it. */
+html.is-tv .player-volume-bar,
+html.is-tv .player-vol-pct { display: none; }
 
 
 /* Bottom navigation (Android): replaces the top tabs and the settings gear. */
