@@ -281,6 +281,10 @@ const IDLE_MS = IS_TV ? 6000 : 2500;
 function wakePlayer() {
   if (playerFrame.classList.contains('is-idle')) {
     playerFrame.classList.remove('is-idle');
+    if (IS_TV) {
+      if (!mpvState.seeking) paintPosition();
+      paintBuffered();
+    }
   }
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => {
@@ -296,6 +300,27 @@ function stopIdle() {
   clearTimeout(idleTimer);
   idleTimer = 0;
   playerFrame.classList.remove('is-idle');
+}
+
+// The time and the progress bar, as mpv reports the position. On a TV not
+// while the controls are hidden: a Fire TV Stick spent most of a core
+// redrawing them; they are painted again as the controls show (wakePlayer).
+function paintPosition() {
+  if (IS_TV && playerFrame.classList.contains('is-idle')) return;
+  const t = mpvState.timePos;
+  playerCurTime.textContent = fmtTime(t);
+  playerProgress.setAttribute('aria-valuenow', String(Math.round(t)));
+  const pct = mpvState.duration > 0 ? (t / mpvState.duration) * 100 : 0;
+  playerProgressPlayed.style.width = pct + '%';
+  playerProgressThumb.style.left = pct + '%';
+}
+
+function paintBuffered() {
+  if (IS_TV && playerFrame.classList.contains('is-idle')) return;
+  if (mpvState.duration > 0) {
+    const pct = Math.min(100, ((mpvState.cacheEnd || 0) / mpvState.duration) * 100);
+    playerProgressBuffered.style.width = pct + '%';
+  }
 }
 
 const OBSERVED_PROPS = [
@@ -387,13 +412,7 @@ function applyProperty(name, value) {
     case 'time-pos': {
       const t = Number(value) || 0;
       mpvState.timePos = t;
-      if (!mpvState.seeking) {
-        playerCurTime.textContent = fmtTime(t);
-        playerProgress.setAttribute('aria-valuenow', String(Math.round(t)));
-        const pct = mpvState.duration > 0 ? (t / mpvState.duration) * 100 : 0;
-        playerProgressPlayed.style.width = pct + '%';
-        playerProgressThumb.style.left = pct + '%';
-      }
+      if (!mpvState.seeking) paintPosition();
       if (!resumeSaveTimer) {
         resumeSaveTimer = setTimeout(() => {
           resumeSaveTimer = 0;
@@ -431,10 +450,7 @@ function applyProperty(name, value) {
     case 'demuxer-cache-time': {
       const ahead = Number(value) || 0;
       mpvState.cacheEnd = mpvState.timePos + ahead;
-      if (mpvState.duration > 0) {
-        const pct = Math.min(100, (mpvState.cacheEnd / mpvState.duration) * 100);
-        playerProgressBuffered.style.width = pct + '%';
-      }
+      paintBuffered();
       break;
     }
     case 'track-list': {

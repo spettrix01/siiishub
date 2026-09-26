@@ -14,7 +14,9 @@ import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioManager
 import android.media.MediaCodecList
+import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.util.Base64
 import android.util.Log
 import android.view.SurfaceHolder
@@ -87,6 +89,9 @@ class OpenUrlArgs {
     lateinit var url: String
 }
 
+/** How often a TV forwards the position and the cache ahead to the web UI. */
+private const val UI_EVENT_INTERVAL_MS = 250L
+
 /**
  * libmpv embedded under the webview.
  *
@@ -103,6 +108,16 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
     private var webView: WebView? = null
     @Volatile private var created = false
     private var surfaceView: SurfaceView? = null
+
+    // On a TV the position and the cache ahead go to the web UI 4 times a
+    // second at most, not on every frame: the UI shows seconds, and a Fire
+    // TV Stick spent most of a core redrawing it. The last value of a burst
+    // still goes, a little later (a seek while paused).
+    private var throttleUi = false
+    private val throttledProps = setOf("time-pos", "demuxer-cache-time")
+    private val lastEmitAt = HashMap<String, Long>()
+    private val pendingValues = HashMap<String, Double>()
+    private val uiHandler = Handler(Looper.getMainLooper())
     private var channel: Channel? = null
     private val observed = HashSet<String>()
 
@@ -509,6 +524,7 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
         val isTv = (activity.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager).currentModeType ==
             Configuration.UI_MODE_TYPE_TELEVISION
         val lowRam = isTv && mem.totalMem < 1536L * 1024 * 1024
+        throttleUi = isTv
         MPVLib.setOptionString("demuxer-max-bytes", ((if (lowRam) 24L else 64L) * 1024 * 1024).toString())
         MPVLib.setOptionString("demuxer-max-back-bytes", ((if (lowRam) 8L else 32L) * 1024 * 1024).toString())
         if (lowRam) MPVLib.setOptionString("vd-lavc-threads", "2")
@@ -626,7 +642,29 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
 
     override fun eventProperty(property: String, value: Long) = emitProperty(property, value)
 
-    override fun eventProperty(property: String, value: Double) = emitProperty(property, value)
+    override fun eventProperty(property: String, value: Double) {
+        if (!throttleUi || property !in throttledProps) return emitProperty(property, value)
+        synchronized(pendingValues) {
+            val now = SystemClock.uptimeMillis()
+            val wait = UI_EVENT_INTERVAL_MS - (now - (lastEmitAt[property] ?: 0L))
+            if (wait > 0 || property in pendingValues) {
+                if (pendingValues.put(property, value) == null) {
+                    uiHandler.postDelayed({ flushProperty(property) }, maxOf(wait, 0L))
+                }
+                return
+            }
+            lastEmitAt[property] = now
+        }
+        emitProperty(property, value)
+    }
+
+    private fun flushProperty(property: String) {
+        val value = synchronized(pendingValues) {
+            lastEmitAt[property] = SystemClock.uptimeMillis()
+            pendingValues.remove(property)
+        } ?: return
+        emitProperty(property, value)
+    }
 
     override fun eventProperty(property: String, value: Boolean) {
         when (property) {
