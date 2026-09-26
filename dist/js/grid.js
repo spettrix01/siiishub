@@ -188,6 +188,11 @@ export async function loadMore() {
       setStatus(state.items.size ? t('grid.endOfResults') : '');
     } else {
       setStatus('');
+      // The observer only calls when the sentinel comes into reach: one
+      // already in reach (a page too short to fill a big screen, or a call
+      // that came while this page was loading) is looked at again.
+      io.unobserve(sentinel);
+      io.observe(sentinel);
     }
     state.page++;
   } catch (e) {
