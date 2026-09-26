@@ -1,5 +1,5 @@
 import { $, $$, escapeHTML, FORM_TAGS, openExternal } from './dom.js';
-import { IS_ANDROID } from './platform.js';
+import { IS_ANDROID, IS_TV } from './platform.js';
 import { t as tx } from './i18n.js';
 import { fmtTime, fmtBytes, fmtSpeed, fmtFullDate, fmtMoney, fmtRuntime, fmtVote } from './format.js';
 import {
@@ -275,7 +275,9 @@ function stopMpvGeometry() {
 }
 
 let idleTimer = 0;
-const IDLE_MS = 2500;
+// On a TV, watched from afar with a remote, the controls (and the remote's
+// selection, which goes with them) stay longer.
+const IDLE_MS = IS_TV ? 6000 : 2500;
 function wakePlayer() {
   if (playerFrame.classList.contains('is-idle')) {
     playerFrame.classList.remove('is-idle');
