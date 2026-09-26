@@ -435,9 +435,11 @@ function setFocus(el, dir = null) {
   const typing = document.activeElement;
   if (dir && typing !== current && typing?.matches?.('input, textarea, select')) typing.blur();
   reveal(current, dir);
-  // Android TV keeps Back for the page while the selection is in it
-  // (android-back.js).
-  const where = scope !== document.body ? 'layer' : current.closest('.topbar') ? 'topbar' : 'page';
+  // Android TV keeps Back for the page and for a section of the settings
+  // while the selection is in them (android-back.js).
+  const where = scope === document.body
+    ? (current.closest('.topbar') ? 'topbar' : 'page')
+    : (current.closest('#settingsModal .pane.is-active') ? 'pane' : 'layer');
   document.dispatchEvent(new CustomEvent('snav:focus', { detail: { where } }));
 }
 
