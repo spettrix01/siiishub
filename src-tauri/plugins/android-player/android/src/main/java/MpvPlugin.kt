@@ -1,7 +1,9 @@
 package dev.siiis.siiishub.player
 
 import android.app.Activity
+import android.app.ActivityManager
 import android.app.DownloadManager
+import android.app.UiModeManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -471,8 +473,17 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
         MPVLib.setOptionString("idle", "yes")
         MPVLib.setOptionString("force-window", "no")
         MPVLib.setOptionString("keep-open", "yes")
-        MPVLib.setOptionString("demuxer-max-bytes", (64L * 1024 * 1024).toString())
-        MPVLib.setOptionString("demuxer-max-back-bytes", (32L * 1024 * 1024).toString())
+        // A TV with little memory (a 1 GB Fire TV Stick) gets a smaller cache
+        // and fewer software decoding threads: Android killed the app while a
+        // stream loaded. Phones keep the full cache.
+        val mem = ActivityManager.MemoryInfo()
+        (activity.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager).getMemoryInfo(mem)
+        val isTv = (activity.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager).currentModeType ==
+            Configuration.UI_MODE_TYPE_TELEVISION
+        val lowRam = isTv && mem.totalMem < 1536L * 1024 * 1024
+        MPVLib.setOptionString("demuxer-max-bytes", ((if (lowRam) 24L else 64L) * 1024 * 1024).toString())
+        MPVLib.setOptionString("demuxer-max-back-bytes", ((if (lowRam) 8L else 32L) * 1024 * 1024).toString())
+        if (lowRam) MPVLib.setOptionString("vd-lavc-threads", "2")
         // HTTPS streams are verified against the system trust store. The
         // bundled FFmpeg (Mbed TLS) has no CA store of its own, so the system
         // roots are handed to it as a PEM bundle. If the bundle cannot be

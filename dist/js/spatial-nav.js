@@ -431,9 +431,12 @@ function setFocus(el, dir = null) {
     if (p.matches(REMEMBER)) remembered.set(p, current);
   }
   if (dir && current.matches(AUTO_OPEN) && !current.classList.contains('is-active')) current.click();
-  // A field being typed in is left behind.
-  const typing = document.activeElement;
-  if (dir && typing !== current && typing?.matches?.('input, textarea, select')) typing.blur();
+  // What has the page's own focus is left behind: a field being typed in,
+  // and on a TV a button its WebView focused with the D-pad while the
+  // interface was loading, which would stay outlined.
+  const focused = document.activeElement;
+  if (dir && focused && focused !== current && focused !== document.body
+      && (IS_TV || focused.matches('input, textarea, select'))) focused.blur();
   reveal(current, dir);
   // Android TV keeps Back for the page and for a section of the settings
   // while the selection is in them (android-back.js).
@@ -457,11 +460,27 @@ function pickInitial(list) {
 }
 
 // Where a TV starts: the selection shows at once, on the welcome page's
-// button or the tab of the section (the titles load after it).
+// button or on the first title. Until the titles have loaded it waits on the
+// tab of the section, and moves to the first one as it shows, unless the
+// remote moved it meanwhile.
 function begin() {
   if (current && isVisible(current)) return;
-  const el = pickInitial(candidates(activeScope()));
-  if (el) setFocus(el);
+  // The WebView's own D-pad focus, from keys pressed while loading.
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  const start = pickInitial(candidates(activeScope()));
+  if (!start) return;
+  setFocus(start);
+  if (!start.matches('.tab')) return;
+  const titles = new MutationObserver(() => {
+    if (current !== start) { titles.disconnect(); return; }
+    const first = pickInitial(candidates(activeScope()));
+    if (first && !first.matches('.tab')) {
+      titles.disconnect();
+      setFocus(first);
+    }
+  });
+  titles.observe($('#page-scroll') || document.body, { childList: true, subtree: true });
+  setTimeout(() => titles.disconnect(), 30000);
 }
 
 function move(dir) {
