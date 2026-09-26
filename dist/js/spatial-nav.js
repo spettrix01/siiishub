@@ -448,9 +448,18 @@ function pickInitial(list) {
     return r.bottom > 0 && r.top < vh;
   });
   const pool = inView.length ? inView : list;
-  return pool.find(el => el.matches('.streams-pick-option.is-active, .genre-option.is-active, .settings-nav-item.is-active, #playerProgress, .play-btn, [data-play], .dossier-actions button, [data-rd-play], a.card, .trending-card'))
+  return pool.find(el => el.matches('.streams-pick-option.is-active, .genre-option.is-active, .settings-nav-item.is-active, #playerProgress, .play-btn, [data-play], .dossier-actions button, [data-rd-play], .empty button, a.card, .trending-card'))
+    || pool.find(el => el.matches('.tab.is-active'))
     || pool[0]
     || null;
+}
+
+// Where a TV starts: the selection shows at once, on the welcome page's
+// button or the tab of the section (the titles load after it).
+function begin() {
+  if (current && isVisible(current)) return;
+  const el = pickInitial(candidates(activeScope()));
+  if (el) setFocus(el);
 }
 
 function move(dir) {
@@ -757,5 +766,5 @@ if (genreMenu) {
 }
 
 export const spatialNav = {
-  move, activate, back, backInside, backToTabs, home, clear: clearFocus, focus: setFocus,
+  move, activate, back, backInside, backToTabs, home, begin, clear: clearFocus, focus: setFocus,
 };

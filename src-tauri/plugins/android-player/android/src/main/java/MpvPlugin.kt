@@ -130,6 +130,12 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
         // cannot hide it: touch scrolling needs no track.
         webView.isVerticalScrollBarEnabled = false
         webView.isHorizontalScrollBarEnabled = false
+        // The page takes the keys from the start: with nothing focused in the
+        // window, the first press of a TV remote's D-pad would only move
+        // Android's focus onto the WebView.
+        webView.isFocusable = true
+        webView.isFocusableInTouchMode = true
+        webView.post { webView.requestFocus() }
         activity.requestedOrientation = defaultOrientation()
         val root = contentRoot() ?: return
         ViewCompat.setOnApplyWindowInsetsListener(root) { _, insets ->

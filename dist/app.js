@@ -1,4 +1,4 @@
-import './js/platform.js';
+import { IS_TV } from './js/platform.js';
 import { state } from './js/state.js';
 import { init as initUserStore, migrateFromLocalStorage } from './js/userstore.js';
 import { applyTheme, currentTheme } from './js/theme.js';
@@ -19,6 +19,7 @@ import './js/android-genres.js';
 import './js/android-inputs.js';
 import './js/android-player.js';
 import './js/tv-nav.js';
+import { spatialNav } from './js/spatial-nav.js';
 import { startDownloadBadgePolling } from './js/library.js';
 
 function syncScrollbarVar() {
@@ -60,6 +61,8 @@ if (!state.settings.tmdbKey) {
   loadMore();
 }
 startDownloadBadgePolling();
+// Android TV: the remote's selection shows from the start.
+if (IS_TV) spatialNav.begin();
 
 onLangChange(async () => {
   if (!state.settings.tmdbKey || state.section === 'library') return;
