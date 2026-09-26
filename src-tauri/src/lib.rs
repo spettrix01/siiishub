@@ -258,6 +258,7 @@ pub fn run() {
             commands::mpv_observe,
             commands::mpv_set_geometry,
             commands::mpv_set_visible,
+            commands::device_video_caps,
             commands::window_set_fullscreen,
         ])
         .run(tauri::generate_context!())

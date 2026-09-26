@@ -29,13 +29,13 @@ export function closeModal(sel) {
   }
 }
 
-function attachAlertHandlers({ onOk, onCancel, onKey, onOverlay }) {
+function attachAlertHandlers({ onOk, onCancel, onKey, onOverlay, focusCancel = false }) {
   const cancelBtn = alertModal.querySelector('[data-alert-cancel]');
   alertOk.addEventListener('click', onOk);
   cancelBtn?.addEventListener('click', onCancel);
   document.addEventListener('keydown', onKey, true);
   alertModal.addEventListener('click', onOverlay);
-  setTimeout(() => alertOk.focus(), 0);
+  setTimeout(() => ((focusCancel && cancelBtn) || alertOk).focus(), 0);
   return () => {
     alertOk.removeEventListener('click', onOk);
     cancelBtn?.removeEventListener('click', onCancel);
@@ -44,11 +44,14 @@ function attachAlertHandlers({ onOk, onCancel, onKey, onOverlay }) {
   };
 }
 
+// focusCancel: the dialog opens on Cancel, for a confirmation that should
+// not be given by just pressing OK again.
 export function showConfirm(message, {
   title = t('modal.confirmTitle'),
   variant = 'warn',
   okLabel = t('modal.confirm'),
   cancelLabel = t('common.cancel'),
+  focusCancel = false,
 } = {}) {
   setVariant(variant);
   alertTitle.textContent = title;
@@ -73,12 +76,14 @@ export function showConfirm(message, {
       onCancel: () => settle(false),
       onKey: (e) => {
         if (alertModal.hidden) { cleanup(); return; }
-        if (e.key === 'Enter') { e.preventDefault(); settle(true); }
+        // Enter on Cancel cancels.
+        if (e.key === 'Enter') { e.preventDefault(); settle(!e.target.closest?.('[data-alert-cancel]')); }
         else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); settle(false); }
       },
       onOverlay: (e) => {
         if (e.target.matches('[data-close]')) settle(false);
       },
+      focusCancel,
     });
   });
 }

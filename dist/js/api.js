@@ -364,6 +364,16 @@ export async function mpvSetVisible(visible) {
   return invoke('mpv_set_visible', { visible: !!visible });
 }
 
+// Which video the device's hardware decoders take, on Android
+// ({ hevc4k, avc4k }); null elsewhere.
+export async function deviceVideoCaps() {
+  try {
+    return (await invoke('device_video_caps')) || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function windowSetFullscreen(fullscreen) {
   return invoke('window_set_fullscreen', { fullscreen: !!fullscreen });
 }

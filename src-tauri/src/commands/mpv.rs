@@ -12,6 +12,27 @@ fn require_mpv(state: &State<'_, Arc<AppState>>) -> CmdResult<Arc<Mpv>> {
     state.mpv().ok_or_else(|| "Player non pronto".to_string())
 }
 
+/// What the device's hardware video decoders take, on Android
+/// (`{"hevc4k": bool, "avc4k": bool}`): the TV interface keeps away from 4K
+/// a device would decode in software. `None` elsewhere.
+#[tauri::command]
+pub async fn device_video_caps(app: tauri::AppHandle) -> CmdResult<Option<Value>> {
+    #[cfg(target_os = "android")]
+    {
+        use tauri::Manager;
+        let Some(plugin) = app.try_state::<siiishub_android_player::AndroidMpv<tauri::Wry>>() else {
+            return Ok(None);
+        };
+        let caps = plugin.decoder_caps()?;
+        Ok(Some(serde_json::to_value(caps).map_err(err)?))
+    }
+    #[cfg(not(target_os = "android"))]
+    {
+        let _ = app;
+        Ok(None)
+    }
+}
+
 #[tauri::command]
 pub async fn mpv_load(
     state: State<'_, Arc<AppState>>,

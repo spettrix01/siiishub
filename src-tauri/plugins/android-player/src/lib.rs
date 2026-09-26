@@ -64,6 +64,13 @@ struct ValueResponse {
     value: Option<String>,
 }
 
+/// Whether the device's hardware video decoders take 4K, per codec.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct DecoderCaps {
+    pub hevc4k: bool,
+    pub avc4k: bool,
+}
+
 /// Handle to the Kotlin plugin, managed in the app state on Android.
 #[cfg(mobile)]
 pub struct AndroidMpv<R: Runtime>(tauri::plugin::PluginHandle<R>);
@@ -134,6 +141,11 @@ impl<R: Runtime> AndroidMpv<R> {
     /// Opens a web page with the app the system picks for it (the browser).
     pub fn open_url(&self, url: &str) -> Result<(), String> {
         self.call::<()>("openUrl", OpenUrlArgs { url })
+    }
+
+    /// Which video sizes the hardware decoders take (4K or not).
+    pub fn decoder_caps(&self) -> Result<DecoderCaps, String> {
+        self.call::<DecoderCaps>("decoderCaps", ())
     }
 }
 

@@ -13,6 +13,7 @@ import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.media.AudioManager
+import android.media.MediaCodecList
 import android.os.Looper
 import android.util.Base64
 import android.util.Log
@@ -297,6 +298,31 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
             invoke.reject(ex.message ?: ex.toString())
         }
     }
+
+    /**
+     * Whether the hardware video decoders take 4K (3840x2160), for HEVC and
+     * H.264. A 1080p TV stick (Fire TV Stick 3rd generation: 1920x1088 at
+     * most) leaves 4K to mpv's software decoder, which it cannot keep up with
+     * and which runs it out of memory: the interface steers away from it.
+     */
+    @Command
+    fun decoderCaps(invoke: Invoke) {
+        val out = JSObject()
+        out.put("hevc4k", hardwareDecodes("video/hevc", 3840, 2160))
+        out.put("avc4k", hardwareDecodes("video/avc", 3840, 2160))
+        invoke.resolve(out)
+    }
+
+    private fun hardwareDecodes(mime: String, width: Int, height: Int): Boolean =
+        MediaCodecList(MediaCodecList.REGULAR_CODECS).codecInfos.any { info ->
+            val name = info.name.lowercase()
+            !info.isEncoder &&
+                !name.startsWith("omx.google.") && !name.startsWith("c2.android.") &&
+                info.supportedTypes.any { it.equals(mime, ignoreCase = true) } &&
+                runCatching {
+                    info.getCapabilitiesForType(mime).videoCapabilities.isSizeSupported(width, height)
+                }.getOrDefault(false)
+        }
 
     /** Opens a web page (http or https) with the app the system picks: the browser. */
     @Command

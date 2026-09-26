@@ -1,18 +1,20 @@
-import { IS_PHONE } from './platform.js';
+import { IS_PHONE, IS_TV } from './platform.js';
 import { $, escapeHTML, DOTS_HTML, CHECK_SVG, COPY_SVG, copyToClipboard, openExternal } from './dom.js';
 import { state, tmdbType, TMDB_IMG } from './state.js';
-import { tmdb, fetchStreams, fetchTvSeason, rdPlay, onMediaProgress, downloadStart, downloadPlay, downloadFiles, downloadList, destroyTorrentSession } from './api.js';
+import { tmdb, fetchStreams, fetchTvSeason, rdPlay, onMediaProgress, downloadStart, downloadPlay, downloadFiles, downloadList, destroyTorrentSession, deviceVideoCaps } from './api.js';
 import { fmtFullDate, fmtMoney, fmtRuntime, fmtVote } from './format.js';
 import { sha256 } from './hash.js';
 import { streamPickerHtml, setupStreamPicker } from './picker.js';
 import { openPlayerWithUrl, openPlayerLoading, attachToOpenPlayer, pushPlayerLog, showPlayerError, setPlayerAbortController } from './player.js';
-import { closeModal } from './modal.js';
+import { closeModal, showConfirm } from './modal.js';
 import { openSettings } from './settings-ui.js';
 import { isFavorite, toggleFavorite } from './favorites.js';
 import { saveWatchedStream, getWatchedStream, lastEpisode } from './resume.js';
 import { t, locMsg, tmdbLang } from './i18n.js';
 
 const detailsModal = $('#detailsModal');
+// What the TV's hardware video decoders take, asked once (android-player).
+const videoCaps = IS_TV ? deviceVideoCaps() : Promise.resolve(null);
 
 const STATUS_KEYS = {
   'Released': 'details.status.released',
@@ -838,7 +840,14 @@ async function loadStreams(root, type, id) {
     }
 
     const enriched = streams.map(s => ({ s, meta: parseStreamMeta(s) }));
-    enriched.sort((a, b) => b.meta.q.rank - a.meta.q.rank);
+    // A TV that cannot decode 4K in hardware (a 1080p Fire TV Stick) would
+    // decode it in software, too slowly, until it runs out of memory: its 4K
+    // streams go last, and ask before playing.
+    const caps = await videoCaps;
+    if (myGen !== state.detailGen) return;
+    const no4k = !!caps && !caps.hevc4k && !caps.avc4k;
+    const tooBig = e => no4k && e.meta.q.rank === 4;
+    enriched.sort((a, b) => (tooBig(b) ? -1 : b.meta.q.rank) - (tooBig(a) ? -1 : a.meta.q.rank));
     if (counter) counter.textContent = enriched.length === 1
       ? t('details.resultsOne', { n: enriched.length })
       : t('details.resultsMany', { n: enriched.length });
@@ -1000,6 +1009,14 @@ async function loadStreams(root, type, id) {
       const playBtn = e.target.closest('[data-rd-play]');
       if (playBtn) {
         const entry = enriched[Number(playBtn.dataset.rdPlay)];
+        if (entry && tooBig(entry)) {
+          const go = await showConfirm(t('details.stream.no4kBody'), {
+            title: t('details.stream.no4kTitle'),
+            okLabel: t('details.stream.playAnyway'),
+            focusCancel: true,
+          });
+          if (!go || myGen !== state.detailGen) return;
+        }
         if (entry) {
           const ctx = buildPlayCtx(type, id, entry.s._addon);
           startRdPlayback(entry.s, entry.meta, playBtn, ctx).then(played => {
