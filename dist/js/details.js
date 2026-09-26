@@ -120,6 +120,7 @@ function parseStreamMeta(s) {
   const metaLine = lines.slice(1).join(' ');
   return {
     q: qualityRank(fullText),
+    av1: /\bav1\b/i.test(fullText),
     titleLine,
     seeders: metaLine.match(RE_SEEDERS)?.[1]?.trim() || null,
     size:    metaLine.match(RE_SIZE)?.[1]?.trim()    || null,
@@ -840,14 +841,16 @@ async function loadStreams(root, type, id) {
     }
 
     const enriched = streams.map(s => ({ s, meta: parseStreamMeta(s) }));
-    // A TV that cannot decode 4K in hardware (a 1080p Fire TV Stick) would
-    // decode it in software, too slowly, until it runs out of memory: its 4K
-    // streams go last, and ask before playing.
+    // What a TV cannot decode in hardware (4K, AV1 on a 1080p Fire TV Stick)
+    // it would decode in software, too slowly, until it runs out of memory:
+    // those streams go last, and ask before playing.
     const caps = await videoCaps;
     if (myGen !== state.detailGen) return;
     const no4k = !!caps && !caps.hevc4k && !caps.avc4k;
-    const tooBig = e => no4k && e.meta.q.rank === 4;
-    enriched.sort((a, b) => (tooBig(b) ? -1 : b.meta.q.rank) - (tooBig(a) ? -1 : a.meta.q.rank));
+    const noAv1 = !!caps && caps.av1 === false;
+    const unsupported = e => (no4k && e.meta.q.rank === 4 ? 'no4k' : noAv1 && e.meta.av1 ? 'noAv1' : null);
+    const rank = e => (unsupported(e) ? -1 : e.meta.q.rank);
+    enriched.sort((a, b) => rank(b) - rank(a));
     if (counter) counter.textContent = enriched.length === 1
       ? t('details.resultsOne', { n: enriched.length })
       : t('details.resultsMany', { n: enriched.length });
@@ -1009,9 +1012,10 @@ async function loadStreams(root, type, id) {
       const playBtn = e.target.closest('[data-rd-play]');
       if (playBtn) {
         const entry = enriched[Number(playBtn.dataset.rdPlay)];
-        if (entry && tooBig(entry)) {
-          const go = await showConfirm(t('details.stream.no4kBody'), {
-            title: t('details.stream.no4kTitle'),
+        const why = entry && unsupported(entry);
+        if (why) {
+          const go = await showConfirm(t(`details.stream.${why}Body`), {
+            title: t(`details.stream.${why}Title`),
             okLabel: t('details.stream.playAnyway'),
             focusCancel: true,
           });

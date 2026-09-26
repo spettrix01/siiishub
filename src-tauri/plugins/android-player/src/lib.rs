@@ -64,11 +64,12 @@ struct ValueResponse {
     value: Option<String>,
 }
 
-/// Whether the device's hardware video decoders take 4K, per codec.
+/// What the device's hardware video decoders take: 4K per codec, and AV1.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct DecoderCaps {
     pub hevc4k: bool,
     pub avc4k: bool,
+    pub av1: bool,
 }
 
 /// Handle to the Kotlin plugin, managed in the app state on Android.
@@ -143,7 +144,7 @@ impl<R: Runtime> AndroidMpv<R> {
         self.call::<()>("openUrl", OpenUrlArgs { url })
     }
 
-    /// Which video sizes the hardware decoders take (4K or not).
+    /// What the hardware decoders take (4K, AV1).
     pub fn decoder_caps(&self) -> Result<DecoderCaps, String> {
         self.call::<DecoderCaps>("decoderCaps", ())
     }

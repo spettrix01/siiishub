@@ -306,6 +306,8 @@ export const CS = {
   'details.stream.downloadedTooltip': "Již staženo — odstraňte ze sekce Stažené pro opětovné stažení",
   "details.stream.no4kTitle": "4K není podporováno",
   "details.stream.no4kBody": "Toto zařízení neumí dekódovat video 4K: musel by to dělat procesor, příliš pomalu, a aplikace se může zavřít. Vyberte stream 1080p.",
+  "details.stream.noAv1Title": "AV1 není podporováno",
+  "details.stream.noAv1Body": "Toto zařízení neumí dekódovat video AV1: musel by to dělat procesor, příliš pomalu, a aplikace se může zavřít. Vyberte stream v H.264 nebo HEVC.",
   "details.stream.playAnyway": "Přesto přehrát",
   'details.stream.download': "Stáhnout",
   'details.rd.cached': "Uloženo v Real Debrid",

@@ -365,7 +365,7 @@ export async function mpvSetVisible(visible) {
 }
 
 // Which video the device's hardware decoders take, on Android
-// ({ hevc4k, avc4k }); null elsewhere.
+// ({ hevc4k, avc4k, av1 }); null elsewhere.
 export async function deviceVideoCaps() {
   try {
     return (await invoke('device_video_caps')) || null;

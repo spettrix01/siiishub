@@ -306,6 +306,8 @@ export const HU = {
   'details.stream.downloadedTooltip': "Már letöltve — töröld a Letöltések szekcióból az újbóli letöltéshez",
   "details.stream.no4kTitle": "A 4K nem támogatott",
   "details.stream.no4kBody": "Ez az eszköz nem tud 4K videót dekódolni: a processzornak kellene, túl lassan, és az alkalmazás bezáródhat. Válassz 1080p-s streamet.",
+  "details.stream.noAv1Title": "Az AV1 nem támogatott",
+  "details.stream.noAv1Body": "Ez az eszköz nem tud AV1 videót dekódolni: a processzornak kellene, túl lassan, és az alkalmazás bezáródhat. Válassz H.264 vagy HEVC streamet.",
   "details.stream.playAnyway": "Lejátszás mégis",
   'details.stream.download': "Letöltés",
   'details.rd.cached': "Gyorsítótárazva a Real Debriden",

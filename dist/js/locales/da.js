@@ -306,6 +306,8 @@ export const DA = {
   'details.stream.downloadedTooltip': "Allerede downloadet — slet den fra Downloads-sektionen for at downloade igen",
   "details.stream.no4kTitle": "4K understøttes ikke",
   "details.stream.no4kBody": "Denne enhed kan ikke afkode 4K-video: processoren skulle gøre det, alt for langsomt, og appen kan lukke. Vælg en 1080p-stream.",
+  "details.stream.noAv1Title": "AV1 understøttes ikke",
+  "details.stream.noAv1Body": "Denne enhed kan ikke afkode AV1-video: processoren skulle gøre det, alt for langsomt, og appen kan lukke. Vælg en stream i H.264 eller HEVC.",
   "details.stream.playAnyway": "Afspil alligevel",
   'details.stream.download': "Download",
   'details.rd.cached': "Cachet på Real Debrid",

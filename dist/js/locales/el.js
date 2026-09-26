@@ -306,6 +306,8 @@ export const EL = {
   'details.stream.downloadedTooltip': "Έχει ήδη ληφθεί — διαγράψτε το από την ενότητα Λήψεις για να το κατεβάσετε ξανά",
   "details.stream.no4kTitle": "Το 4K δεν υποστηρίζεται",
   "details.stream.no4kBody": "Αυτή η συσκευή δεν μπορεί να αποκωδικοποιήσει βίντεο 4K: θα έπρεπε να το κάνει ο επεξεργαστής, πολύ αργά, και η εφαρμογή μπορεί να κλείσει. Επίλεξε ένα stream 1080p.",
+  "details.stream.noAv1Title": "Το AV1 δεν υποστηρίζεται",
+  "details.stream.noAv1Body": "Αυτή η συσκευή δεν μπορεί να αποκωδικοποιήσει βίντεο AV1: θα έπρεπε να το κάνει ο επεξεργαστής, πολύ αργά, και η εφαρμογή μπορεί να κλείσει. Επίλεξε ένα stream σε H.264 ή HEVC.",
   "details.stream.playAnyway": "Αναπαραγωγή ούτως ή άλλως",
   'details.stream.download': "Λήψη",
   'details.rd.cached': "Στην cache του Real Debrid",

@@ -306,6 +306,8 @@ export const PT = {
   'details.stream.downloadedTooltip': "Já transferido — elimine-o na secção Transferências para transferir novamente",
   "details.stream.no4kTitle": "4K não suportado",
   "details.stream.no4kBody": "Este dispositivo não consegue descodificar vídeo 4K: teria de ser o processador, lento demais, e a app pode fechar. Escolhe um stream 1080p.",
+  "details.stream.noAv1Title": "AV1 não suportado",
+  "details.stream.noAv1Body": "Este dispositivo não consegue descodificar vídeo AV1: teria de ser o processador, lento demais, e a app pode fechar. Escolhe um stream em H.264 ou HEVC.",
   "details.stream.playAnyway": "Reproduzir mesmo assim",
   'details.stream.download': "Transferir",
   'details.rd.cached': "Em cache no Real Debrid",

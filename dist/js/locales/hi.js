@@ -306,6 +306,8 @@ export const HI = {
   'details.stream.downloadedTooltip': "पहले से डाउनलोड किया गया — फिर से डाउनलोड करने के लिए इसे Downloads अनुभाग से हटाएँ",
   "details.stream.no4kTitle": "4K समर्थित नहीं",
   "details.stream.no4kBody": "यह डिवाइस 4K वीडियो डिकोड नहीं कर सकता: यह काम प्रोसेसर को करना पड़ेगा, बहुत धीरे, और ऐप बंद हो सकता है। 1080p स्ट्रीम चुनें।",
+  "details.stream.noAv1Title": "AV1 समर्थित नहीं",
+  "details.stream.noAv1Body": "यह डिवाइस AV1 वीडियो डिकोड नहीं कर सकता: यह काम प्रोसेसर को करना पड़ेगा, बहुत धीरे, और ऐप बंद हो सकता है। H.264 या HEVC वाली स्ट्रीम चुनें।",
   "details.stream.playAnyway": "फिर भी चलाएँ",
   'details.stream.download': "डाउनलोड",
   'details.rd.cached': "Real Debrid पर कैश किया गया",

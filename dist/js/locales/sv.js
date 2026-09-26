@@ -306,6 +306,8 @@ export const SV = {
   'details.stream.downloadedTooltip': "Redan nedladdad — ta bort den från Nedladdningar för att ladda ner igen",
   "details.stream.no4kTitle": "4K stöds inte",
   "details.stream.no4kBody": "Den här enheten kan inte avkoda 4K-video: processorn skulle behöva göra det, alldeles för långsamt, och appen kan stängas. Välj en 1080p-ström.",
+  "details.stream.noAv1Title": "AV1 stöds inte",
+  "details.stream.noAv1Body": "Den här enheten kan inte avkoda AV1-video: processorn skulle behöva göra det, alldeles för långsamt, och appen kan stängas. Välj en ström i H.264 eller HEVC.",
   "details.stream.playAnyway": "Spela ändå",
   'details.stream.download': "Ladda ner",
   'details.rd.cached': "Cachad på Real Debrid",

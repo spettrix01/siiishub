@@ -306,6 +306,8 @@ export const NB = {
   'details.stream.downloadedTooltip': "Allerede lastet ned — slett den fra Nedlastinger-delen for å laste ned igjen",
   "details.stream.no4kTitle": "4K støttes ikke",
   "details.stream.no4kBody": "Denne enheten kan ikke dekode 4K-video: prosessoren måtte gjort det, altfor sakte, og appen kan lukkes. Velg en 1080p-strøm.",
+  "details.stream.noAv1Title": "AV1 støttes ikke",
+  "details.stream.noAv1Body": "Denne enheten kan ikke dekode AV1-video: prosessoren måtte gjort det, altfor sakte, og appen kan lukkes. Velg en strøm i H.264 eller HEVC.",
   "details.stream.playAnyway": "Spill av likevel",
   'details.stream.download': "Last ned",
   'details.rd.cached': "Bufret på Real Debrid",

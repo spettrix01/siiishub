@@ -306,6 +306,8 @@ export const NL = {
   'details.stream.downloadedTooltip': "Al gedownload — verwijder het uit het Downloads-gedeelte om opnieuw te downloaden",
   "details.stream.no4kTitle": "4K niet ondersteund",
   "details.stream.no4kBody": "Dit apparaat kan 4K-video niet decoderen: de processor zou het moeten doen, veel te traag, en de app kan sluiten. Kies een 1080p-stream.",
+  "details.stream.noAv1Title": "AV1 niet ondersteund",
+  "details.stream.noAv1Body": "Dit apparaat kan AV1-video niet decoderen: de processor zou het moeten doen, veel te traag, en de app kan sluiten. Kies een stream in H.264 of HEVC.",
   "details.stream.playAnyway": "Toch afspelen",
   'details.stream.download': "Downloaden",
   'details.rd.cached': "In cache op Real Debrid",

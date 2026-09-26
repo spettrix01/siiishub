@@ -306,6 +306,8 @@ export const RO = {
   'details.stream.downloadedTooltip': "Deja descărcat — șterge-l din secțiunea Descărcări pentru a-l descărca din nou",
   "details.stream.no4kTitle": "4K nu este acceptat",
   "details.stream.no4kBody": "Acest dispozitiv nu poate decoda video 4K: ar trebui să o facă procesorul, mult prea lent, iar aplicația s-ar putea închide. Alege un stream 1080p.",
+  "details.stream.noAv1Title": "AV1 nu este acceptat",
+  "details.stream.noAv1Body": "Acest dispozitiv nu poate decoda video AV1: ar trebui să o facă procesorul, mult prea lent, iar aplicația s-ar putea închide. Alege un stream în H.264 sau HEVC.",
   "details.stream.playAnyway": "Redă oricum",
   'details.stream.download': "Descarcă",
   'details.rd.cached': "În cache pe Real Debrid",

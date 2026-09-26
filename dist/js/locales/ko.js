@@ -306,6 +306,8 @@ export const KO = {
   'details.stream.downloadedTooltip': "이미 다운로드됨 — 다시 다운로드하려면 다운로드 섹션에서 삭제하세요",
   "details.stream.no4kTitle": "4K 미지원",
   "details.stream.no4kBody": "이 기기는 4K 동영상을 디코딩할 수 없습니다. 프로세서가 처리하면 너무 느리고 앱이 종료될 수 있습니다. 1080p 스트림을 선택하세요.",
+  "details.stream.noAv1Title": "AV1 미지원",
+  "details.stream.noAv1Body": "이 기기는 AV1 동영상을 디코딩할 수 없습니다. 프로세서가 처리하면 너무 느리고 앱이 종료될 수 있습니다. H.264 또는 HEVC 스트림을 선택하세요.",
   "details.stream.playAnyway": "그래도 재생",
   'details.stream.download': "다운로드",
   'details.rd.cached': "Real Debrid에 캐시됨",

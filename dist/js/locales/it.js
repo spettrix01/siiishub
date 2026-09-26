@@ -306,6 +306,8 @@ export const IT = {
   'details.stream.downloadedTooltip': 'Già scaricato — elimina dalla sezione Download per riscaricare',
   "details.stream.no4kTitle": "4K non supportato",
   "details.stream.no4kBody": "Questo dispositivo non decodifica i video 4K: dovrebbe farlo il processore, troppo lentamente, e l’app potrebbe chiudersi. Scegli uno stream 1080p.",
+  "details.stream.noAv1Title": "AV1 non supportato",
+  "details.stream.noAv1Body": "Questo dispositivo non decodifica i video AV1: dovrebbe farlo il processore, troppo lentamente, e l’app potrebbe chiudersi. Scegli uno stream H.264 o HEVC.",
   "details.stream.playAnyway": "Riproduci comunque",
   'details.stream.download': 'Scarica',
   'details.rd.cached': 'Cachato su Real Debrid',

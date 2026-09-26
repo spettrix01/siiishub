@@ -306,6 +306,8 @@ export const FI = {
   'details.stream.downloadedTooltip': "Jo ladattu — poista se Lataukset-osiosta ladataksesi uudelleen",
   "details.stream.no4kTitle": "4K:ta ei tueta",
   "details.stream.no4kBody": "Tämä laite ei pysty purkamaan 4K-videota: suorittimen pitäisi tehdä se, aivan liian hitaasti, ja sovellus voi sulkeutua. Valitse 1080p-stream.",
+  "details.stream.noAv1Title": "AV1:tä ei tueta",
+  "details.stream.noAv1Body": "Tämä laite ei pysty purkamaan AV1-videota: suorittimen pitäisi tehdä se, aivan liian hitaasti, ja sovellus voi sulkeutua. Valitse H.264- tai HEVC-stream.",
   "details.stream.playAnyway": "Toista silti",
   'details.stream.download': "Lataa",
   'details.rd.cached': "Välimuistissa Real Debridissä",

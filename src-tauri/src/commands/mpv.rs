@@ -13,8 +13,8 @@ fn require_mpv(state: &State<'_, Arc<AppState>>) -> CmdResult<Arc<Mpv>> {
 }
 
 /// What the device's hardware video decoders take, on Android
-/// (`{"hevc4k": bool, "avc4k": bool}`): the TV interface keeps away from 4K
-/// a device would decode in software. `None` elsewhere.
+/// (`{"hevc4k": bool, "avc4k": bool, "av1": bool}`): the TV interface keeps
+/// away from the video a device would decode in software. `None` elsewhere.
 #[tauri::command]
 pub async fn device_video_caps(app: tauri::AppHandle) -> CmdResult<Option<Value>> {
     #[cfg(target_os = "android")]

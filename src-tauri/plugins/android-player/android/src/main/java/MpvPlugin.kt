@@ -300,16 +300,18 @@ class MpvPlugin(private val activity: Activity) : Plugin(activity), MPVLib.Event
     }
 
     /**
-     * Whether the hardware video decoders take 4K (3840x2160), for HEVC and
-     * H.264. A 1080p TV stick (Fire TV Stick 3rd generation: 1920x1088 at
-     * most) leaves 4K to mpv's software decoder, which it cannot keep up with
-     * and which runs it out of memory: the interface steers away from it.
+     * What the hardware video decoders take: 4K (3840x2160) in HEVC and
+     * H.264, and AV1 at 1080p. A 1080p TV stick (Fire TV Stick 3rd
+     * generation: 1920x1088 at most, no AV1) leaves the rest to mpv's
+     * software decoder, which it cannot keep up with and which runs it out of
+     * memory: the interface steers away from it.
      */
     @Command
     fun decoderCaps(invoke: Invoke) {
         val out = JSObject()
         out.put("hevc4k", hardwareDecodes("video/hevc", 3840, 2160))
         out.put("avc4k", hardwareDecodes("video/avc", 3840, 2160))
+        out.put("av1", hardwareDecodes("video/av01", 1920, 1080))
         invoke.resolve(out)
     }
 

@@ -306,6 +306,8 @@ export const ZH = {
   'details.stream.downloadedTooltip': "已下载 — 从下载部分删除后可重新下载",
   "details.stream.no4kTitle": "不支持 4K",
   "details.stream.no4kBody": "此设备无法解码 4K 视频：需由处理器解码，速度太慢，应用可能会关闭。请选择 1080p 的流。",
+  "details.stream.noAv1Title": "不支持 AV1",
+  "details.stream.noAv1Body": "此设备无法解码 AV1 视频：需由处理器解码，速度太慢，应用可能会关闭。请选择 H.264 或 HEVC 的流。",
   "details.stream.playAnyway": "仍然播放",
   'details.stream.download': "下载",
   'details.rd.cached': "已缓存在 Real Debrid",

@@ -306,6 +306,8 @@ export const PL = {
   'details.stream.downloadedTooltip': "Już pobrane — usuń z sekcji Pobrania, aby pobrać ponownie",
   "details.stream.no4kTitle": "4K nieobsługiwane",
   "details.stream.no4kBody": "To urządzenie nie dekoduje wideo 4K: musiałby to robić procesor, zbyt wolno, a aplikacja może się zamknąć. Wybierz stream 1080p.",
+  "details.stream.noAv1Title": "AV1 nieobsługiwane",
+  "details.stream.noAv1Body": "To urządzenie nie dekoduje wideo AV1: musiałby to robić procesor, zbyt wolno, a aplikacja może się zamknąć. Wybierz stream w H.264 lub HEVC.",
   "details.stream.playAnyway": "Odtwórz mimo to",
   'details.stream.download': "Pobierz",
   'details.rd.cached': "W pamięci podręcznej Real Debrid",

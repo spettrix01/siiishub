@@ -306,6 +306,8 @@ export const TR = {
   'details.stream.downloadedTooltip': "Zaten indirildi — yeniden indirmek için İndirmeler bölümünden silin",
   "details.stream.no4kTitle": "4K desteklenmiyor",
   "details.stream.no4kBody": "Bu cihaz 4K videoyu çözemiyor: bunu işlemci yapmak zorunda kalır, çok yavaş, ve uygulama kapanabilir. 1080p bir yayın seç.",
+  "details.stream.noAv1Title": "AV1 desteklenmiyor",
+  "details.stream.noAv1Body": "Bu cihaz AV1 videoyu çözemiyor: bunu işlemci yapmak zorunda kalır, çok yavaş, ve uygulama kapanabilir. H.264 veya HEVC bir yayın seç.",
   "details.stream.playAnyway": "Yine de oynat",
   'details.stream.download': "İndir",
   'details.rd.cached': "Real Debrid'de önbelleğe alındı",

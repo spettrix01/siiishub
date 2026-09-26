@@ -306,6 +306,8 @@ export const UK = {
   'details.stream.downloadedTooltip': "Уже завантажено — видаліть із розділу «Завантаження», щоб завантажити знову",
   "details.stream.no4kTitle": "4K не підтримується",
   "details.stream.no4kBody": "Цей пристрій не може декодувати відео 4K: це довелося б робити процесору, надто повільно, і застосунок може закритися. Виберіть потік 1080p.",
+  "details.stream.noAv1Title": "AV1 не підтримується",
+  "details.stream.noAv1Body": "Цей пристрій не може декодувати відео AV1: це довелося б робити процесору, надто повільно, і застосунок може закритися. Виберіть потік у H.264 або HEVC.",
   "details.stream.playAnyway": "Усе одно відтворити",
   'details.stream.download': "Завантажити",
   'details.rd.cached': "Кешовано на Real Debrid",

@@ -306,6 +306,8 @@ export const FR = {
   'details.stream.downloadedTooltip': "Déjà téléchargé — supprimez-le de la section Téléchargements pour le télécharger à nouveau",
   "details.stream.no4kTitle": "4K non pris en charge",
   "details.stream.no4kBody": "Cet appareil ne sait pas décoder la vidéo 4K : le processeur devrait le faire, bien trop lentement, et l’app pourrait se fermer. Choisis un flux 1080p.",
+  "details.stream.noAv1Title": "AV1 non pris en charge",
+  "details.stream.noAv1Body": "Cet appareil ne sait pas décoder la vidéo AV1 : le processeur devrait le faire, bien trop lentement, et l’app pourrait se fermer. Choisis un flux en H.264 ou HEVC.",
   "details.stream.playAnyway": "Lire quand même",
   'details.stream.download': "Télécharger",
   'details.rd.cached': "En cache sur Real Debrid",
