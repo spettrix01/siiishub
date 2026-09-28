@@ -334,7 +334,6 @@ export const FI = {
   "player.trackN": "Raita {id}",
   "player.speedNormal": "Normaali (1x)",
   "player.subSync": "Synkronointi",
-  "player.subSyncHint": "Myöhässä? Paina −. Etuajassa? Paina +.",
   "player.subSyncEarlier": "Tekstitykset 0,1 s aiemmin",
   "player.subSyncLater": "Tekstitykset 0,1 s myöhemmin",
   "player.subSyncReset": "Nollaa synkronointi",

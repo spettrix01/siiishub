@@ -334,7 +334,6 @@ export const RO = {
   "player.trackN": "Pista {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Sincronizare",
-  "player.subSyncHint": "Întârzie? Apasă −. Vin prea devreme? Apasă +.",
   "player.subSyncEarlier": "Subtitrări cu 0,1 s mai devreme",
   "player.subSyncLater": "Subtitrări cu 0,1 s mai târziu",
   "player.subSyncReset": "Resetează sincronizarea",

@@ -334,7 +334,6 @@ export const KO = {
   "player.trackN": "트랙 {id}",
   "player.speedNormal": "보통 (1x)",
   "player.subSync": "동기화",
-  "player.subSyncHint": "자막이 늦으면 −, 빠르면 +를 누르세요.",
   "player.subSyncEarlier": "자막 0.1초 빠르게",
   "player.subSyncLater": "자막 0.1초 느리게",
   "player.subSyncReset": "동기화 초기화",

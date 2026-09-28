@@ -334,7 +334,6 @@ export const EL = {
   "player.trackN": "Κομμάτι {id}",
   "player.speedNormal": "Κανονική (1x)",
   "player.subSync": "Συγχρονισμός",
-  "player.subSyncHint": "Καθυστερούν; Πάτησε −. Προηγούνται; Πάτησε +.",
   "player.subSyncEarlier": "Υπότιτλοι 0,1 s νωρίτερα",
   "player.subSyncLater": "Υπότιτλοι 0,1 s αργότερα",
   "player.subSyncReset": "Επαναφορά συγχρονισμού",

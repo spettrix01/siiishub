@@ -334,7 +334,6 @@ export const TR = {
   "player.trackN": "Parça {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Eşitleme",
-  "player.subSyncHint": "Geç mi kalıyor? − tuşuna bas. Erken mi? + tuşuna bas.",
   "player.subSyncEarlier": "Altyazı 0,1 sn önce",
   "player.subSyncLater": "Altyazı 0,1 sn sonra",
   "player.subSyncReset": "Eşitlemeyi sıfırla",

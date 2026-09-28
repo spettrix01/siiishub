@@ -334,7 +334,6 @@ export const PT = {
   "player.trackN": "Faixa {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Sincronia",
-  "player.subSyncHint": "Atrasadas? Carrega em −. Adiantadas? Carrega em +.",
   "player.subSyncEarlier": "Legendas 0,1 s antes",
   "player.subSyncLater": "Legendas 0,1 s depois",
   "player.subSyncReset": "Repor a sincronia",

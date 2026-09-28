@@ -334,7 +334,6 @@ export const IT = {
   "player.trackN": "Traccia {id}",
   "player.speedNormal": "Normale (1x)",
   "player.subSync": "Sincronia",
-  "player.subSyncHint": "In ritardo? Premi −. In anticipo? Premi +.",
   "player.subSyncEarlier": "Sottotitoli 0,1 s prima",
   "player.subSyncLater": "Sottotitoli 0,1 s dopo",
   "player.subSyncReset": "Azzera la sincronia",

@@ -334,7 +334,6 @@ export const PL = {
   "player.trackN": "Ścieżka {id}",
   "player.speedNormal": "Normalna (1x)",
   "player.subSync": "Synchronizacja",
-  "player.subSyncHint": "Spóźnione? Naciśnij −. Za wcześnie? Naciśnij +.",
   "player.subSyncEarlier": "Napisy 0,1 s wcześniej",
   "player.subSyncLater": "Napisy 0,1 s później",
   "player.subSyncReset": "Zeruj synchronizację",

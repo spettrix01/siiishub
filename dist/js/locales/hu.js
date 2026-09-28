@@ -334,7 +334,6 @@ export const HU = {
   "player.trackN": "{id}. sáv",
   "player.speedNormal": "Normál (1x)",
   "player.subSync": "Szinkron",
-  "player.subSyncHint": "Ha a felirat késik: −. Ha siet: +.",
   "player.subSyncEarlier": "Felirat 0,1 mp-cel korábban",
   "player.subSyncLater": "Felirat 0,1 mp-cel később",
   "player.subSyncReset": "Szinkron visszaállítása",

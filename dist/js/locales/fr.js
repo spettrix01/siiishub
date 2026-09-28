@@ -334,7 +334,6 @@ export const FR = {
   "player.trackN": "Piste {id}",
   "player.speedNormal": "Normale (1x)",
   "player.subSync": "Synchro",
-  "player.subSyncHint": "En retard ? Appuie sur −. En avance ? Appuie sur +.",
   "player.subSyncEarlier": "Sous-titres 0,1 s plus tôt",
   "player.subSyncLater": "Sous-titres 0,1 s plus tard",
   "player.subSyncReset": "Réinitialiser la synchro",

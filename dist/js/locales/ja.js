@@ -334,7 +334,6 @@ export const JA = {
   "player.trackN": "トラック{id}",
   "player.speedNormal": "標準（1x）",
   "player.subSync": "同期",
-  "player.subSyncHint": "遅れている場合は −、早い場合は + を押してください。",
   "player.subSyncEarlier": "字幕を 0.1 秒早く",
   "player.subSyncLater": "字幕を 0.1 秒遅く",
   "player.subSyncReset": "同期をリセット",

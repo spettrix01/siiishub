@@ -334,7 +334,6 @@ export const NL = {
   "player.trackN": "Track {id}",
   "player.speedNormal": "Normaal (1x)",
   "player.subSync": "Synchronisatie",
-  "player.subSyncHint": "Te laat? Druk op −. Te vroeg? Druk op +.",
   "player.subSyncEarlier": "Ondertitels 0,1 s eerder",
   "player.subSyncLater": "Ondertitels 0,1 s later",
   "player.subSyncReset": "Synchronisatie herstellen",

@@ -334,7 +334,6 @@ export const SV = {
   "player.trackN": "Spår {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Synk",
-  "player.subSyncHint": "För sent? Tryck −. För tidigt? Tryck +.",
   "player.subSyncEarlier": "Undertexter 0,1 s tidigare",
   "player.subSyncLater": "Undertexter 0,1 s senare",
   "player.subSyncReset": "Återställ synk",

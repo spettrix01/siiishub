@@ -3559,7 +3559,7 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 /* The Subtitles tab (player.js): the sync on top, always in view above the
    tracks, and the look of the subtitles one button away. */
 .player-settings-head {
-  padding: 0.6rem 0.6rem 0.55rem;
+  padding: 0.75rem 0.6rem 0.7rem;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .player-settings-head[hidden] { display: none; }
@@ -3610,17 +3610,12 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   transition: color .12s, background .12s;
 }
 .pss-sync-value.is-set { color: var(--violet); background: var(--violet-soft); }
-.pss-hint {
-  margin: 0.4rem 0.15rem 0.55rem;
-  font-size: 0.7rem;
-  line-height: 1.35;
-  color: rgba(255,255,255,0.42);
-}
 .pss-look-btn {
   display: flex;
   align-items: center;
   gap: 10px;
   width: 100%;
+  margin-top: 0.75rem;
   padding: 0.5rem 0.55rem 0.5rem 0.65rem;
   border-radius: 8px;
   background: rgba(255,255,255,0.05);

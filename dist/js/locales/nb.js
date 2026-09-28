@@ -334,7 +334,6 @@ export const NB = {
   "player.trackN": "Spor {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Synkronisering",
-  "player.subSyncHint": "For sent? Trykk −. For tidlig? Trykk +.",
   "player.subSyncEarlier": "Undertekster 0,1 s tidligere",
   "player.subSyncLater": "Undertekster 0,1 s senere",
   "player.subSyncReset": "Tilbakestill synkronisering",

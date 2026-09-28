@@ -334,7 +334,6 @@ export const EN = {
   "player.trackN": "Track {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Sync",
-  "player.subSyncHint": "Subtitles late? Press −. Early? Press +.",
   "player.subSyncEarlier": "Subtitles 0.1 s earlier",
   "player.subSyncLater": "Subtitles 0.1 s later",
   "player.subSyncReset": "Reset sync",

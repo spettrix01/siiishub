@@ -334,7 +334,6 @@ export const RU = {
   "player.trackN": "Дорожка {id}",
   "player.speedNormal": "Обычная (1x)",
   "player.subSync": "Синхронизация",
-  "player.subSyncHint": "Запаздывают? Нажмите −. Опережают? Нажмите +.",
   "player.subSyncEarlier": "Субтитры на 0,1 с раньше",
   "player.subSyncLater": "Субтитры на 0,1 с позже",
   "player.subSyncReset": "Сбросить синхронизацию",

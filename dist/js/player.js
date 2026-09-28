@@ -991,7 +991,6 @@ function renderSubHead() {
           <button type="button" class="pss-step pss-reset" data-subdelay-reset aria-label="${attr('player.subSyncReset')}" title="${attr('player.subSyncReset')}">${SUB_ICON.reset}</button>
         </div>
       </div>
-      <p class="pss-hint">${attr('player.subSyncHint')}</p>
       <button type="button" class="pss-look-btn" data-sub-look-toggle aria-expanded="false">
         <span class="pss-look-name">${attr('player.subLook')}</span>
         <span class="pss-look-summary" data-sub-look-summary></span>

@@ -334,7 +334,6 @@ export const DE = {
   "player.trackN": "Spur {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Synchronisation",
-  "player.subSyncHint": "Zu spät? Drücke −. Zu früh? Drücke +.",
   "player.subSyncEarlier": "Untertitel 0,1 s früher",
   "player.subSyncLater": "Untertitel 0,1 s später",
   "player.subSyncReset": "Synchronisation zurücksetzen",

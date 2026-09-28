@@ -334,7 +334,6 @@ export const HI = {
   "player.trackN": "ट्रैक {id}",
   "player.speedNormal": "सामान्य (1x)",
   "player.subSync": "सिंक",
-  "player.subSyncHint": "देर से आ रहे हैं? − दबाएँ। जल्दी आ रहे हैं? + दबाएँ।",
   "player.subSyncEarlier": "सबटाइटल 0.1 s पहले",
   "player.subSyncLater": "सबटाइटल 0.1 s बाद में",
   "player.subSyncReset": "सिंक रीसेट करें",

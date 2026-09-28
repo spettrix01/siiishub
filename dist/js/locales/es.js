@@ -334,7 +334,6 @@ export const ES = {
   "player.trackN": "Pista {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Sincronía",
-  "player.subSyncHint": "¿Van con retraso? Pulsa −. ¿Van adelantados? Pulsa +.",
   "player.subSyncEarlier": "Subtítulos 0,1 s antes",
   "player.subSyncLater": "Subtítulos 0,1 s después",
   "player.subSyncReset": "Restablecer sincronía",

@@ -334,7 +334,6 @@ export const DA = {
   "player.trackN": "Spor {id}",
   "player.speedNormal": "Normal (1x)",
   "player.subSync": "Synkronisering",
-  "player.subSyncHint": "For sent? Tryk −. For tidligt? Tryk +.",
   "player.subSyncEarlier": "Undertekster 0,1 s tidligere",
   "player.subSyncLater": "Undertekster 0,1 s senere",
   "player.subSyncReset": "Nulstil synkronisering",

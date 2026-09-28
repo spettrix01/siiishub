@@ -334,7 +334,6 @@ export const CS = {
   "player.trackN": "Stopa {id}",
   "player.speedNormal": "Normální (1x)",
   "player.subSync": "Synchronizace",
-  "player.subSyncHint": "Titulky se opožďují? Stiskněte −. Předbíhají? Stiskněte +.",
   "player.subSyncEarlier": "Titulky o 0,1 s dříve",
   "player.subSyncLater": "Titulky o 0,1 s později",
   "player.subSyncReset": "Vynulovat synchronizaci",

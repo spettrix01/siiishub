@@ -334,7 +334,6 @@ export const ZH = {
   "player.trackN": "轨道 {id}",
   "player.speedNormal": "正常（1x）",
   "player.subSync": "同步",
-  "player.subSyncHint": "字幕慢了？按 −。快了？按 +。",
   "player.subSyncEarlier": "字幕提前 0.1 秒",
   "player.subSyncLater": "字幕延后 0.1 秒",
   "player.subSyncReset": "重置同步",

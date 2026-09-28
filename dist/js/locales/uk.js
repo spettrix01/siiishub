@@ -334,7 +334,6 @@ export const UK = {
   "player.trackN": "Доріжка {id}",
   "player.speedNormal": "Звичайна (1x)",
   "player.subSync": "Синхронізація",
-  "player.subSyncHint": "Запізнюються? Натисніть −. Випереджають? Натисніть +.",
   "player.subSyncEarlier": "Субтитри на 0,1 с раніше",
   "player.subSyncLater": "Субтитри на 0,1 с пізніше",
   "player.subSyncReset": "Скинути синхронізацію",
