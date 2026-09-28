@@ -3556,54 +3556,159 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   letter-spacing: 0;
   text-transform: none;
 }
-.player-settings-extra {
+/* The Subtitles tab (player.js): the sync on top, always in view above the
+   tracks, and the look of the subtitles one button away. */
+.player-settings-head {
+  padding: 0.6rem 0.6rem 0.55rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.player-settings-head[hidden] { display: none; }
+.pss-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-top: 0.7rem;
-  padding: 0.9rem 0.7rem 0.7rem;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  gap: 10px;
 }
-.pse-label {
-  font-size: 0.72rem;
+.pss-label {
+  font-size: 0.7rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
   color: rgba(255,255,255,0.55);
   white-space: nowrap;
 }
-.pse-controls {
+.pss-sync { padding-left: 0.15rem; }
+.pss-sync-ctrl {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
-.pse-btn {
-  appearance: none;
-  border: none;
-  background: rgba(255,255,255,0.07);
-  color: rgba(255,255,255,0.85);
-  padding: 0.3rem 0.5rem;
+.pss-step {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  transition: background .12s, color .12s, opacity .12s;
+}
+.pss-step:hover { background: rgba(255,255,255,0.16); color: #fff; }
+.pss-step:active { transform: scale(0.94); }
+.pss-reset { background: transparent; color: rgba(255,255,255,0.7); }
+.pss-reset.is-idle { opacity: 0.35; }
+.pss-sync-value {
+  min-width: 68px;
+  padding: 0.35rem 0.5rem;
   border-radius: 8px;
-  font-family: var(--body);
-  font-size: 0.76rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: background .12s, color .12s;
-  white-space: nowrap;
-}
-.pse-btn:hover { background: rgba(255,255,255,0.14); color: #fff; }
-.pse-btn.is-active {
-  color: var(--violet);
-  background: var(--violet-soft);
-}
-.pse-value {
-  min-width: 44px;
+  background: rgba(255,255,255,0.05);
   text-align: center;
   font-family: var(--mono);
-  font-size: 0.76rem;
+  font-size: 0.84rem;
+  font-variant-numeric: tabular-nums;
   color: rgba(255,255,255,0.85);
+  transition: color .12s, background .12s;
 }
+.pss-sync-value.is-set { color: var(--violet); background: var(--violet-soft); }
+.pss-hint {
+  margin: 0.4rem 0.15rem 0.55rem;
+  font-size: 0.7rem;
+  line-height: 1.35;
+  color: rgba(255,255,255,0.42);
+}
+.pss-look-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 0.5rem 0.55rem 0.5rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  text-align: left;
+  transition: background .12s;
+}
+.pss-look-btn:hover { background: rgba(255,255,255,0.1); }
+.pss-look-name {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.92);
+  white-space: nowrap;
+}
+.pss-look-summary {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+  font-size: 0.74rem;
+  color: rgba(255,255,255,0.5);
+}
+.pss-look-btn svg {
+  flex: 0 0 auto;
+  color: rgba(255,255,255,0.55);
+  transition: transform .15s;
+}
+.pss-look-btn.is-open { background: var(--violet-soft); }
+.pss-look-btn.is-open .pss-look-name,
+.pss-look-btn.is-open svg { color: var(--violet); }
+.pss-look-btn.is-open svg { transform: rotate(90deg); }
+/* The look's choices, in place of the tracks. */
+.pss-look {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.15rem 0.2rem;
+}
+.pss-look-row { padding: 0.35rem 0.1rem 0.35rem 0.3rem; }
+.pss-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.pss-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 34px;
+  padding: 0 0.65rem;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.82);
+  font-size: 0.78rem;
+  white-space: nowrap;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.pss-chip:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.pss-chip.is-active {
+  border-color: rgba(var(--violet-rgb), 0.6);
+  background: var(--violet-soft);
+  color: var(--violet);
+}
+.pss-chip--size { padding: 0; width: 36px; }
+.pss-size { font-family: var(--display); font-weight: 700; line-height: 1; }
+.pss-size--s { font-size: 11px; }
+.pss-size--m { font-size: 14px; }
+.pss-size--l { font-size: 17px; }
+.pss-size--xl { font-size: 21px; }
+.pss-chip--color { padding: 0; width: 36px; }
+.pss-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--swatch);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.35);
+}
+.pss-note {
+  margin: 0.25rem 0.3rem 0.1rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: rgba(255, 196, 120, 0.9);
+}
+.pss-note[hidden] { display: none; }
 
 .addon-group-head {
   list-style: none;

@@ -1,6 +1,7 @@
 import { $, $$, escapeHTML, FORM_TAGS, openExternal } from './dom.js';
-import { IS_ANDROID, IS_TV } from './platform.js';
-import { t as tx } from './i18n.js';
+import { IS_ANDROID, IS_TV, IS_WEB } from './platform.js';
+import { t as tx, intlLocale } from './i18n.js';
+import { userStore } from './userstore.js';
 import { fmtTime, fmtBytes, fmtSpeed, fmtFullDate, fmtMoney, fmtRuntime, fmtVote } from './format.js';
 import {
   destroyTorrentSession,
@@ -50,6 +51,7 @@ const playerProgressThumb = $('#playerProgressThumb');
 const playerProgressTip = $('#playerProgressTip');
 const playerSettingsBtn = $('#playerSettingsBtn');
 const playerSettings = $('#playerSettings');
+const playerSettingsHead = $('#playerSettingsHead');
 const playerSettingsBody = $('#playerSettingsBody');
 const playerFsBtn = $('#playerFsBtn');
 const playerSplitBtn = $('#playerSplitBtn');
@@ -483,8 +485,7 @@ function applyProperty(name, value) {
     }
     case 'sub-delay': {
       mpvState.subDelay = Number(value) || 0;
-      const el = playerSettingsBody.querySelector('[data-subdelay-value]');
-      if (el) el.textContent = fmtSubDelay(mpvState.subDelay);
+      updateSubHead();
       break;
     }
     case 'eof-reached': {
@@ -636,6 +637,7 @@ function speedLabel(s) {
 function renderSettingsBody() {
   if (!playerSettingsBody) return;
   if (playerSettings.hidden) return;
+  renderSubHead();
 
   if (settingsTab === 'speed') {
     delete playerSettingsBody.dataset.shellTab;
@@ -646,6 +648,11 @@ function renderSettingsBody() {
   if (settingsTab === 'opensubtitles') {
     delete playerSettingsBody.dataset.shellTab;
     renderOpenSubtitlesList();
+    return;
+  }
+
+  if (settingsTab === 'sub' && subLookOpen) {
+    renderSubLook();
     return;
   }
 
@@ -892,24 +899,163 @@ function renderSpeedList() {
 }
 
 function fmtSubDelay(d) {
-  const v = Number(d) || 0;
-  return `${v > 0 ? '+' : ''}${v.toFixed(1)}s`;
+  const v = Math.round((Number(d) || 0) * 10) / 10;
+  const n = new Intl.NumberFormat(intlLocale(), {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+    signDisplay: 'exceptZero',
+  }).format(v);
+  return `${n} s`;
 }
 
-function trackShellExtraHtml() {
-  if (settingsTab === 'sub') {
-    return `
-      <div class="player-settings-extra">
-        <span class="pse-label">${escapeHTML(tx('player.subDelay'))}</span>
-        <div class="pse-controls">
-          <button type="button" class="pse-btn" data-subdelay="-0.1">−0.1s</button>
-          <span class="pse-value" data-subdelay-value>${escapeHTML(fmtSubDelay(mpvState.subDelay))}</span>
-          <button type="button" class="pse-btn" data-subdelay="0.1">+0.1s</button>
-          <button type="button" class="pse-btn" data-subdelay-reset>0s</button>
+// ---------- Subtitles: sync and look ----------
+// The Subtitles tab keeps the sync above the tracks, always in view, and the
+// look of the subtitles one button away: its choices take the place of the
+// tracks, so the panel does not grow past the top of a TV's screen.
+
+// The look, kept on each device (a TV is read from the sofa, a PC from arm's
+// length): user data under siiis:player:, which the account does not carry.
+// Values are mpv's: sub-scale, sub-color, the opacity of the box behind the
+// text (none: the usual outline), sub-pos.
+const SUB_LOOK_KEY = 'siiis:player:sub-';
+const SUB_LOOK = {
+  size: { fallback: 'm', choices: { s: 0.8, m: 1, l: 1.25, xl: 1.55 } },
+  color: { fallback: 'white', choices: { white: '#FFFFFF', yellow: '#FFE14D', cyan: '#5CE1FF', green: '#7CFC8A' } },
+  back: { fallback: 'none', choices: { none: 0, light: 0.6, solid: 0.9 } },
+  pos: { fallback: 'low', choices: { low: 100, mid: 93, high: 86 } },
+};
+// Image subtitles (PGS, VobSub, DVB) and ASS ones bring their own colours:
+// mpv only resizes and moves them. The browser plays text subtitles only.
+const OWN_STYLE_CODECS = /pgs|dvd_sub|dvb_sub|xsub|^ass$|^ssa$/i;
+
+let subLookOpen = false;
+
+function subLook(name) {
+  const { fallback, choices } = SUB_LOOK[name];
+  const saved = userStore.getItem(SUB_LOOK_KEY + name);
+  return Object.prototype.hasOwnProperty.call(choices, saved) ? saved : fallback;
+}
+
+function setSubLook(name, value) {
+  if (!SUB_LOOK[name] || !Object.prototype.hasOwnProperty.call(SUB_LOOK[name].choices, value)) return;
+  userStore.setItem(SUB_LOOK_KEY + name, value);
+  applySubLook();
+  updateSubLook();
+  updateSubHead();
+}
+
+function applySubLook() {
+  const value = name => SUB_LOOK[name].choices[subLook(name)];
+  const back = value('back');
+  const alpha = Math.round(back * 255).toString(16).padStart(2, '0').toUpperCase();
+  const set = (name, v) => mpvSet(name, v).catch(() => {});
+  set('sub-scale', value('size'));
+  set('sub-color', value('color'));
+  // A box behind the lines (mpv 0.39 and later), as far out from them as the
+  // shadow's offset; without it the usual outline, with no shadow.
+  set('sub-border-style', back ? 'background-box' : 'outline-and-shadow');
+  set('sub-back-color', `#${alpha}000000`);
+  set('sub-shadow-offset', back ? 6 : 0);
+  set('sub-pos', value('pos'));
+}
+
+function subHasOwnStyle() {
+  if (IS_WEB) return false;
+  const track = tracksOf('sub').find(t => Number(t.id) === Number(mpvState.sid));
+  return !!track && OWN_STYLE_CODECS.test(String(track.codec || ''));
+}
+
+const SUB_ICON = {
+  minus: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 12h12"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M12 6v12M6 12h12"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3M4.5 4.5v3.9h3.9"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></svg>',
+};
+
+// Above the tracks, drawn once per language and updated in place: the
+// remote's selection may be on one of its buttons.
+function renderSubHead() {
+  if (!playerSettingsHead) return;
+  playerSettingsHead.hidden = settingsTab !== 'sub';
+  if (playerSettingsHead.hidden) return;
+  if (playerSettingsHead.dataset.locale !== intlLocale()) {
+    playerSettingsHead.dataset.locale = intlLocale();
+    const attr = key => escapeHTML(tx(key));
+    playerSettingsHead.innerHTML = `
+      <div class="pss-row pss-sync">
+        <span class="pss-label">${attr('player.subSync')}</span>
+        <div class="pss-sync-ctrl">
+          <button type="button" class="pss-step" data-subdelay="-0.1" aria-label="${attr('player.subSyncEarlier')}" title="${attr('player.subSyncEarlier')}">${SUB_ICON.minus}</button>
+          <span class="pss-sync-value" data-subdelay-value></span>
+          <button type="button" class="pss-step" data-subdelay="0.1" aria-label="${attr('player.subSyncLater')}" title="${attr('player.subSyncLater')}">${SUB_ICON.plus}</button>
+          <button type="button" class="pss-step pss-reset" data-subdelay-reset aria-label="${attr('player.subSyncReset')}" title="${attr('player.subSyncReset')}">${SUB_ICON.reset}</button>
         </div>
+      </div>
+      <p class="pss-hint">${attr('player.subSyncHint')}</p>
+      <button type="button" class="pss-look-btn" data-sub-look-toggle aria-expanded="false">
+        <span class="pss-look-name">${attr('player.subLook')}</span>
+        <span class="pss-look-summary" data-sub-look-summary></span>
+        ${SUB_ICON.chevron}
+      </button>`;
+  }
+  updateSubHead();
+}
+
+function updateSubHead() {
+  if (!playerSettingsHead || playerSettingsHead.hidden) return;
+  const delay = Number(mpvState.subDelay) || 0;
+  const value = playerSettingsHead.querySelector('[data-subdelay-value]');
+  if (value) {
+    value.textContent = fmtSubDelay(delay);
+    value.classList.toggle('is-set', Math.abs(delay) >= 0.05);
+  }
+  playerSettingsHead.querySelector('[data-subdelay-reset]')?.classList.toggle('is-idle', Math.abs(delay) < 0.05);
+  const toggle = playerSettingsHead.querySelector('[data-sub-look-toggle]');
+  if (toggle) {
+    toggle.classList.toggle('is-open', subLookOpen);
+    toggle.setAttribute('aria-expanded', subLookOpen ? 'true' : 'false');
+  }
+  const summary = playerSettingsHead.querySelector('[data-sub-look-summary]');
+  if (summary) {
+    summary.textContent = Object.keys(SUB_LOOK).map(name => tx(`player.subLook.${name}.${subLook(name)}`)).join(' · ');
+  }
+}
+
+// The look's choices, in place of the tracks.
+function renderSubLook() {
+  if (playerSettingsBody.dataset.shellTab !== 'sub-look' || playerSettingsBody.dataset.locale !== intlLocale()) {
+    playerSettingsBody.dataset.shellTab = 'sub-look';
+    playerSettingsBody.dataset.locale = intlLocale();
+    const chips = (name, inner) => Object.keys(SUB_LOOK[name].choices).map(v => {
+      const label = escapeHTML(tx(`player.subLook.${name}.${v}`));
+      return `<button type="button" class="pss-chip pss-chip--${name}" data-sub-look="${name}" data-value="${v}" role="radio" aria-checked="false" aria-label="${label}" title="${label}">${inner(v, label)}</button>`;
+    }).join('');
+    const row = (name, inner) => `
+      <div class="pss-row pss-look-row">
+        <span class="pss-label" id="pssLabel-${name}">${escapeHTML(tx(`player.subLook.${name}`))}</span>
+        <div class="pss-chips" role="radiogroup" aria-labelledby="pssLabel-${name}">${chips(name, inner)}</div>
+      </div>`;
+    playerSettingsBody.innerHTML = `
+      <div class="pss-look">
+        ${row('size', v => `<span class="pss-size pss-size--${v}">A</span>`)}
+        ${row('color', v => `<span class="pss-swatch" style="--swatch: ${SUB_LOOK.color.choices[v]}"></span>`)}
+        ${row('back', (v, label) => label)}
+        ${row('pos', (v, label) => label)}
+        <p class="pss-note" data-sub-look-note hidden>${escapeHTML(tx('player.subLookOwn'))}</p>
       </div>`;
   }
-  return '';
+  updateSubLook();
+}
+
+function updateSubLook() {
+  if (playerSettingsBody.dataset.shellTab !== 'sub-look') return;
+  for (const el of playerSettingsBody.querySelectorAll('[data-sub-look]')) {
+    const on = subLook(el.dataset.subLook) === el.dataset.value;
+    el.classList.toggle('is-active', on);
+    el.setAttribute('aria-checked', on ? 'true' : 'false');
+  }
+  const note = playerSettingsBody.querySelector('[data-sub-look-note]');
+  if (note) note.hidden = !subHasOwnStyle();
 }
 
 function ensureTrackShell() {
@@ -921,7 +1067,6 @@ function ensureTrackShell() {
       <input type="search" class="player-settings-search" placeholder="${escapeHTML(tx('player.searchTrack'))}" autocomplete="off" spellcheck="false" />
     </div>
     <div class="player-settings-list" data-track-list></div>
-    ${trackShellExtraHtml()}
   `;
   const input = playerSettingsBody.querySelector('.player-settings-search');
   input.value = filter;
@@ -993,6 +1138,7 @@ function openSettings() {
   wakePlayer();
 }
 function closeSettings() {
+  subLookOpen = false;
   playerSettings.hidden = true;
   playerSettingsBtn.setAttribute('aria-expanded', 'false');
   wakePlayer();
@@ -1066,9 +1212,11 @@ async function attachStream(playlistUrl, opts = {}) {
     await mpvSetVisible(true);
     await ensureObservers();
 
-    // Any subtitle sync tweak is specific to the previous file.
+    // Any subtitle sync tweak is specific to the previous file; the look of
+    // the subtitles is the device's.
     mpvState.subDelay = 0;
     mpvSet('sub-delay', 0).catch(() => {});
+    applySubLook();
 
     const r = playerCtx ? getResume(playerCtx) : null;
     if (r && Number.isFinite(r.time) && r.time > 5) {
@@ -1426,6 +1574,24 @@ $$('[data-pst-tab]', playerSettings).forEach(btn => {
     renderSettingsBody();
   });
 });
+playerSettingsHead?.addEventListener('click', e => {
+  if (e.target.closest('[data-sub-look-toggle]')) {
+    subLookOpen = !subLookOpen;
+    renderSettingsBody();
+    return;
+  }
+  if (e.target.closest('[data-subdelay-reset]')) {
+    mpvSet('sub-delay', 0).catch(() => {});
+    return;
+  }
+  const sdBtn = e.target.closest('[data-subdelay]');
+  if (sdBtn) {
+    const step = Number(sdBtn.dataset.subdelay);
+    if (Number.isFinite(step) && step) {
+      mpvCommand(['add', 'sub-delay', String(step)]).catch(() => {});
+    }
+  }
+});
 playerSettingsBody.addEventListener('click', e => {
   const speedOpt = e.target.closest('[data-speed]');
   if (speedOpt) {
@@ -1437,17 +1603,9 @@ playerSettingsBody.addEventListener('click', e => {
     }
     return;
   }
-  const sdReset = e.target.closest('[data-subdelay-reset]');
-  if (sdReset) {
-    mpvSet('sub-delay', 0).catch(() => {});
-    return;
-  }
-  const sdBtn = e.target.closest('[data-subdelay]');
-  if (sdBtn) {
-    const step = Number(sdBtn.dataset.subdelay);
-    if (Number.isFinite(step) && step) {
-      mpvCommand(['add', 'sub-delay', String(step)]).catch(() => {});
-    }
+  const lookChip = e.target.closest('[data-sub-look]');
+  if (lookChip) {
+    setSubLook(lookChip.dataset.subLook, lookChip.dataset.value);
     return;
   }
   const osOpt = e.target.closest('[data-os-id]');

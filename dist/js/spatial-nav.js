@@ -90,8 +90,9 @@ const ZONES = [
   ['.player-row', 'row'],
   ['.player-volume', 'row'],
   ['.player-settings-tabs', 'row'],
+  ['.player-settings-head', 'box'],
   ['.player-settings-body', 'box'],
-  ['.player-settings-extra', 'row'],
+  ['.pss-row', 'row'],
   ['.player-settings-imdb-wrap', 'row'],
 ];
 const ZONE_SELECTOR = ZONES.map(([sel]) => sel).join(',');
@@ -112,6 +113,7 @@ const PREFERRED = [
   ['.player-volume', '#playerMuteBtn'],
   ['.player-settings-tabs', '.is-active'],
   ['.player-settings-body', '.player-settings-opt.is-active'],
+  ['.pss-row', '.pss-chip.is-active'],
 ];
 
 // Zones read from the top unless the selection comes up into them: a

@@ -73,7 +73,8 @@ Android and Android TV sign in to them to share one library: Continue
 watching and resume points, favorites, the stream last watched, the addons,
 the TMDB and debrid keys, the tracker list, the language, the audio and
 subtitle languages and the theme. Downloads stay on the device that made
-them.
+them, and so does the look of the subtitles, set for the screen and the
+distance each device is watched from.
 
 - **The first account**, the administrator's, is made on the login page the
   first time the server runs, from a device on the home network. The

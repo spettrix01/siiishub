@@ -302,13 +302,39 @@ function parseVtt(text) {
   return cues;
 }
 
+// The look of the subtitles, which the app sets as mpv's options (js/player.js):
+// size, colour and background as the cues' style (::cue in web.css), the
+// height as where the cues go.
+const subLook = { scale: 1, color: '#FFFFFF', box: false, back: 0, pos: 100 };
+
+function styleCues() {
+  video.style.setProperty('--sub-scale', String(subLook.scale));
+  video.style.setProperty('--sub-color', subLook.color);
+  video.style.setProperty('--sub-back', subLook.box ? `rgba(0, 0, 0, ${subLook.back})` : 'transparent');
+  video.style.setProperty('--sub-outline', subLook.box ? 'none' : '0 0 2px #000, 0 0 3px #000, 0 1px 4px #000');
+}
+
+// mpv's colours: #RRGGBB, or #AARRGGBB with the opacity first.
+function mpvColor(value) {
+  const m = /^#([0-9a-f]{2})?([0-9a-f]{6})$/i.exec(String(value || '').trim());
+  if (!m) return null;
+  return { rgb: `#${m[2]}`, alpha: m[1] ? parseInt(m[1], 16) / 255 : 1 };
+}
+
 // A cue of the film on the video's timeline: shifted by the subtitle delay,
-// and by where a progressive stream started.
+// and by where a progressive stream started. Raised, its lowest line ends
+// where mpv's sub-pos puts it, in % of the height.
 function toVideoCue(c) {
   const shift = subDelay - offset;
   const end = c.end + shift;
   if (end <= 0) return null;
-  return new VTTCue(Math.max(0, c.start + shift), end, c.text);
+  const cue = new VTTCue(Math.max(0, c.start + shift), end, c.text);
+  if (subLook.pos < 100) {
+    cue.snapToLines = false;
+    cue.line = subLook.pos - 5;
+    cue.lineAlign = 'end';
+  }
+  return cue;
 }
 
 // Chromium keeps the box of a cue on screen for good when the video loads
@@ -847,6 +873,26 @@ function setProperty(name, value) {
       subDelay = Math.round((Number(value) || 0) * 1000) / 1000;
       renderCues();
       prop('sub-delay', subDelay);
+      return null;
+    case 'sub-scale':
+      subLook.scale = Math.max(0.3, Math.min(3, Number(value) || 1));
+      styleCues();
+      return null;
+    case 'sub-color':
+      subLook.color = mpvColor(value)?.rgb || '#FFFFFF';
+      styleCues();
+      return null;
+    case 'sub-border-style':
+      subLook.box = value === 'background-box' || value === 'opaque-box';
+      styleCues();
+      return null;
+    case 'sub-back-color':
+      subLook.back = mpvColor(value)?.alpha ?? 0;
+      styleCues();
+      return null;
+    case 'sub-pos':
+      subLook.pos = Math.max(0, Math.min(150, Number(value) || 100));
+      renderCues();
       return null;
     case 'aid': {
       const next = value === 'no' || value === false ? aid : Number(value);

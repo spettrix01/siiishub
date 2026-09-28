@@ -77,10 +77,13 @@ html.is-web .player-video { background: #000; }
 .web-notice-close:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
 .web-notice-close svg { width: 14px; height: 14px; }
 
+/* The look of the subtitles (Player settings → Subtitles → Look), set by
+   web/player.js. */
 .web-video::cue {
   font-family: var(--body);
-  font-size: clamp(16px, 2.4vw, 40px);
+  font-size: calc(clamp(16px, 2.4vw, 40px) * var(--sub-scale, 1));
   line-height: 1.3;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.6);
+  color: var(--sub-color, #fff);
+  background: var(--sub-back, rgba(0, 0, 0, 0.6));
+  text-shadow: var(--sub-outline, none);
 }

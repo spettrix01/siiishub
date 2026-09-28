@@ -17,9 +17,10 @@ use serde::{Deserialize, Serialize};
 
 use crate::settings::Settings;
 
-/// User data that belongs to the device: what it downloaded and its own
-/// bookkeeping.
-const LOCAL_KEYS: &[&str] = &["siiis:dl:", "_migrated"];
+/// User data that belongs to the device: what it downloaded, its own
+/// bookkeeping, and the look of the player's subtitles, set for the screen
+/// and the distance it is watched from.
+const LOCAL_KEYS: &[&str] = &["siiis:dl:", "_migrated", "siiis:player:"];
 
 /// The settings a sync carries. The rest (the remote's port, the phones
 /// paired with it) belong to the device.
@@ -275,6 +276,7 @@ mod tests {
         assert!(synced_userdata("siiis:resume:tv:1:1:1"));
         assert!(synced_userdata("siiishub-theme"));
         assert!(!synced_userdata("siiis:dl:seen"));
+        assert!(!synced_userdata("siiis:player:sub-size"));
         assert!(!synced_userdata("_migrated_v1"));
         assert!(!synced_userdata("settings.addons"));
         assert_eq!(setting_field("settings.addons"), Some("addons"));
