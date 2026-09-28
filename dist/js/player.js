@@ -1031,9 +1031,9 @@ function updateSubHead() {
 // ---------- Audio: passthrough ----------
 // The audio as the file has it, for an amplifier or a soundbar to decode:
 // the way Dolby Atmos reaches them. Switched on, the formats to pass show as
-// boxes to tick: those any amplifier takes over any link (optical, HDMI ARC)
-// come ticked; DTS-HD and TrueHD, for eARC or an amplifier on HDMI, on
-// request (with DTS alone, a DTS-HD track passes its DTS core). mpv's
+// boxes to tick, each time from those any amplifier takes over any link
+// (optical, HDMI ARC); DTS-HD and TrueHD, for eARC or an amplifier on HDMI,
+// on request (with DTS alone, a DTS-HD track passes its DTS core). mpv's
 // audio-spdif; a device that refuses a format gets it decoded as usual. Kept
 // on each device, like the subtitles' look: it depends on what the device is
 // plugged into.
@@ -1071,6 +1071,7 @@ function applyPassthrough({ reload = false } = {}) {
 function setPassthrough(on) {
   if (on === passthroughOn()) return;
   userStore.setItem(SPDIF_KEY, on ? 'on' : 'off');
+  if (on) userStore.setItem(SPDIF_FORMATS_KEY, SPDIF_DEFAULT.join(','));
   applyPassthrough({ reload: true });
   updateAudioHead();
 }
