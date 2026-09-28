@@ -360,7 +360,6 @@ export const NL = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Uit",
   "player.passthrough.on": "Aan",
-  "player.passthroughFormats": "Formaten",
   "player.imdbPlaceholder": "tt1234567  of  tt1234567:S:E",
   "player.searchBtn": "Zoeken",
   "player.filterByLang": "Filteren op taal…",

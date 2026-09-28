@@ -360,7 +360,6 @@ export const RU = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Выкл.",
   "player.passthrough.on": "Вкл.",
-  "player.passthroughFormats": "Форматы",
   "player.imdbPlaceholder": "tt1234567  или  tt1234567:S:E",
   "player.searchBtn": "Поиск",
   "player.filterByLang": "Фильтр по языку…",

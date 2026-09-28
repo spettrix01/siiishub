@@ -360,7 +360,6 @@ export const KO = {
   "player.passthrough": "패스스루",
   "player.passthrough.off": "끔",
   "player.passthrough.on": "켬",
-  "player.passthroughFormats": "형식",
   "player.imdbPlaceholder": "tt1234567  또는  tt1234567:S:E",
   "player.searchBtn": "검색",
   "player.filterByLang": "언어로 필터…",

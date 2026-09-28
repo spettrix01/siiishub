@@ -360,7 +360,6 @@ export const NB = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Av",
   "player.passthrough.on": "På",
-  "player.passthroughFormats": "Formater",
   "player.imdbPlaceholder": "tt1234567  eller  tt1234567:S:E",
   "player.searchBtn": "Søk",
   "player.filterByLang": "Filtrer etter språk…",

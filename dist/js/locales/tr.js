@@ -360,7 +360,6 @@ export const TR = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Kapalı",
   "player.passthrough.on": "Açık",
-  "player.passthroughFormats": "Biçimler",
   "player.imdbPlaceholder": "tt1234567  veya  tt1234567:S:E",
   "player.searchBtn": "Ara",
   "player.filterByLang": "Dile göre filtrele…",

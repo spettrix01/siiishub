@@ -360,7 +360,6 @@ export const SV = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Av",
   "player.passthrough.on": "På",
-  "player.passthroughFormats": "Format",
   "player.imdbPlaceholder": "tt1234567  eller  tt1234567:S:E",
   "player.searchBtn": "Sök",
   "player.filterByLang": "Filtrera efter språk…",

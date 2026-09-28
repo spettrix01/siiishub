@@ -360,7 +360,6 @@ export const EL = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Ανενεργό",
   "player.passthrough.on": "Ενεργό",
-  "player.passthroughFormats": "Μορφές",
   "player.imdbPlaceholder": "tt1234567  ή  tt1234567:S:E",
   "player.searchBtn": "Αναζήτηση",
   "player.filterByLang": "Φιλτράρισμα κατά γλώσσα…",

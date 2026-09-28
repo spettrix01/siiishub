@@ -360,7 +360,6 @@ export const CS = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Vypnuto",
   "player.passthrough.on": "Zapnuto",
-  "player.passthroughFormats": "Formáty",
   "player.imdbPlaceholder": "tt1234567  nebo  tt1234567:S:E",
   "player.searchBtn": "Hledat",
   "player.filterByLang": "Filtrovat podle jazyka…",

@@ -360,7 +360,6 @@ export const HU = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Ki",
   "player.passthrough.on": "Be",
-  "player.passthroughFormats": "Formátumok",
   "player.imdbPlaceholder": "tt1234567  vagy  tt1234567:S:E",
   "player.searchBtn": "Keresés",
   "player.filterByLang": "Szűrés nyelv szerint…",

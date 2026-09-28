@@ -360,7 +360,6 @@ export const JA = {
   "player.passthrough": "パススルー",
   "player.passthrough.off": "オフ",
   "player.passthrough.on": "オン",
-  "player.passthroughFormats": "形式",
   "player.imdbPlaceholder": "tt1234567  または  tt1234567:S:E",
   "player.searchBtn": "検索",
   "player.filterByLang": "言語で絞り込み…",

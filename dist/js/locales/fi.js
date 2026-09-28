@@ -360,7 +360,6 @@ export const FI = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Pois",
   "player.passthrough.on": "Päällä",
-  "player.passthroughFormats": "Muodot",
   "player.imdbPlaceholder": "tt1234567  tai  tt1234567:S:E",
   "player.searchBtn": "Hae",
   "player.filterByLang": "Suodata kielen mukaan…",

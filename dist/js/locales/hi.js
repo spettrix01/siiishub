@@ -360,7 +360,6 @@ export const HI = {
   "player.passthrough": "पासथ्रू",
   "player.passthrough.off": "बंद",
   "player.passthrough.on": "चालू",
-  "player.passthroughFormats": "फ़ॉर्मैट",
   "player.imdbPlaceholder": "tt1234567  या  tt1234567:S:E",
   "player.searchBtn": "खोजें",
   "player.filterByLang": "भाषा के अनुसार छाँटें…",

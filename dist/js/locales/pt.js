@@ -360,7 +360,6 @@ export const PT = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Desligado",
   "player.passthrough.on": "Ligado",
-  "player.passthroughFormats": "Formatos",
   "player.imdbPlaceholder": "tt1234567  ou  tt1234567:S:E",
   "player.searchBtn": "Procurar",
   "player.filterByLang": "Filtrar por idioma…",

@@ -360,7 +360,6 @@ export const ZH = {
   "player.passthrough": "音频直通",
   "player.passthrough.off": "关闭",
   "player.passthrough.on": "开启",
-  "player.passthroughFormats": "格式",
   "player.imdbPlaceholder": "tt1234567  或  tt1234567:S:E",
   "player.searchBtn": "搜索",
   "player.filterByLang": "按语言筛选…",

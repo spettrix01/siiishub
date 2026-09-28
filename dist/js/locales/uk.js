@@ -360,7 +360,6 @@ export const UK = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Вимк.",
   "player.passthrough.on": "Увімк.",
-  "player.passthroughFormats": "Формати",
   "player.imdbPlaceholder": "tt1234567  або  tt1234567:S:E",
   "player.searchBtn": "Пошук",
   "player.filterByLang": "Фільтрувати за мовою…",

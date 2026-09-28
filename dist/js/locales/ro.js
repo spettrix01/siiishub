@@ -360,7 +360,6 @@ export const RO = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Oprit",
   "player.passthrough.on": "Pornit",
-  "player.passthroughFormats": "Formate",
   "player.imdbPlaceholder": "tt1234567  sau  tt1234567:S:E",
   "player.searchBtn": "Caută",
   "player.filterByLang": "Filtrează după limbă…",

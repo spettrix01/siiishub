@@ -360,7 +360,6 @@ export const IT = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Spento",
   "player.passthrough.on": "Acceso",
-  "player.passthroughFormats": "Formati",
   "player.imdbPlaceholder": "tt1234567  oppure  tt1234567:S:E",
   "player.searchBtn": "Cerca",
   "player.filterByLang": "Filtra per lingua…",

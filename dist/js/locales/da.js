@@ -360,7 +360,6 @@ export const DA = {
   "player.passthrough": "Passthrough",
   "player.passthrough.off": "Fra",
   "player.passthrough.on": "Til",
-  "player.passthroughFormats": "Formater",
   "player.imdbPlaceholder": "tt1234567  eller  tt1234567:S:E",
   "player.searchBtn": "Søg",
   "player.filterByLang": "Filtrér efter sprog…",
