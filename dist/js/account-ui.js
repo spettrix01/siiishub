@@ -2,7 +2,8 @@
 // library, favorites, addons, keys and preferences with (account.rs),
 // signed in with an account made in the server version. In the browser
 // version: who is signed in, their password and, for the administrator,
-// the server's accounts (server/accounts.rs).
+// the server's accounts and the devices signed in to each
+// (server/accounts.rs).
 import { $, escapeHTML } from './dom.js';
 import { t, intlLocale } from './i18n.js';
 import { IS_WEB, IS_ANDROID, IS_TV } from './platform.js';
@@ -10,6 +11,7 @@ import { showConfirm, showForm } from './modal.js';
 import {
   syncStatus, syncSignIn, syncSignOut, syncNow,
   accountStatus, accountsList, accountCreate, accountDelete, accountPassword,
+  accountDeviceRemove,
 } from './api.js';
 import { refreshAfterSync } from './sync-client.js';
 
@@ -21,9 +23,13 @@ function hint(text = '', kind = '') {
   el.textContent = text;
 }
 
+function errorCode(e) {
+  return typeof e === 'string' ? e : (e?.message || String(e));
+}
+
 // The backend's error codes (account.rs, accounts.rs) in words.
 function errorText(e) {
-  const code = typeof e === 'string' ? e : (e?.message || String(e));
+  const code = errorCode(e);
   const key = `settings.account.error.${code}`;
   const text = t(key);
   return text === key ? `${t('common.error')}: ${code}` : text;
@@ -112,8 +118,7 @@ async function checkLink() {
     linkState('ok', t('settings.account.connected'));
   } catch (err) {
     if (run !== checking) return;
-    const code = typeof err === 'string' ? err : (err?.message || String(err));
-    if (code === 'signed-out') {
+    if (errorCode(err) === 'signed-out') {
       await renderApp();
       hint(errorText(err), 'error');
       return;
@@ -235,15 +240,119 @@ async function createAccount() {
   await renderAccounts();
 }
 
+// The accounts whose devices are open, kept across a new render of the list.
+const openAccounts = new Set();
+
+const CHEVRON = '<svg class="account-chevron" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></svg>';
+const KICK_ICON = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></svg>';
+// A device as its kind: a TV, a phone, a PC's screen.
+const DEVICE_ICONS = {
+  tv: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M3.5 7h17a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-17a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1ZM8 3l4 4 4-4"/></svg>',
+  phone: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M8 3h8a1.5 1.5 0 0 1 1.5 1.5v15A1.5 1.5 0 0 1 16 21H8a1.5 1.5 0 0 1-1.5-1.5v-15A1.5 1.5 0 0 1 8 3Zm3 15h2"/></svg>',
+  screen: '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" d="M4 4.5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1Zm4 15h8m-4-4v4"/></svg>',
+};
+
+function deviceIcon(kind = '') {
+  if (/\btv\b/i.test(kind)) return DEVICE_ICONS.tv;
+  if (/android/i.test(kind)) return DEVICE_ICONS.phone;
+  return DEVICE_ICONS.screen;
+}
+
+// "Android TV · Amazon AFTKA": what the app said it is when it signed in,
+// and the device's own name, which apps tell from 1.3.7 on.
+function deviceLabel(d) {
+  const kind = d.kind || 'App';
+  return d.name ? `${kind} · ${d.name}` : kind;
+}
+
+function signedInDate(secs) {
+  return new Date(secs * 1000).toLocaleDateString(intlLocale(), { dateStyle: 'medium' });
+}
+
+function deviceRow(account, d) {
+  const label = deviceLabel(d);
+  let state = '';
+  if (d.online) state = `<span class="account-device-state is-online">${escapeHTML(t('settings.account.deviceOnline'))}</span>`;
+  else if (d.seen) state = `<span class="account-device-state">${escapeHTML(t('settings.account.deviceSeen', { time: syncTime(d.seen) }))}</span>`;
+  const facts = [
+    d.version ? `v${d.version}` : '',
+    d.address || '',
+    d.created ? t('settings.account.deviceSince', { date: signedInDate(d.created) }) : '',
+  ].filter(Boolean).map(fact => `<span>${escapeHTML(fact)}</span>`);
+  const meta = [state, ...facts].filter(Boolean).join('');
+  const kick = t('settings.account.deviceKick');
+  return `
+        <li class="account-device${d.online ? ' is-online' : ''}">
+          <span class="account-device-icon">${deviceIcon(d.kind)}</span>
+          <span class="account-device-text">
+            <span class="account-device-name">${escapeHTML(label)}</span>
+            <span class="account-device-meta">${meta}</span>
+          </span>
+          <button type="button" class="account-device-kick" data-device-kick="${escapeHTML(d.id)}" data-account="${escapeHTML(account.id)}" data-name="${escapeHTML(label)}" data-user="${escapeHTML(account.username)}" title="${escapeHTML(kick)}" aria-label="${escapeHTML(`${kick}: ${label}`)}">${KICK_ICON}</button>
+        </li>`;
+}
+
+// A row per account; with devices, the row opens their list.
+function accountRow(a) {
+  const devices = Array.isArray(a.devices) ? a.devices : [];
+  const open = devices.length > 0 && openAccounts.has(a.id);
+  const listId = `accountDevices-${a.id}`;
+  const head = `
+        <span class="remote-device-name">${escapeHTML(a.username)}</span>
+        ${a.admin ? `<span class="remote-iface-badge">${escapeHTML(t('settings.account.admin'))}</span>` : ''}
+        <span class="account-row-meta">${escapeHTML(t('settings.account.devices', { n: devices.length }))}</span>`;
+  const toggle = devices.length
+    ? `<button type="button" class="account-toggle" aria-expanded="${open}" aria-controls="${escapeHTML(listId)}">${head}${CHEVRON}</button>`
+    : `<span class="account-toggle">${head}</span>`;
+  const remove = a.id === selfId
+    ? ''
+    : `<button type="button" class="remote-device-btn is-forget" data-account-delete="${escapeHTML(a.id)}" data-name="${escapeHTML(a.username)}">${escapeHTML(t('settings.account.delete'))}</button>`;
+  const list = devices.length
+    ? `<ul class="account-devices" id="${escapeHTML(listId)}"${open ? '' : ' hidden'}>${devices.map(d => deviceRow(a, d)).join('')}
+      </ul>`
+    : '';
+  return `
+    <li class="account-entry${open ? ' is-open' : ''}" data-account="${escapeHTML(a.id)}">
+      <div class="remote-device account-row${devices.length ? ' is-expandable' : ''}">${toggle}${remove}</div>${list}
+    </li>`;
+}
+
 async function renderAccounts() {
   const list = await accountsList().catch(() => []);
-  $('#accountList').innerHTML = list.map(a => `
-    <li class="remote-device">
-      <span class="remote-device-name">${escapeHTML(a.username)}</span>
-      ${a.admin ? `<span class="remote-iface-badge">${escapeHTML(t('settings.account.admin'))}</span>` : ''}
-      <span class="account-row-meta">${escapeHTML(t('settings.account.devices', { n: a.devices }))}</span>
-      ${a.id === selfId ? '' : `<button type="button" class="remote-device-btn is-forget" data-account-delete="${escapeHTML(a.id)}" data-name="${escapeHTML(a.username)}">${escapeHTML(t('settings.account.delete'))}</button>`}
-    </li>`).join('');
+  $('#accountList').innerHTML = list.map(accountRow).join('');
+}
+
+function toggleAccount(entry) {
+  const toggle = entry.querySelector('button.account-toggle');
+  const devices = entry.querySelector('.account-devices');
+  if (!toggle || !devices) return;
+  const open = devices.hidden;
+  devices.hidden = !open;
+  entry.classList.toggle('is-open', open);
+  toggle.setAttribute('aria-expanded', String(open));
+  if (open) openAccounts.add(entry.dataset.account);
+  else openAccounts.delete(entry.dataset.account);
+}
+
+// Signs one of an account's devices out, once confirmed: its app has to
+// sign in again with the password.
+async function kickDevice(btn) {
+  const { name, user, account } = btn.dataset;
+  const ok = await showConfirm(t('settings.account.deviceKickConfirm', { device: name, user }), {
+    title: t('settings.account.deviceKick'),
+    variant: 'warn',
+    okLabel: t('settings.account.deviceKick'),
+  });
+  if (!ok) return;
+  try {
+    await accountDeviceRemove(account, btn.dataset.deviceKick);
+    hint(t('settings.account.deviceKicked', { device: name }), 'success');
+  } catch (err) {
+    // Signed out meanwhile, from the app itself: gone all the same.
+    if (errorCode(err) !== 'not-found') hint(errorText(err), 'error');
+  }
+  await renderAccounts();
+  $(`#accountList .account-entry[data-account="${CSS.escape(account)}"] .account-toggle`)?.focus();
 }
 
 // Closes this browser's session, for the login page: an account's
@@ -261,8 +370,18 @@ function wireWeb() {
   $('#accountPasswordBtn').addEventListener('click', changePassword);
   $('#accountCreateBtn').addEventListener('click', createAccount);
   $('#accountList').addEventListener('click', async (e) => {
+    const kick = e.target.closest('[data-device-kick]');
+    if (kick) {
+      await kickDevice(kick);
+      return;
+    }
     const btn = e.target.closest('[data-account-delete]');
-    if (!btn) return;
+    if (!btn) {
+      // Anywhere else on an account's row: its devices open or close.
+      const row = e.target.closest('.account-row.is-expandable');
+      if (row) toggleAccount(row.closest('.account-entry'));
+      return;
+    }
     const ok = await showConfirm(t('settings.account.deleteConfirm', { user: btn.dataset.name }), {
       title: t('settings.account.delete'),
       variant: 'warn',
@@ -271,6 +390,7 @@ function wireWeb() {
     if (!ok) return;
     try {
       await accountDelete(btn.dataset.accountDelete);
+      openAccounts.delete(btn.dataset.accountDelete);
       await renderAccounts();
       hint('');
     } catch (err) {

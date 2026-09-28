@@ -55,6 +55,9 @@ export async function appVersion() {
   }
 }
 
+/** The latest release on GitHub: { current, latest, newer, url }. */
+export const updateCheck = () => invoke('update_check');
+
 export async function remoteInfo() {
   try {
     return await invoke('remote_info');
@@ -121,6 +124,7 @@ export const accountStatus = () => invoke('account_status');
 export const accountsList = () => invoke('accounts_list');
 export const accountCreate = (username, password) => invoke('account_create', { username, password });
 export const accountDelete = (id) => invoke('account_delete', { id });
+export const accountDeviceRemove = (account, device) => invoke('account_device_remove', { account, device });
 export const accountPassword = (current, next) => invoke('account_password', { current, next });
 
 export async function openDownloadDir() {

@@ -49,11 +49,13 @@ function attachAlertHandlers({ onOk, onCancel, onKey, onOverlay, focusCancel = f
 export function showConfirm(message, {
   title = t('modal.confirmTitle'),
   variant = 'warn',
+  icon = '',
   okLabel = t('modal.confirm'),
   cancelLabel = t('common.cancel'),
   focusCancel = false,
 } = {}) {
   setVariant(variant);
+  if (icon) alertIcon.innerHTML = icon;
   alertTitle.textContent = title;
   alertBody.textContent = message;
   setAlertButtons(okLabel, cancelLabel);
@@ -69,6 +71,7 @@ export function showConfirm(message, {
       cleanup();
       closeModal('#alertModal');
       setAlertButtons(t('common.ok'), null);
+      alertIcon.innerHTML = defaultIcon;
       resolve(ok);
     };
     cleanup = attachAlertHandlers({

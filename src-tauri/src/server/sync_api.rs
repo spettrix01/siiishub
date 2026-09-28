@@ -4,10 +4,12 @@
 //! answer comes as soon as the profile changes (in the browser, or on
 //! another device), so the change reaches every device at once. What an app
 //! sends reaches the account's pages open in the browser the same way.
+//! Every request tells of the device (`Visit`), for the administrator's list.
 
+use std::net::SocketAddr;
 use std::time::Duration;
 
-use axum::extract::{Query, State};
+use axum::extract::{ConnectInfo, Query, State};
 use axum::http::{header, HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::Json;
@@ -16,7 +18,7 @@ use serde_json::json;
 
 use crate::ops::sync::{self, Change};
 
-use super::accounts::{AccountView, Viewer};
+use super::accounts::{AccountView, Viewer, Visit};
 use super::Server;
 
 fn bearer(headers: &HeaderMap) -> Option<&str> {
@@ -35,9 +37,35 @@ fn unauthorized() -> Response {
 /// Longest wait for news, under the minute proxies give a request.
 const WAIT: Duration = Duration::from_secs(50);
 
-/// The account of the request's token.
-fn account(server: &Server, headers: &HeaderMap) -> Option<AccountView> {
-    server.accounts.token_account(bearer(headers)?)
+/// The app's User-Agent from 1.3.7 on, `SIIISHUB/<version> (<system>;
+/// <name>)`: the version and the device's name. The apps before sent
+/// `siiishub/0.1`.
+fn app_agent(agent: &str) -> Option<(String, String)> {
+    let (version, comment) = agent.strip_prefix("SIIISHUB/")?.split_once(" (")?;
+    let comment = comment.strip_suffix(')')?;
+    let name = comment.split_once(';').map(|(_, name)| name).unwrap_or("");
+    let clean = |s: &str, max: usize| -> String {
+        s.chars().filter(|c| !c.is_control()).take(max).collect::<String>().trim().to_string()
+    };
+    Some((clean(version, 24), clean(name, 64)))
+}
+
+/// What the request tells of the app's device.
+fn visit(headers: &HeaderMap, peer: SocketAddr) -> Visit {
+    let (version, name) = headers
+        .get(header::USER_AGENT)
+        .and_then(|v| v.to_str().ok())
+        .and_then(app_agent)
+        .unwrap_or_default();
+    let address = super::auth::client_address(headers, Some(peer))
+        .map(|ip| ip.to_string())
+        .unwrap_or_default();
+    Visit { name, version, address }
+}
+
+/// The account of the request's token; its device is seen now.
+fn account(server: &Server, headers: &HeaderMap, peer: SocketAddr) -> Option<AccountView> {
+    server.accounts.visit(bearer(headers)?, &visit(headers, peer))
 }
 
 #[derive(Deserialize)]
@@ -49,7 +77,12 @@ pub struct TokenBody {
 }
 
 /// A token for an app, for the account's username and password.
-pub async fn token(State(server): State<Server>, Json(body): Json<TokenBody>) -> Response {
+pub async fn token(
+    State(server): State<Server>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Json(body): Json<TokenBody>,
+) -> Response {
     if !server.auth.attempts_left() {
         return (StatusCode::TOO_MANY_REQUESTS, Json(json!({ "error": "too-many-attempts" }))).into_response();
     }
@@ -59,7 +92,7 @@ pub async fn token(State(server): State<Server>, Json(body): Json<TokenBody>) ->
         return (StatusCode::UNAUTHORIZED, Json(json!({ "error": "wrong-credentials" }))).into_response();
     };
     let device = if body.device.trim().is_empty() { "App" } else { body.device.trim() };
-    let Some(token) = server.accounts.issue_token(&account.id, device) else {
+    let Some(token) = server.accounts.issue_token(&account.id, device, &visit(&headers, peer)) else {
         return unauthorized();
     };
     tracing::info!("[accounts] {} signed in on {device}", account.username);
@@ -85,8 +118,13 @@ pub struct SyncBody {
 }
 
 /// Takes the app's changes, and answers with the profile's after `since`.
-pub async fn sync(State(server): State<Server>, headers: HeaderMap, Json(body): Json<SyncBody>) -> Response {
-    let Some(account) = account(&server, &headers) else {
+pub async fn sync(
+    State(server): State<Server>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Json(body): Json<SyncBody>,
+) -> Response {
+    let Some(account) = account(&server, &headers, peer) else {
         return unauthorized();
     };
     let viewer = Viewer::Account(account.id.clone());
@@ -122,9 +160,14 @@ pub struct WaitQuery {
 
 /// Answers when the account's profile goes past `since` (`changed`), or
 /// after a while with nothing (`changed` false): the app then syncs, or asks
-/// again.
-pub async fn wait(State(server): State<Server>, headers: HeaderMap, Query(query): Query<WaitQuery>) -> Response {
-    let Some(account) = account(&server, &headers) else {
+/// again. A device signed out meanwhile gets its 401 at once.
+pub async fn wait(
+    State(server): State<Server>,
+    ConnectInfo(peer): ConnectInfo<SocketAddr>,
+    headers: HeaderMap,
+    Query(query): Query<WaitQuery>,
+) -> Response {
+    let Some(account) = account(&server, &headers, peer) else {
         return unauthorized();
     };
     let profile = match server.profiles.get(&Viewer::Account(account.id)).await {
@@ -132,7 +175,42 @@ pub async fn wait(State(server): State<Server>, headers: HeaderMap, Query(query)
         Err(e) => return (StatusCode::INTERNAL_SERVER_ERROR, Json(json!({ "error": e }))).into_response(),
     };
     // Further on than the profile: not the one the app synced with.
-    let changed = query.since > profile.sync.seq()
-        || tokio::time::timeout(WAIT, profile.sync.past(query.since)).await.is_ok();
+    if query.since > profile.sync.seq() {
+        return Json(json!({ "changed": true })).into_response();
+    }
+    let deadline = tokio::time::Instant::now() + WAIT;
+    let changed = loop {
+        let kicked = server.accounts.kicked();
+        tokio::select! {
+            _ = profile.sync.past(query.since) => break true,
+            _ = tokio::time::sleep_until(deadline) => break false,
+            _ = kicked => {
+                let token = bearer(&headers).unwrap_or_default();
+                if server.accounts.token_account(token).is_none() {
+                    return unauthorized();
+                }
+            }
+        }
+    };
     Json(json!({ "changed": changed })).into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::app_agent;
+
+    #[test]
+    fn agents() {
+        assert_eq!(
+            app_agent("SIIISHUB/1.3.7 (Windows; DESKTOP-7H2K9)"),
+            Some(("1.3.7".into(), "DESKTOP-7H2K9".into()))
+        );
+        assert_eq!(
+            app_agent("SIIISHUB/1.3.7 (Android TV; Amazon AFTKA)"),
+            Some(("1.3.7".into(), "Amazon AFTKA".into()))
+        );
+        assert_eq!(app_agent("SIIISHUB/1.3.7 (Linux)"), Some(("1.3.7".into(), String::new())));
+        assert_eq!(app_agent("siiishub/0.1"), None);
+        assert_eq!(app_agent("Mozilla/5.0 (X11; Linux x86_64)"), None);
+    }
 }

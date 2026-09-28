@@ -4276,6 +4276,9 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   right: calc(14px + var(--scrollbar-w));
   bottom: 10px;
   z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.02em;
@@ -4283,6 +4286,36 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   pointer-events: none;
   user-select: none;
 }
+/* Next to it, whether a newer one is out (version.js): a dot and a word
+   when this is the latest, the new version's page when it is not. */
+.app-version-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--body);
+  letter-spacing: 0;
+}
+.app-version-state::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.app-version-state.is-ok::before { background: var(--good); }
+.app-version-state.is-new {
+  padding: 2px 9px 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--violet-rgb), 0.35);
+  background: var(--violet-soft);
+  color: var(--violet);
+  font-weight: 600;
+  text-decoration: none;
+  pointer-events: auto;
+  transition: background .14s;
+}
+a.app-version-state.is-new:hover { background: rgba(var(--violet-rgb), 0.22); }
 .app-version:empty,
 html.is-phone .app-version,
 body.is-player-open .app-version { display: none; }
@@ -4820,6 +4853,130 @@ body.is-player-open .backdrop { display: none; }
 /* Rows without the delete button (the administrator's own) as tall as the
    others: the padding, the button and the border. */
 .account-admin .remote-device { min-height: 48px; }
+/* An account with devices (account-ui.js): its row opens their list, each
+   with its x to sign it out. */
+.account-entry { display: flex; flex-direction: column; }
+.account-toggle {
+  appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+button.account-toggle { cursor: pointer; }
+button.account-toggle:focus-visible {
+  outline: 2px solid var(--violet);
+  outline-offset: 6px;
+  border-radius: 4px;
+}
+.account-row.is-expandable { cursor: pointer; transition: border-color .14s; }
+.account-row.is-expandable:hover { border-color: var(--line-2); }
+.account-chevron {
+  flex: 0 0 auto;
+  margin-left: -4px;
+  color: var(--text-3);
+  transition: transform .18s ease;
+}
+.account-entry.is-open .account-chevron { transform: rotate(90deg); }
+.account-devices {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 6px 0 4px 14px;
+  padding: 0 0 0 12px;
+  border-left: 2px solid var(--line);
+  animation: account-devices-in .18s ease-out;
+}
+.account-devices[hidden] { display: none; }
+@keyframes account-devices-in {
+  from { opacity: 0; transform: translateY(-4px); }
+}
+.account-device {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 8px 8px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.account-device-icon {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+}
+.account-device.is-online .account-device-icon { color: var(--text-2); }
+.account-device-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.account-device-name {
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.account-device-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 2px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+/* The dot between two facts ends the first, so a line never starts with one. */
+.account-device-meta > span:not(:last-child)::after {
+  content: '\00b7';
+  margin-left: 6px;
+  opacity: .7;
+}
+.account-device-state.is-online {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--good);
+}
+.account-device-state.is-online::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.account-device-kick {
+  appearance: none;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  background: var(--surface-2);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background .14s, color .14s, border-color .14s;
+}
+.account-device-kick:hover {
+  color: var(--danger);
+  border-color: rgba(255, 107, 138, 0.45);
+  background: rgba(255, 107, 138, 0.1);
+}
 
 .remote-devices {
   list-style: none;

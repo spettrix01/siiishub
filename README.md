@@ -81,6 +81,7 @@ device.
 - **Android TV app** with the interface of the desktop app, driven with the TV remote: the D-pad moves between titles and controls, and in the player it seeks and pauses.
 - **In your browser:** run the server version on a NAS or a mini PC with Docker and watch from any browser, phones and TVs included. Files the browser cannot play are converted on the fly, on the GPU when the server has one. See [docs/WEB.md](docs/WEB.md).
 - **One library on every device:** the server version keeps accounts. Sign in to yours from the apps and your library, favorites, addons, keys and preferences follow you; downloads stay on each device.
+- **Always know what is new:** next to the version in the bottom right corner, SIIISHUB tells whether a newer one is out and opens its page; on a phone, a popup at start says so.
 
 ## Download
 
@@ -117,9 +118,11 @@ SIIISHUB has no cloud account, no telemetry and no server of its own. Settings
 and API keys stay on your device, or on your own server for the browser
 version and the accounts you make there.
 The app connects only to TMDB, to the addons and the debrid service you
-configure, to torrent peers and trackers, and to Google Fonts for the
-interface fonts. The remote control of the desktop and TV apps listens on
-your local network, and every new device has to be approved.
+configure, to torrent peers and trackers, to Google Fonts for the
+interface fonts, and to GitHub to see whether a newer version is out (the
+request carries nothing about you). The remote control of the desktop and
+TV apps listens on your local network, and every new device has to be
+approved.
 
 ## Legal notice
 

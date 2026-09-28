@@ -34,6 +34,7 @@ mod stremio;
 mod sync;
 mod torrent;
 mod torrent_file;
+mod update;
 mod userdata;
 mod util;
 
@@ -215,6 +216,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::app_version,
+            commands::update_check,
             commands::settings_get,
             commands::settings_save,
             commands::userdata_load,

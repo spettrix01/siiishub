@@ -6,6 +6,8 @@
 //! seconds at most while changes keep coming), and as soon as the server
 //! tells of a change in the browser or on another device: the app keeps a
 //! request open for that news. Away from the server, it tries every minute.
+//! The requests tell the server which device they come from (`user_agent`),
+//! for the administrator's list of the account's devices.
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -81,6 +83,65 @@ fn now() -> u64 {
     crate::sync::now_ms() / 1000
 }
 
+/// `SIIISHUB/<version> (<system>; <name>)`: the server shows the app's
+/// version and the device's name in the list of the account's devices.
+fn user_agent() -> String {
+    let system = if cfg!(feature = "tv") {
+        "Android TV"
+    } else if cfg!(target_os = "android") {
+        "Android"
+    } else if cfg!(windows) {
+        "Windows"
+    } else {
+        "Linux"
+    };
+    // A header takes visible ASCII; the parentheses and the semicolon mark
+    // its parts.
+    let name: String = device_name()
+        .chars()
+        .filter(|c| (c.is_ascii_graphic() || *c == ' ') && !matches!(c, '(' | ')' | ';'))
+        .take(64)
+        .collect();
+    let name = name.trim();
+    let version = env!("CARGO_PKG_VERSION");
+    if name.is_empty() {
+        format!("SIIISHUB/{version} ({system})")
+    } else {
+        format!("SIIISHUB/{version} ({system}; {name})")
+    }
+}
+
+/// The PC's name; a phone's or a TV's maker and model ("samsung SM-S911B").
+fn device_name() -> String {
+    #[cfg(windows)]
+    {
+        std::env::var("COMPUTERNAME").unwrap_or_default()
+    }
+    #[cfg(target_os = "android")]
+    {
+        let prop = |name: &str| {
+            std::process::Command::new("getprop")
+                .arg(name)
+                .output()
+                .map(|out| String::from_utf8_lossy(&out.stdout).trim().to_string())
+                .unwrap_or_default()
+        };
+        let (maker, model) = (prop("ro.product.manufacturer"), prop("ro.product.model"));
+        if model.to_lowercase().starts_with(&maker.to_lowercase()) {
+            model
+        } else {
+            format!("{maker} {model}").trim().to_string()
+        }
+    }
+    #[cfg(all(unix, not(target_os = "android")))]
+    {
+        std::fs::read_to_string("/proc/sys/kernel/hostname")
+            .or_else(|_| std::fs::read_to_string("/etc/hostname"))
+            .map(|name| name.trim().to_string())
+            .unwrap_or_default()
+    }
+}
+
 /// `host:port`, with or without `http(s)://` and a trailing slash, as the
 /// base of the server's API; none for what cannot be an address.
 fn server_base(input: &str) -> Option<String> {
@@ -99,7 +160,7 @@ impl Account {
             .ok()
             .and_then(|bytes| serde_json::from_slice(&bytes).ok());
         let http = reqwest::Client::builder()
-            .user_agent("siiishub/0.1")
+            .user_agent(user_agent())
             .connect_timeout(Duration::from_secs(10))
             .timeout(Duration::from_secs(60))
             .build()
@@ -266,6 +327,9 @@ impl Account {
             .send()
             .await;
         let news = match reply {
+            // Signed out on the server (from its settings): the sync that
+            // follows at once says so.
+            Ok(reply) if reply.status() == reqwest::StatusCode::UNAUTHORIZED => return true,
             Ok(reply) if reply.status().is_success() => reply
                 .json::<serde_json::Value>()
                 .await
@@ -474,5 +538,15 @@ mod tests {
         assert_eq!(server_base(" https://nas.lan/ ").as_deref(), Some("https://nas.lan"));
         assert_eq!(server_base("ftp://x"), None);
         assert_eq!(server_base(""), None);
+    }
+
+    /// What the server's list of devices reads (server/sync_api.rs).
+    #[test]
+    fn agent() {
+        let agent = user_agent();
+        println!("{agent}");
+        assert!(agent.starts_with(&format!("SIIISHUB/{} (", env!("CARGO_PKG_VERSION"))), "{agent}");
+        assert!(agent.ends_with(')') && agent.is_ascii(), "{agent}");
+        assert!(reqwest::header::HeaderValue::from_str(&agent).is_ok(), "{agent}");
     }
 }

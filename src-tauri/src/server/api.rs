@@ -287,6 +287,7 @@ async fn dispatch(
         // Accounts (accounts.rs): who is signed in, their password, and the
         // administrator's list. Errors are codes the page words.
         "app_version" => reply(env!("CARGO_PKG_VERSION")),
+        "update_check" => reply(crate::update::check(&server.app.http).await?),
         "account_status" => reply(match viewer {
             // Without a login at all (SIIISHUB_AUTH=off) there is nowhere
             // to sign in.
@@ -338,6 +339,22 @@ async fn dispatch(
             server.accounts.delete(&id).map_err(|e| e.code().to_string())?;
             server.auth.close_account(&id);
             server.profiles.remove(&id).await;
+            reply(())
+        }
+        // One of an account's devices signed out: its app has to sign in
+        // again.
+        "account_device_remove" => {
+            admin(server, viewer)?;
+            #[derive(Deserialize)]
+            struct A {
+                account: String,
+                device: String,
+            }
+            let A { account, device } = parse(args)?;
+            server
+                .accounts
+                .revoke_device(&account, &device)
+                .map_err(|e| e.code().to_string())?;
             reply(())
         }
 

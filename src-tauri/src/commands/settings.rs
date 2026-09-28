@@ -15,6 +15,12 @@ pub fn app_version() -> &'static str {
     env!("CARGO_PKG_VERSION")
 }
 
+/// Whether a newer SIIISHUB is out (update.rs).
+#[tauri::command]
+pub async fn update_check(state: State<'_, Arc<AppState>>) -> CmdResult<crate::update::Update> {
+    crate::update::check(&state.http).await
+}
+
 #[tauri::command]
 pub async fn settings_get(state: State<'_, Arc<AppState>>) -> CmdResult<PublicSettings> {
     Ok(crate::ops::settings::get(&state))

@@ -234,6 +234,28 @@ pub fn home_network(headers: &HeaderMap, peer: Option<SocketAddr>) -> bool {
     !forwarded && peer.is_some_and(|addr| is_private(addr.ip()))
 }
 
+/// Where a request comes from, for the administrator's list of devices:
+/// the client's address as a proxy forwards it, or the peer's.
+pub fn client_address(headers: &HeaderMap, peer: Option<SocketAddr>) -> Option<IpAddr> {
+    let forwarded = ["cf-connecting-ip", "x-real-ip", "x-forwarded-for"].iter().find_map(|name| {
+        headers
+            .get(*name)?
+            .to_str()
+            .ok()?
+            .split(',')
+            .next()?
+            .trim()
+            .parse::<IpAddr>()
+            .ok()
+    });
+    let ip = forwarded.or(peer.map(|p| p.ip()))?;
+    // An IPv4 address on an IPv6 socket, as IPv4.
+    Some(match ip {
+        IpAddr::V6(v6) => v6.to_ipv4_mapped().map(IpAddr::V4).unwrap_or(ip),
+        v4 => v4,
+    })
+}
+
 fn peer(req: &Request) -> Option<SocketAddr> {
     req.extensions().get::<ConnectInfo<SocketAddr>>().map(|ConnectInfo(addr)| *addr)
 }

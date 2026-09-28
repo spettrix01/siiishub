@@ -2,7 +2,7 @@ import { IS_TV } from './js/platform.js';
 import { state } from './js/state.js';
 import { init as initUserStore, migrateFromLocalStorage } from './js/userstore.js';
 import { applyTheme, currentTheme } from './js/theme.js';
-import { loadSettings, loadGenres, appVersion } from './js/api.js';
+import { loadSettings, loadGenres } from './js/api.js';
 import { setLang, onLangChange, t } from './js/i18n.js';
 import { renderGenres } from './js/topbar.js';
 import { loadMore, showEmpty, clearGrid } from './js/grid.js';
@@ -21,6 +21,7 @@ import './js/android-player.js';
 import './js/tv-nav.js';
 import { spatialNav } from './js/spatial-nav.js';
 import { startDownloadBadgePolling } from './js/library.js';
+import { startVersion } from './js/version.js';
 
 function syncScrollbarVar() {
   const ps = document.getElementById('page-scroll');
@@ -37,14 +38,10 @@ await migrateFromLocalStorage();
 
 applyTheme(currentTheme());
 
-// The version, in the bottom right corner.
-appVersion().then((v) => {
-  const el = document.getElementById('appVersion');
-  if (el && v) el.textContent = `v${v}`;
-});
-
 await loadSettings();
 setLang(state.settings.language, { rerender: false });
+// The version, in the bottom right corner, and whether a newer one is out.
+startVersion();
 if (state.settings.tmdbKey) {
   await loadGenres();
 }

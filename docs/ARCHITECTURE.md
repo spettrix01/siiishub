@@ -29,6 +29,9 @@
     `stub.rs` is for development without libmpv.
   - `render.rs` (Windows) and `render_linux.rs` (Linux): video compositing.
   - `power.rs`: keeps the display awake during playback.
+  - `update.rs`: whether a newer release is out on GitHub, for the version
+    in the corner of the interface (`js/version.js`), asked at most once an
+    hour.
 - `src-tauri/plugins/android-player/` is a Tauri plugin with the Kotlin side
   of the Android player.
 

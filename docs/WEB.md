@@ -80,6 +80,13 @@ distance each device is watched from.
   first time the server runs, from a device on the home network. The
   administrator makes the other accounts in Settings → Account, and deletes
   them there; each account changes its own password there too.
+- **The devices of an account:** in the administrator's list, the row of an
+  account opens the apps signed in to it: the kind of device and its name
+  (a PC's, a phone's or a TV's model), the app's version, the address it
+  last came from, whether it is online now or when it was last seen, and
+  since when it is signed in. The × signs one out at once: its app has to
+  sign in again with the password. The name and the version come from the
+  apps of 1.3.7 on.
 - **In the browser**, signing in with an account opens its own library and
   settings on this server.
 - **In the apps**, Settings → Account takes the server's address
@@ -226,9 +233,10 @@ the CPU by itself.
   (`web-sessions.json`). Ten wrong passwords in a minute block every login
   until the minute is over.
 - Passwords are kept as Argon2 hashes (`accounts.json`). An app keeps a token
-  of its own instead, stored on the server as its SHA-256; signing out of the
-  app, or deleting the account, revokes it. Both files are readable only by
-  the server's user.
+  of its own instead, stored on the server as its SHA-256 with what the
+  app's requests tell of its device; signing out of the app, the × in the
+  administrator's list, or deleting the account revokes it. Both files are
+  readable only by the server's user.
 - On the internet, put the server behind a reverse proxy with HTTPS (Caddy,
   Traefik, Nginx Proxy Manager). When the proxy sends
   `X-Forwarded-Proto: https`, the session cookie is only sent encrypted.
