@@ -1030,23 +1030,38 @@ function updateSubHead() {
 
 // ---------- Audio: passthrough ----------
 // The audio as the file has it, for an amplifier or a soundbar to decode:
-// the way Dolby Atmos reaches them. Switched on, mpv's audio-spdif passes
-// what any of them takes over any link (optical, HDMI ARC or eARC): Dolby
-// Digital, Dolby Digital Plus (Atmos of streamed films included) and DTS,
-// the core of DTS-HD tracks too. TrueHD is decoded as usual, as a soundbar
-// on ARC would stay silent with it. A device that refuses a format gets it
-// decoded as well. Kept on each device, like the subtitles' look: it
-// depends on what the device is plugged into.
+// the way Dolby Atmos reaches them. Switched on, the formats to pass show as
+// boxes to tick: those any amplifier takes over any link (optical, HDMI ARC)
+// come ticked; DTS-HD and TrueHD, for eARC or an amplifier on HDMI, on
+// request (with DTS alone, a DTS-HD track passes its DTS core). mpv's
+// audio-spdif; a device that refuses a format gets it decoded as usual. Kept
+// on each device, like the subtitles' look: it depends on what the device is
+// plugged into.
 const SPDIF_KEY = 'siiis:player:spdif';
-const SPDIF_CODECS = 'ac3,eac3,dts';
+const SPDIF_FORMATS_KEY = 'siiis:player:spdif-formats';
+const SPDIF_FORMATS = [
+  ['ac3', 'AC3', 'Dolby Digital'],
+  ['eac3', 'E-AC3', 'Dolby Digital Plus'],
+  ['dts', 'DTS', 'DTS'],
+  ['dts-hd', 'DTS-HD', 'DTS-HD Master Audio'],
+  ['truehd', 'TrueHD', 'Dolby TrueHD'],
+];
+const SPDIF_DEFAULT = ['ac3', 'eac3', 'dts'];
+const CHECK_ICON = '<svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" d="m5 12 5 5L20 7"/></svg>';
 
 const passthroughOn = () => userStore.getItem(SPDIF_KEY) === 'on';
+
+function passthroughFormats() {
+  const saved = userStore.getItem(SPDIF_FORMATS_KEY);
+  if (saved == null) return SPDIF_DEFAULT.slice();
+  return saved.split(',').filter(codec => SPDIF_FORMATS.some(([c]) => c === codec));
+}
 
 // The decoder takes it when it starts: while a file plays, its audio track
 // starts again.
 function applyPassthrough({ reload = false } = {}) {
   if (IS_WEB) return;
-  mpvSet('audio-spdif', passthroughOn() ? SPDIF_CODECS : '').catch(() => {});
+  mpvSet('audio-spdif', passthroughOn() ? passthroughFormats().join(',') : '').catch(() => {});
   const aid = mpvState.aid;
   if (reload && aid != null && aid !== false && aid !== 'no') {
     mpvSet('aid', 'no').then(() => mpvSet('aid', aid)).catch(() => {});
@@ -1060,8 +1075,20 @@ function setPassthrough(on) {
   updateAudioHead();
 }
 
+function togglePassthroughFormat(codec) {
+  const list = passthroughFormats();
+  const next = list.includes(codec) ? list.filter(c => c !== codec) : list.concat(codec);
+  userStore.setItem(SPDIF_FORMATS_KEY, SPDIF_FORMATS.map(([c]) => c).filter(c => next.includes(c)).join(','));
+  if (passthroughOn()) applyPassthrough({ reload: true });
+  updateAudioHead();
+}
+
 function audioHeadHtml() {
   const attr = key => escapeHTML(tx(key));
+  const checks = SPDIF_FORMATS.map(([codec, label, title]) => `
+          <button type="button" class="pss-check" data-spdif="${codec}" role="checkbox" aria-checked="false" title="${escapeHTML(title)}">
+            <span class="pss-check-box">${CHECK_ICON}</span>${escapeHTML(label)}
+          </button>`).join('');
   return `
       <div class="pss-row">
         <span class="pss-label" id="pssLabel-passthrough">${attr('player.passthrough')}</span>
@@ -1069,6 +1096,8 @@ function audioHeadHtml() {
           <button type="button" class="pss-chip" data-passthrough="off" role="radio" aria-checked="false">${attr('player.passthrough.off')}</button>
           <button type="button" class="pss-chip" data-passthrough="on" role="radio" aria-checked="false">${attr('player.passthrough.on')}</button>
         </div>
+      </div>
+      <div class="pss-checks" data-spdif-formats hidden>${checks}
       </div>`;
 }
 
@@ -1079,6 +1108,14 @@ function updateAudioHead() {
     const active = (el.dataset.passthrough === 'on') === on;
     el.classList.toggle('is-active', active);
     el.setAttribute('aria-checked', active ? 'true' : 'false');
+  }
+  const checks = playerSettingsHead.querySelector('[data-spdif-formats]');
+  if (checks) checks.hidden = !on;
+  const list = passthroughFormats();
+  for (const el of playerSettingsHead.querySelectorAll('[data-spdif]')) {
+    const checked = list.includes(el.dataset.spdif);
+    el.classList.toggle('is-checked', checked);
+    el.setAttribute('aria-checked', checked ? 'true' : 'false');
   }
 }
 
@@ -1640,6 +1677,11 @@ playerSettingsHead?.addEventListener('click', e => {
   const passthrough = e.target.closest('[data-passthrough]');
   if (passthrough) {
     setPassthrough(passthrough.dataset.passthrough === 'on');
+    return;
+  }
+  const format = e.target.closest('[data-spdif]');
+  if (format) {
+    togglePassthroughFormat(format.dataset.spdif);
     return;
   }
   if (e.target.closest('[data-sub-look-toggle]')) {

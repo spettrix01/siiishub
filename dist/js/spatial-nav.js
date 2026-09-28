@@ -93,6 +93,7 @@ const ZONES = [
   ['.player-settings-head', 'box'],
   ['.player-settings-body', 'box'],
   ['.pss-row', 'row'],
+  ['.pss-checks', 'box'],
   ['.player-settings-imdb-wrap', 'row'],
 ];
 const ZONE_SELECTOR = ZONES.map(([sel]) => sel).join(',');

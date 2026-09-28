@@ -3648,6 +3648,48 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
 .pss-look-btn.is-open .pss-look-name,
 .pss-look-btn.is-open svg { color: var(--violet); }
 .pss-look-btn.is-open svg { transform: rotate(90deg); }
+/* The Audio tab: under the passthrough switched on, the formats it passes,
+   as boxes to tick. */
+.pss-checks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-top: 0.7rem;
+}
+.pss-checks[hidden] { display: none; }
+.pss-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 0.6rem;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.75);
+  font-size: 0.78rem;
+  text-align: left;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.pss-check:hover { background: rgba(255,255,255,0.12); color: #fff; }
+.pss-check-box {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid rgba(255,255,255,0.45);
+  border-radius: 4px;
+  transition: background .12s, border-color .12s;
+}
+.pss-check-box svg { opacity: 0; }
+.pss-check.is-checked { color: #fff; }
+.pss-check.is-checked .pss-check-box {
+  border-color: var(--violet);
+  background: var(--violet);
+  color: #1a0e02;
+}
+.pss-check.is-checked .pss-check-box svg { opacity: 1; }
 /* The look's choices, in place of the tracks. */
 .pss-look {
   display: flex;
