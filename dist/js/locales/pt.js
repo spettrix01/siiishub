@@ -230,7 +230,7 @@ export const PT = {
   'welcome.body': "Para começar, adicione a sua API key TMDB nas definições. Sem uma chave, não consigo carregar filmes nem séries.",
   'welcome.openSettings': "Abrir definições",
   "update.upToDate": "Atualizado",
-  "update.available": "{version} disponível",
+  "update.available": "Atualização disponível",
   "update.open": "Abrir a página da nova versão",
   "update.popupTitle": "Nova versão disponível",
   "update.popupBody": "Saiu o SIIISHUB {latest} e este telemóvel tem a {current}. Transfere o APK da página da versão e instala-o por cima: as definições e a biblioteca mantêm-se.",

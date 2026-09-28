@@ -230,7 +230,7 @@ export const ZH = {
   'welcome.body': "开始之前，请在设置中添加你的 TMDB API key。没有 key 我无法加载电影或剧集。",
   'welcome.openSettings': "打开设置",
   "update.upToDate": "已是最新",
-  "update.available": "{version} 可用",
+  "update.available": "有可用更新",
   "update.open": "打开新版本页面",
   "update.popupTitle": "有新版本可用",
   "update.popupBody": "SIIISHUB {latest} 已发布，此手机上是 {current}。请从版本页面下载 APK 并覆盖安装：设置和媒体库都会保留。",

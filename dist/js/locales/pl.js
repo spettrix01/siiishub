@@ -230,7 +230,7 @@ export const PL = {
   'welcome.body': "Aby zacząć, dodaj swój klucz API TMDB w ustawieniach. Bez klucza nie mogę ładować filmów ani seriali.",
   'welcome.openSettings': "Otwórz ustawienia",
   "update.upToDate": "Aktualna",
-  "update.available": "Dostępna {version}",
+  "update.available": "Dostępna aktualizacja",
   "update.open": "Otwórz stronę nowej wersji",
   "update.popupTitle": "Dostępna nowa wersja",
   "update.popupBody": "Wyszedł SIIISHUB {latest}, a na tym telefonie jest {current}. Pobierz APK ze strony wersji i zainstaluj ją na obecnej: ustawienia i biblioteka zostaną zachowane.",

@@ -230,7 +230,7 @@ export const KO = {
   'welcome.body': "시작하려면 설정에서 TMDB API key를 추가하세요. 키가 없으면 영화나 시리즈를 불러올 수 없습니다.",
   'welcome.openSettings': "설정 열기",
   "update.upToDate": "최신 버전",
-  "update.available": "{version} 사용 가능",
+  "update.available": "업데이트 가능",
   "update.open": "새 버전 페이지 열기",
   "update.popupTitle": "새 버전이 있습니다",
   "update.popupBody": "SIIISHUB {latest}이(가) 나왔고, 이 휴대폰에는 {current}이(가) 설치되어 있습니다. 버전 페이지에서 APK를 다운로드해 덮어 설치하세요. 설정과 라이브러리는 그대로 유지됩니다.",

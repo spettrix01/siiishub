@@ -230,7 +230,7 @@ export const NL = {
   'welcome.body': "Voeg om te beginnen je TMDB API key toe in de instellingen. Zonder key kan ik geen films of series laden.",
   'welcome.openSettings': "Instellingen openen",
   "update.upToDate": "Up-to-date",
-  "update.available": "{version} beschikbaar",
+  "update.available": "Update beschikbaar",
   "update.open": "Pagina van de nieuwe versie openen",
   "update.popupTitle": "Nieuwe versie beschikbaar",
   "update.popupBody": "SIIISHUB {latest} is uit en deze telefoon heeft {current}. Download de APK van de pagina van de versie en installeer hem over deze heen: je instellingen en bibliotheek blijven behouden.",

@@ -230,7 +230,7 @@ export const CS = {
   'welcome.body': "Pro začátek přidejte svůj TMDB API key v nastavení. Bez klíče nemohu načíst filmy ani seriály.",
   'welcome.openSettings': "Otevřít nastavení",
   "update.upToDate": "Aktuální",
-  "update.available": "K dispozici {version}",
+  "update.available": "Je dostupná aktualizace",
   "update.open": "Otevřít stránku nové verze",
   "update.popupTitle": "Je k dispozici nová verze",
   "update.popupBody": "Vyšel SIIISHUB {latest} a v tomto telefonu je {current}. Stáhněte APK ze stránky verze a nainstalujte ho přes tuto: nastavení i knihovna zůstanou.",

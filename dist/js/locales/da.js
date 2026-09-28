@@ -230,7 +230,7 @@ export const DA = {
   'welcome.body': "For at komme i gang skal du tilføje din TMDB API key i indstillingerne. Uden en key kan jeg ikke indlæse film eller serier.",
   'welcome.openSettings': "Åbn indstillinger",
   "update.upToDate": "Opdateret",
-  "update.available": "{version} tilgængelig",
+  "update.available": "Opdatering tilgængelig",
   "update.open": "Åbn siden for den nye version",
   "update.popupTitle": "Ny version tilgængelig",
   "update.popupBody": "SIIISHUB {latest} er udkommet, og denne telefon har {current}. Hent APK’en fra versionens side, og installer den oven på denne: dine indstillinger og dit bibliotek bevares.",

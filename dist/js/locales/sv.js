@@ -230,7 +230,7 @@ export const SV = {
   'welcome.body': "För att komma igång, lägg till din TMDB API key i inställningarna. Utan en nyckel kan jag inte ladda filmer eller serier.",
   'welcome.openSettings': "Öppna inställningar",
   "update.upToDate": "Uppdaterad",
-  "update.available": "{version} tillgänglig",
+  "update.available": "Uppdatering tillgänglig",
   "update.open": "Öppna sidan för den nya versionen",
   "update.popupTitle": "Ny version tillgänglig",
   "update.popupBody": "SIIISHUB {latest} har kommit, och den här telefonen har {current}. Ladda ner APK:n från versionens sida och installera den ovanpå: dina inställningar och ditt bibliotek finns kvar.",

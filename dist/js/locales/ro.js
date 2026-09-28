@@ -230,7 +230,7 @@ export const RO = {
   'welcome.body': "Pentru a începe, adaugă API key-ul tău TMDB în setări. Fără o cheie nu pot încărca filme sau seriale.",
   'welcome.openSettings': "Deschide setările",
   "update.upToDate": "La zi",
-  "update.available": "{version} disponibilă",
+  "update.available": "Actualizare disponibilă",
   "update.open": "Deschide pagina noii versiuni",
   "update.popupTitle": "Versiune nouă disponibilă",
   "update.popupBody": "A apărut SIIISHUB {latest}, iar pe acest telefon este {current}. Descarcă APK-ul de pe pagina versiunii și instalează-l peste aceasta: setările și biblioteca rămân.",

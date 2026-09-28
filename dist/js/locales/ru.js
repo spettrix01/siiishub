@@ -230,7 +230,7 @@ export const RU = {
   'welcome.body': "Для начала добавьте свой API key TMDB в настройках. Без ключа я не смогу загружать фильмы и сериалы.",
   'welcome.openSettings': "Открыть настройки",
   "update.upToDate": "Актуальная версия",
-  "update.available": "Доступна {version}",
+  "update.available": "Доступно обновление",
   "update.open": "Открыть страницу новой версии",
   "update.popupTitle": "Доступна новая версия",
   "update.popupBody": "Вышел SIIISHUB {latest}, а на этом телефоне {current}. Скачайте APK со страницы версии и установите поверх текущей: настройки и библиотека сохранятся.",

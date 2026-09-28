@@ -230,7 +230,7 @@ export const TR = {
   'welcome.body': "Başlamak için ayarlarda TMDB API key'inizi ekleyin. Anahtar olmadan film veya dizi yükleyemem.",
   'welcome.openSettings': "Ayarları aç",
   "update.upToDate": "Güncel",
-  "update.available": "{version} mevcut",
+  "update.available": "Güncelleme mevcut",
   "update.open": "Yeni sürümün sayfasını aç",
   "update.popupTitle": "Yeni sürüm mevcut",
   "update.popupBody": "SIIISHUB {latest} çıktı, bu telefonda ise {current} var. APK’yı sürümün sayfasından indirip bunun üzerine kurun: ayarlarınız ve kitaplığınız korunur.",

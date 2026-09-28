@@ -230,7 +230,7 @@ export const FI = {
   'welcome.body': "Aloita lisäämällä TMDB API key asetuksiin. Ilman avainta en voi ladata elokuvia tai sarjoja.",
   'welcome.openSettings': "Avaa asetukset",
   "update.upToDate": "Ajan tasalla",
-  "update.available": "{version} saatavilla",
+  "update.available": "Päivitys saatavilla",
   "update.open": "Avaa uuden version sivu",
   "update.popupTitle": "Uusi versio saatavilla",
   "update.popupBody": "SIIISHUB {latest} on julkaistu, ja tässä puhelimessa on {current}. Lataa APK version sivulta ja asenna se tämän päälle: asetukset ja kirjasto säilyvät.",

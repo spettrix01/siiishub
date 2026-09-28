@@ -230,7 +230,7 @@ export const HI = {
   'welcome.body': "शुरू करने के लिए, सेटिंग्स में अपनी TMDB API key जोड़ें। key के बिना मैं फ़िल्में या सीरीज़ लोड नहीं कर सकता।",
   'welcome.openSettings': "सेटिंग्स खोलें",
   "update.upToDate": "अप टू डेट",
-  "update.available": "{version} उपलब्ध",
+  "update.available": "अपडेट उपलब्ध है",
   "update.open": "नए संस्करण का पेज खोलें",
   "update.popupTitle": "नया संस्करण उपलब्ध है",
   "update.popupBody": "SIIISHUB {latest} आ गया है, और इस फ़ोन में {current} है। संस्करण के पेज से APK डाउनलोड करें और इसके ऊपर इंस्टॉल करें: आपकी सेटिंग्स और लाइब्रेरी बनी रहेंगी।",

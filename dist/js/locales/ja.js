@@ -230,7 +230,7 @@ export const JA = {
   'welcome.body': "始めるには、設定でTMDB API keyを追加してください。keyがないと映画やシリーズを読み込めません。",
   'welcome.openSettings': "設定を開く",
   "update.upToDate": "最新です",
-  "update.available": "{version} が利用可能",
+  "update.available": "アップデートがあります",
   "update.open": "新しいバージョンのページを開く",
   "update.popupTitle": "新しいバージョンがあります",
   "update.popupBody": "SIIISHUB {latest} が公開されました。この端末は {current} です。バージョンのページから APK をダウンロードして上書きインストールしてください。設定とライブラリはそのまま残ります。",

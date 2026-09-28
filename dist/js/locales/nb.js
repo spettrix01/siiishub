@@ -230,7 +230,7 @@ export const NB = {
   'welcome.body': "For å komme i gang legger du til TMDB API-nøkkelen din i innstillingene. Uten en nøkkel kan jeg ikke laste filmer eller serier.",
   'welcome.openSettings': "Åpne innstillinger",
   "update.upToDate": "Oppdatert",
-  "update.available": "{version} tilgjengelig",
+  "update.available": "Oppdatering tilgjengelig",
   "update.open": "Åpne siden for den nye versjonen",
   "update.popupTitle": "Ny versjon tilgjengelig",
   "update.popupBody": "SIIISHUB {latest} er ute, og denne telefonen har {current}. Last ned APK-en fra versjonens side og installer den over denne: innstillingene og biblioteket ditt beholdes.",

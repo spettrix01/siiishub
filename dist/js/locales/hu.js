@@ -230,7 +230,7 @@ export const HU = {
   'welcome.body': "A kezdéshez add meg a TMDB API kulcsodat a beállításokban. Kulcs nélkül nem tudok filmeket vagy sorozatokat betölteni.",
   'welcome.openSettings': "Beállítások megnyitása",
   "update.upToDate": "Naprakész",
-  "update.available": "{version} elérhető",
+  "update.available": "Frissítés érhető el",
   "update.open": "Az új verzió oldalának megnyitása",
   "update.popupTitle": "Új verzió érhető el",
   "update.popupBody": "Megjelent a SIIISHUB {latest}, ezen a telefonon a {current} van. Töltsd le az APK-t a verzió oldaláról, és telepítsd a mostani fölé: a beállítások és a könyvtár megmaradnak.",
