@@ -64,7 +64,7 @@ device.
 - **Every stream in one list,** from any Stremio-compatible addon, sorted by quality or seeders and filtered by resolution or addon.
 - **Torrent streaming** with librqbit: playback starts while the file is still downloading.
 - **Real-Debrid and AllDebrid:** cached torrents start instantly from a high-speed CDN.
-- **Smart tracks:** your preferred audio and subtitle languages are picked automatically, and subtitle search, subtitle sync and playback speed are one tap away.
+- **Smart tracks:** your preferred audio and subtitle languages are picked automatically, the tracks you choose for a movie or a series are kept for it, and subtitle search, subtitle sync and playback speed are one tap away.
 - **Resume** exactly where you left off.
 
 ### Keep
@@ -80,7 +80,7 @@ device.
 - **Android app** made for touch: bottom navigation, a full-screen landscape player and pinch to fill the screen.
 - **Android TV app** with the interface of the desktop app, driven with the TV remote: the D-pad moves between titles and controls, and in the player it seeks and pauses.
 - **In your browser:** run the server version on a NAS or a mini PC with Docker and watch from any browser, phones and TVs included. Files the browser cannot play are converted on the fly, on the GPU when the server has one. See [docs/WEB.md](docs/WEB.md).
-- **One library on every device:** the server version keeps accounts. Sign in to yours from the apps and your library, favorites, addons, keys and preferences follow you; downloads stay on each device.
+- **One library on every device:** the server version keeps accounts. Sign in to yours from the apps and your library, favorites, the audio and subtitle tracks you chose, addons, keys and preferences follow you; downloads and the look of the subtitles stay on each device.
 - **Always know what is new:** next to the version in the bottom right corner, SIIISHUB tells whether a newer one is out and opens its page; on a phone, a popup at start says so.
 
 ## Download

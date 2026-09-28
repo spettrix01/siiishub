@@ -18,7 +18,8 @@ import {
   remotePushState,
   onRemoteCmd,
 } from './api.js';
-import { saveResume, getResume } from './resume.js';
+import { saveResume, getResume, saveTrackChoice, getTrackChoice } from './resume.js';
+import { langKey } from './lang-codes.js';
 import { state } from './state.js';
 import { spatialNav } from './spatial-nav.js';
 
@@ -388,6 +389,8 @@ function handleMpvEvent(payload) {
       } else {
         clearPlayerLog();
       }
+      tracksPending = true;
+      applyTrackChoice();
       wakePlayer();
       break;
     case 'playback_restart':
@@ -459,6 +462,7 @@ function applyProperty(name, value) {
     }
     case 'track-list': {
       mpvState.trackList = Array.isArray(value) ? value : [];
+      applyTrackChoice();
       renderSettingsBody();
       pushRemoteStateNow();
       break;
@@ -1210,6 +1214,133 @@ function renderTrackList() {
   }
   target.innerHTML = html;
 }
+
+// ---------- The tracks picked for a title ----------
+// A track picked in the settings or from the phone remote is kept for the
+// movie, or for the series and its episodes (resume.js), and goes with the
+// account to its other devices: the next time the title plays, there or
+// here, it starts with that track instead of the one the preferred languages
+// pick. Another device or another release numbers the tracks otherwise, so
+// a track is recalled by what it is: its language first, then its title,
+// codec, channels and place among those of its language. A subtitle added
+// from the search comes back from its address, for the same film or episode.
+
+// From the loading of a file until its tracks are known and the ones picked
+// for the title are applied.
+let tracksPending = false;
+// The subtitles added from the search for this file, by the title sub-add
+// gave their track: { url, id }.
+const searchedSubs = new Map();
+
+const isNoTrack = id => id === false || id === 'no' || id == null;
+
+function trackChannels(t) {
+  return Number(t['demux-channel-count'] ?? t['audio-channels']) || 0;
+}
+
+function sameLangTracks(list, lang) {
+  const key = langKey(lang);
+  return list.filter(t => langKey(t.lang) === key);
+}
+
+// What a subtitle of the search was found for: an episode, or the film.
+function searchedFor(ctx) {
+  return ctx?.type === 'tv' ? `${ctx.season}:${ctx.episode}` : '';
+}
+
+function describeTrack(t, list) {
+  const choice = {
+    lang: t.lang || '',
+    title: t.title || '',
+    codec: t.codec || '',
+    forced: !!t.forced,
+    channels: trackChannels(t),
+    n: sameLangTracks(list, t.lang).indexOf(t),
+  };
+  const searched = t.external ? searchedSubs.get(t.title || '') : null;
+  if (searched) Object.assign(choice, searched, { for: searchedFor(playerCtx) });
+  return choice;
+}
+
+function rememberTrack(prop, value) {
+  if (!playerCtx) return;
+  const kind = prop === 'aid' ? 'audio' : 'sub';
+  // No subtitles is a choice to keep; no sound is not.
+  if (isNoTrack(value)) {
+    if (kind === 'sub') saveTrackChoice(playerCtx, 'sub', { off: true });
+    return;
+  }
+  const list = tracksOf(kind);
+  const track = list.find(t => Number(t.id) === Number(value));
+  if (track) saveTrackChoice(playerCtx, kind, describeTrack(track, list));
+}
+
+// The track of `list` most like the one picked, among those of its language.
+function matchTrack(list, want) {
+  const same = sameLangTracks(list, want.lang);
+  let best = null;
+  let bestScore = -1;
+  for (const t of same) {
+    let score = 0;
+    if (want.title && (t.title || '') === want.title) score += 4;
+    if (want.codec && t.codec === want.codec) score += 2;
+    if (!!t.forced === !!want.forced) score += 1;
+    if (want.channels && trackChannels(t) === want.channels) score += 1;
+    if (same.indexOf(t) === want.n) score += 1;
+    if (score > bestScore) {
+      best = t;
+      bestScore = score;
+    }
+  }
+  // A track without a language is recognised by its title or codec only.
+  return langKey(want.lang) || bestScore >= 3 ? best : null;
+}
+
+function addSearchedSub(url, title, lang, id) {
+  const args = ['sub-add', url, 'select', title];
+  if (lang) args.push(lang);
+  return mpvCommand(args).then(() => {
+    searchedSubs.set(title, { url, id });
+    openSubsAppliedId = id;
+    if (settingsTab === 'opensubtitles') paintOpenSubtitlesList(openSubsCache || []);
+  });
+}
+
+// Once per file, as soon as its tracks are known: the tracks picked for the
+// title, on this device or another. They are set even when they look
+// selected already: mpv may report the new file's aid and sid after its
+// tracks, and setting the track in use changes nothing.
+function applyTrackChoice() {
+  if (!tracksPending || !mpvState.trackList.length) return;
+  tracksPending = false;
+  if (!playerCtx) return;
+  const audio = getTrackChoice(playerCtx, 'audio');
+  const a = audio && !audio.off ? matchTrack(tracksOf('audio'), audio) : null;
+  if (a) mpvSet('aid', Number(a.id)).catch(() => {});
+
+  const sub = getTrackChoice(playerCtx, 'sub');
+  if (!sub) return;
+  if (sub.off) {
+    mpvSet('sid', 'no').catch(() => {});
+    return;
+  }
+  const fromFile = () => {
+    const s = matchTrack(tracksOf('sub').filter(t => !t.external), sub);
+    if (s) mpvSet('sid', Number(s.id)).catch(() => {});
+  };
+  if (!sub.url || sub.for !== searchedFor(playerCtx)) {
+    fromFile();
+    return;
+  }
+  // The search tab marks it as the one in use.
+  const found = getOpenSubsCtx();
+  if (found) openSubsCacheKey = `${found.kind}:${found.id}`;
+  addSearchedSub(sub.url, sub.title, sub.lang, sub.id).catch(err => {
+    console.warn('sub-add failed', err);
+    fromFile();
+  });
+}
+
 function hasSubtitlesAddon() {
   return (state.settings.addons || []).some(a =>
     a.enabled !== false && Array.isArray(a.resources) && a.resources.includes('subtitles'),
@@ -1277,6 +1408,8 @@ function detachPlayer({ keepTorrent = false, sendStop = false } = {}) {
   playerCtx = null;
   playerOnEnded = null;
   pendingResumeTime = 0;
+  tracksPending = false;
+  searchedSubs.clear();
   trackFilter.audio = '';
   trackFilter.sub = '';
   openSubsFilter = '';
@@ -1725,12 +1858,10 @@ playerSettingsBody.addEventListener('click', e => {
     const title = osOpt.dataset.osTitle || 'OpenSubtitles';
     const id = osOpt.dataset.osId;
     if (!url) return;
-    const args = ['sub-add', url, 'select', title];
-    if (lang) args.push(lang);
-    mpvCommand(args)
+    const ctx = playerCtx;
+    addSearchedSub(url, title, lang, id)
       .then(() => {
-        openSubsAppliedId = id;
-        if (settingsTab === 'opensubtitles') paintOpenSubtitlesList(openSubsCache || []);
+        if (ctx && ctx === playerCtx) saveTrackChoice(ctx, 'sub', { lang, title, url, id, for: searchedFor(ctx) });
       })
       .catch(err => {
         console.warn('sub-add failed', err);
@@ -1744,6 +1875,7 @@ playerSettingsBody.addEventListener('click', e => {
   const prop = settingsTab === 'audio' ? 'aid' : 'sid';
   const value = id === 'no' ? 'no' : Number(id);
   mpvSet(prop, value).catch(() => {});
+  rememberTrack(prop, value);
 });
 
 document.addEventListener('click', e => {
@@ -2126,6 +2258,7 @@ function handleRemoteCmd(cmd) {
       if (kind !== 'aid' && kind !== 'sid') break;
       const v = id === 'no' || id == null ? 'no' : Number(id);
       mpvSet(kind, v).catch(() => {});
+      rememberTrack(kind, v);
       break;
     }
     case 'nav':

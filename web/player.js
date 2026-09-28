@@ -15,6 +15,7 @@
 // MP4 as one stream from a given second, restarted at every seek.
 import { state } from '../js/state.js';
 import { t } from '../js/i18n.js';
+import { sameLang } from '../js/lang-codes.js';
 
 const EVENT = 'mpv://event';
 const VOLUME_MAX = 200;
@@ -218,26 +219,9 @@ function videoParams() {
 }
 
 // ---------- Languages ----------
-// ISO 639-1 codes and their 639-2 forms, B and T (the app's settings and the
-// files use either).
-const LANGS = {
-  en: ['eng'], it: ['ita'], es: ['spa'], fr: ['fre', 'fra'], de: ['ger', 'deu'], pt: ['por'],
-  nl: ['dut', 'nld'], pl: ['pol'], ru: ['rus'], uk: ['ukr'], cs: ['cze', 'ces'], hu: ['hun'],
-  ro: ['rum', 'ron'], el: ['gre', 'ell'], tr: ['tur'], sv: ['swe'], da: ['dan'], fi: ['fin'],
-  nb: ['nob', 'nor'], no: ['nor', 'nob'], ja: ['jpn'], ko: ['kor'], zh: ['chi', 'zho'],
-  ar: ['ara'], he: ['heb'], hi: ['hin'],
-};
-function langKey(code) {
-  const c = (code || '').toLowerCase().split(/[-_]/)[0];
-  if (c.length === 2) return c;
-  for (const [two, three] of Object.entries(LANGS)) if (three.includes(c)) return two;
-  return c;
-}
-function sameLang(a, b) {
-  return !!a && !!b && langKey(a) === langKey(b);
-}
-
-// The audio track the app's settings prefer, else the default one.
+// The audio track the app's settings prefer, else the default one. The
+// codes of the settings and of the files compare as one language
+// (js/lang-codes.js).
 function preferredAudio(info) {
   for (const lang of state.settings?.playerAudioLangs || []) {
     const i = info.audios.findIndex(a => sameLang(a.lang, lang));

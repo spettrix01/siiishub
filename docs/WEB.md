@@ -40,8 +40,9 @@ several times that.
 
 A change of audio track opens a new HLS session from the same second (about
 2 seconds). Speed, volume up to 200% and the resume position work as in the
-app, and the preferred audio and subtitle languages of the settings pick the
-tracks.
+app, and the tracks are picked as in the app: the ones chosen for the movie
+or the series (see Accounts and sync), otherwise the preferred audio and
+subtitle languages of the settings.
 
 Subtitles: the ones of the subtitle addons (converted to WebVTT, SRT in
 UTF-8 or Windows-1252, ASS through FFmpeg), and the text ones inside the file
@@ -70,11 +71,21 @@ switched from the phone: browsers allow it only after a click on the page.
 
 The server keeps accounts, and the SIIISHUB apps for Windows, Linux,
 Android and Android TV sign in to them to share one library: Continue
-watching and resume points, favorites, the stream last watched, the addons,
-the TMDB and debrid keys, the tracker list, the language, the audio and
-subtitle languages and the theme. Downloads stay on the device that made
-them, and so does the look of the subtitles, set for the screen and the
-distance each device is watched from.
+watching and resume points, favorites, the stream last watched, the audio
+and subtitle tracks chosen for a movie or a series, the addons, the TMDB and
+debrid keys, the tracker list, the language, the audio and subtitle
+languages and the theme. Downloads stay on the device that made them, and
+so do the look of the subtitles, set for the screen and the distance each
+device is watched from, and the audio passthrough; the subtitle sync starts
+from zero with every file.
+
+A track picked in the player (or from the phone remote) is kept for the
+movie, or for the series and all its episodes, and the title starts with it
+on every device, instead of the track the preferred languages pick. Devices
+and releases number the tracks differently, so a track is recalled by its
+language, then its title, codec and channels; when the file has none in that
+language, the preferred languages pick as usual. A subtitle added from the
+search comes back from its address for the same movie or episode.
 
 - **The first account**, the administrator's, is made on the login page the
   first time the server runs, from a device on the home network. The

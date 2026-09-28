@@ -116,6 +116,35 @@ export function getWatchedStream(ctx) {
   return typeof data?.k === 'string' ? data.k : null;
 }
 
+// The audio and the subtitle track picked in the player for a movie, or for
+// a series and all its episodes: they travel with the account, so every
+// device plays the title with them (js/player.js). The sync and the look of
+// the subtitles stay with each device (siiis:player:).
+const TRACK_PREFIX = 'siiis:track:';
+
+function trackKeyOf(ctx, kind) {
+  if (kind !== 'audio' && kind !== 'sub') return null;
+  if ((ctx?.type === 'movie' || ctx?.type === 'tv') && ctx.tmdbId != null) {
+    return `${TRACK_PREFIX}${kind}:${ctx.type}:${ctx.tmdbId}`;
+  }
+  if (ctx?.type === 'local' && ctx.id != null && ctx.id !== '') return `${TRACK_PREFIX}${kind}:local:${ctx.id}`;
+  return null;
+}
+
+/** `choice`: what the track is (language, title, codec...), or `{ off: true }`
+ *  for subtitles turned off. */
+export function saveTrackChoice(ctx, kind, choice) {
+  const k = trackKeyOf(ctx, kind);
+  if (!k || !choice) return;
+  userStore.setItem(k, JSON.stringify({ ...choice, ts: Date.now() }));
+}
+
+export function getTrackChoice(ctx, kind) {
+  const k = trackKeyOf(ctx, kind);
+  const data = k ? safeJsonParse(userStore.getItem(k)) : null;
+  return data && typeof data === 'object' ? data : null;
+}
+
 /** The episode of a series watched last, played or waiting in Continue
  *  watching: `{ season, episode }`, or null. */
 export function lastEpisode(tmdbId) {
