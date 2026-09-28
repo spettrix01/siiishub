@@ -86,7 +86,7 @@ distance each device is watched from.
   last came from, whether it is online now or when it was last seen, and
   since when it is signed in. The × signs one out at once: its app has to
   sign in again with the password. The name and the version come from the
-  apps of 1.3.7 on.
+  apps of 1.3.8 on.
 - **In the browser**, signing in with an account opens its own library and
   settings on this server.
 - **In the apps**, Settings → Account takes the server's address

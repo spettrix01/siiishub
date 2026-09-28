@@ -37,7 +37,7 @@ fn unauthorized() -> Response {
 /// Longest wait for news, under the minute proxies give a request.
 const WAIT: Duration = Duration::from_secs(50);
 
-/// The app's User-Agent from 1.3.7 on, `SIIISHUB/<version> (<system>;
+/// The app's User-Agent from 1.3.8 on, `SIIISHUB/<version> (<system>;
 /// <name>)`: the version and the device's name. The apps before sent
 /// `siiishub/0.1`.
 fn app_agent(agent: &str) -> Option<(String, String)> {
@@ -202,14 +202,14 @@ mod tests {
     #[test]
     fn agents() {
         assert_eq!(
-            app_agent("SIIISHUB/1.3.7 (Windows; DESKTOP-7H2K9)"),
-            Some(("1.3.7".into(), "DESKTOP-7H2K9".into()))
+            app_agent("SIIISHUB/1.3.8 (Windows; DESKTOP-7H2K9)"),
+            Some(("1.3.8".into(), "DESKTOP-7H2K9".into()))
         );
         assert_eq!(
-            app_agent("SIIISHUB/1.3.7 (Android TV; Amazon AFTKA)"),
-            Some(("1.3.7".into(), "Amazon AFTKA".into()))
+            app_agent("SIIISHUB/1.3.8 (Android TV; Amazon AFTKA)"),
+            Some(("1.3.8".into(), "Amazon AFTKA".into()))
         );
-        assert_eq!(app_agent("SIIISHUB/1.3.7 (Linux)"), Some(("1.3.7".into(), String::new())));
+        assert_eq!(app_agent("SIIISHUB/1.3.8 (Linux)"), Some(("1.3.8".into(), String::new())));
         assert_eq!(app_agent("siiishub/0.1"), None);
         assert_eq!(app_agent("Mozilla/5.0 (X11; Linux x86_64)"), None);
     }

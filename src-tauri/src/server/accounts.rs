@@ -60,7 +60,7 @@ struct DeviceToken {
     #[serde(default)]
     created: u64,
     /// The device's own name (a PC's, a phone's model) and the app's
-    /// version, as its requests tell them from 1.3.7 on.
+    /// version, as its requests tell them from 1.3.8 on.
     #[serde(default, skip_serializing_if = "String::is_empty")]
     name: String,
     #[serde(default, skip_serializing_if = "String::is_empty")]
@@ -563,7 +563,7 @@ mod tests {
         let accounts = Accounts::load(dir.join("accounts.json"));
         let mario = accounts.create("mario", "password1", false).await.unwrap();
         let old = accounts.issue_token(&mario.id, "Windows", &Visit::default()).unwrap();
-        let visit = Visit { name: "SALOTTO".into(), version: "1.3.7".into(), address: "192.168.1.20".into() };
+        let visit = Visit { name: "SALOTTO".into(), version: "1.3.8".into(), address: "192.168.1.20".into() };
         let tv = accounts.issue_token(&mario.id, "Android TV", &visit).unwrap();
 
         let list = accounts.list();
@@ -571,9 +571,9 @@ mod tests {
         assert_eq!(devices.len(), 2);
         assert!(devices.iter().all(|d| d.online && d.id.len() == 16));
         let shown = devices.iter().find(|d| d.kind == "Android TV").unwrap();
-        assert_eq!((shown.name.as_str(), shown.version.as_str(), shown.address.as_str()), ("SALOTTO", "1.3.7", "192.168.1.20"));
+        assert_eq!((shown.name.as_str(), shown.version.as_str(), shown.address.as_str()), ("SALOTTO", "1.3.8", "192.168.1.20"));
 
-        // A request of an app from before 1.3.7 keeps what is known.
+        // A request of an app from before 1.3.8 keeps what is known.
         assert!(accounts.visit(&tv, &Visit { address: "10.0.0.5".into(), ..Visit::default() }).is_some());
         let list = accounts.list();
         let shown = list[0].devices.iter().find(|d| d.kind == "Android TV").unwrap();

@@ -259,7 +259,7 @@ function deviceIcon(kind = '') {
 }
 
 // "Android TV · Amazon AFTKA": what the app said it is when it signed in,
-// and the device's own name, which apps tell from 1.3.7 on.
+// and the device's own name, which apps tell from 1.3.8 on.
 function deviceLabel(d) {
   const kind = d.kind || 'App';
   return d.name ? `${kind} · ${d.name}` : kind;
