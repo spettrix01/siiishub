@@ -3569,6 +3569,12 @@ html:not(.is-android) .player-frame:not(.is-fs) .plp-head { min-height: var(--to
   justify-content: space-between;
   gap: 10px;
 }
+.pss-row[hidden] { display: none; }
+/* The Audio tab: the formats sent as they are, under the passthrough. */
+.pss-formats { margin-top: 0.7rem; align-items: flex-start; }
+.pss-formats .pss-label { padding-top: 0.6rem; }
+.pss-formats .pss-chips { gap: 5px; }
+.pss-formats .pss-chip { padding: 0 0.5rem; }
 .pss-label {
   font-size: 0.7rem;
   font-weight: 600;

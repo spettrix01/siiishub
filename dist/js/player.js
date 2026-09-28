@@ -637,7 +637,7 @@ function speedLabel(s) {
 function renderSettingsBody() {
   if (!playerSettingsBody) return;
   if (playerSettings.hidden) return;
-  renderSubHead();
+  renderSettingsHead();
 
   if (settingsTab === 'speed') {
     delete playerSettingsBody.dataset.shellTab;
@@ -972,16 +972,26 @@ const SUB_ICON = {
   chevron: '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="m9 6 6 6-6 6"/></svg>',
 };
 
-// Above the tracks, drawn once per language and updated in place: the
-// remote's selection may be on one of its buttons.
-function renderSubHead() {
+// Above the tracks, the sync of the subtitles or the audio's passthrough
+// (not in a browser, which always decodes), drawn once per tab and language
+// and updated in place: the remote's selection may be on one of its buttons.
+function renderSettingsHead() {
   if (!playerSettingsHead) return;
-  playerSettingsHead.hidden = settingsTab !== 'sub';
-  if (playerSettingsHead.hidden) return;
-  if (playerSettingsHead.dataset.locale !== intlLocale()) {
-    playerSettingsHead.dataset.locale = intlLocale();
-    const attr = key => escapeHTML(tx(key));
-    playerSettingsHead.innerHTML = `
+  const kind = settingsTab === 'sub' ? 'sub' : settingsTab === 'audio' && !IS_WEB ? 'audio' : '';
+  playerSettingsHead.hidden = !kind;
+  if (!kind) return;
+  const key = `${kind}:${intlLocale()}`;
+  if (playerSettingsHead.dataset.key !== key) {
+    playerSettingsHead.dataset.key = key;
+    playerSettingsHead.innerHTML = kind === 'sub' ? subHeadHtml() : audioHeadHtml();
+  }
+  if (kind === 'sub') updateSubHead();
+  else updateAudioHead();
+}
+
+function subHeadHtml() {
+  const attr = key => escapeHTML(tx(key));
+  return `
       <div class="pss-row pss-sync">
         <span class="pss-label">${attr('player.subSync')}</span>
         <div class="pss-sync-ctrl">
@@ -996,8 +1006,6 @@ function renderSubHead() {
         <span class="pss-look-summary" data-sub-look-summary></span>
         ${SUB_ICON.chevron}
       </button>`;
-  }
-  updateSubHead();
 }
 
 function updateSubHead() {
@@ -1017,6 +1025,95 @@ function updateSubHead() {
   const summary = playerSettingsHead.querySelector('[data-sub-look-summary]');
   if (summary) {
     summary.textContent = Object.keys(SUB_LOOK).map(name => tx(`player.subLook.${name}.${subLook(name)}`)).join(' · ');
+  }
+}
+
+// ---------- Audio: passthrough ----------
+// The audio as the file has it (Dolby, DTS), for an amplifier or a soundbar
+// to decode: the only way Dolby Atmos and DTS:X reach them. mpv's
+// audio-spdif, for the formats chosen; a device that refuses one gets it
+// decoded as usual. Kept on each device, like the subtitles' look: it
+// depends on what the device is plugged into.
+const SPDIF_KEY = 'siiis:player:spdif';
+const SPDIF_FORMATS_KEY = 'siiis:player:spdif-formats';
+const SPDIF_FORMATS = [
+  ['ac3', 'AC3', 'Dolby Digital (AC3)'],
+  ['eac3', 'E-AC3', 'Dolby Digital Plus (E-AC3)'],
+  ['dts', 'DTS', 'DTS'],
+  ['dts-hd', 'DTS-HD', 'DTS-HD Master Audio'],
+  ['truehd', 'TrueHD', 'Dolby TrueHD'],
+];
+// What any amplifier takes, also over HDMI ARC; the lossless ones on request.
+const SPDIF_DEFAULT = ['ac3', 'eac3', 'dts'];
+
+const passthroughOn = () => userStore.getItem(SPDIF_KEY) === 'on';
+
+function passthroughFormats() {
+  const saved = userStore.getItem(SPDIF_FORMATS_KEY);
+  if (saved == null) return SPDIF_DEFAULT.slice();
+  return saved.split(',').filter(codec => SPDIF_FORMATS.some(([c]) => c === codec));
+}
+
+// The decoder takes it when it starts: while a file plays, its audio track
+// starts again.
+function applyPassthrough({ reload = false } = {}) {
+  if (IS_WEB) return;
+  mpvSet('audio-spdif', passthroughOn() ? passthroughFormats().join(',') : '').catch(() => {});
+  const aid = mpvState.aid;
+  if (reload && aid != null && aid !== false && aid !== 'no') {
+    mpvSet('aid', 'no').then(() => mpvSet('aid', aid)).catch(() => {});
+  }
+}
+
+function setPassthrough(on) {
+  if (on === passthroughOn()) return;
+  userStore.setItem(SPDIF_KEY, on ? 'on' : 'off');
+  applyPassthrough({ reload: true });
+  updateAudioHead();
+}
+
+function togglePassthroughFormat(codec) {
+  const list = passthroughFormats();
+  const next = list.includes(codec) ? list.filter(c => c !== codec) : list.concat(codec);
+  userStore.setItem(SPDIF_FORMATS_KEY, SPDIF_FORMATS.map(([c]) => c).filter(c => next.includes(c)).join(','));
+  if (passthroughOn()) applyPassthrough({ reload: true });
+  updateAudioHead();
+}
+
+function audioHeadHtml() {
+  const attr = key => escapeHTML(tx(key));
+  const formats = SPDIF_FORMATS.map(([codec, label, title]) =>
+    `<button type="button" class="pss-chip" data-spdif="${codec}" aria-pressed="false" aria-label="${escapeHTML(title)}" title="${escapeHTML(title)}">${escapeHTML(label)}</button>`,
+  ).join('');
+  return `
+      <div class="pss-row">
+        <span class="pss-label" id="pssLabel-passthrough">${attr('player.passthrough')}</span>
+        <div class="pss-chips" role="radiogroup" aria-labelledby="pssLabel-passthrough">
+          <button type="button" class="pss-chip" data-passthrough="off" role="radio" aria-checked="false">${attr('player.passthrough.off')}</button>
+          <button type="button" class="pss-chip" data-passthrough="on" role="radio" aria-checked="false">${attr('player.passthrough.on')}</button>
+        </div>
+      </div>
+      <div class="pss-row pss-formats" data-spdif-formats hidden>
+        <span class="pss-label">${attr('player.passthroughFormats')}</span>
+        <div class="pss-chips">${formats}</div>
+      </div>`;
+}
+
+function updateAudioHead() {
+  if (!playerSettingsHead || playerSettingsHead.hidden) return;
+  const on = passthroughOn();
+  for (const el of playerSettingsHead.querySelectorAll('[data-passthrough]')) {
+    const active = (el.dataset.passthrough === 'on') === on;
+    el.classList.toggle('is-active', active);
+    el.setAttribute('aria-checked', active ? 'true' : 'false');
+  }
+  const row = playerSettingsHead.querySelector('[data-spdif-formats]');
+  if (row) row.hidden = !on;
+  const list = passthroughFormats();
+  for (const el of playerSettingsHead.querySelectorAll('[data-spdif]')) {
+    const active = list.includes(el.dataset.spdif);
+    el.classList.toggle('is-active', active);
+    el.setAttribute('aria-pressed', active ? 'true' : 'false');
   }
 }
 
@@ -1216,6 +1313,7 @@ async function attachStream(playlistUrl, opts = {}) {
     mpvState.subDelay = 0;
     mpvSet('sub-delay', 0).catch(() => {});
     applySubLook();
+    applyPassthrough();
 
     const r = playerCtx ? getResume(playerCtx) : null;
     if (r && Number.isFinite(r.time) && r.time > 5) {
@@ -1574,6 +1672,16 @@ $$('[data-pst-tab]', playerSettings).forEach(btn => {
   });
 });
 playerSettingsHead?.addEventListener('click', e => {
+  const passthrough = e.target.closest('[data-passthrough]');
+  if (passthrough) {
+    setPassthrough(passthrough.dataset.passthrough === 'on');
+    return;
+  }
+  const format = e.target.closest('[data-spdif]');
+  if (format) {
+    togglePassthroughFormat(format.dataset.spdif);
+    return;
+  }
   if (e.target.closest('[data-sub-look-toggle]')) {
     subLookOpen = !subLookOpen;
     renderSettingsBody();
