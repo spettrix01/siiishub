@@ -488,6 +488,8 @@ export const KO = {
   "settings.account.synced": "모두 최신 상태입니다.",
   "settings.account.lastSync": "마지막 동기화: {time}",
   "settings.account.never": "아직 동기화되지 않음",
+  "settings.account.checking": "연결 확인 중…",
+  "settings.account.connected": "서버에 연결됨",
   "settings.account.fillIn": "서버, 사용자 이름, 비밀번호를 입력하세요.",
   "settings.account.changePassword": "비밀번호 변경",
   "settings.account.currentPassword": "현재 비밀번호",

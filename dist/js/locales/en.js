@@ -488,6 +488,8 @@ export const EN = {
   "settings.account.synced": "Up to date.",
   "settings.account.lastSync": "Last sync: {time}",
   "settings.account.never": "Not synced yet",
+  "settings.account.checking": "Checking the connection…",
+  "settings.account.connected": "Connected to the server",
   "settings.account.fillIn": "Fill in the server, the username and the password.",
   "settings.account.changePassword": "Change password",
   "settings.account.currentPassword": "Current password",

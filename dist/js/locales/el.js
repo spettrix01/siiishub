@@ -488,6 +488,8 @@ export const EL = {
   "settings.account.synced": "Όλα ενημερωμένα.",
   "settings.account.lastSync": "Τελευταίος συγχρονισμός: {time}",
   "settings.account.never": "Δεν έχει συγχρονιστεί ακόμα",
+  "settings.account.checking": "Έλεγχος σύνδεσης…",
+  "settings.account.connected": "Συνδεδεμένο με τον διακομιστή",
   "settings.account.fillIn": "Συμπληρώστε διακομιστή, όνομα χρήστη και κωδικό πρόσβασης.",
   "settings.account.changePassword": "Αλλαγή κωδικού πρόσβασης",
   "settings.account.currentPassword": "Τρέχων κωδικός πρόσβασης",

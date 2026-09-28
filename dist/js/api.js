@@ -110,6 +110,7 @@ export const syncStatus = () => invoke('sync_status');
 export const syncSignIn = (server, username, password, device) =>
   invoke('sync_sign_in', { server, username, password, device });
 export const syncSignOut = () => invoke('sync_sign_out');
+export const syncNow = () => invoke('sync_now');
 
 export function onSyncChanged(handler) {
   return TAURI.event.listen('sync://changed', e => handler(e.payload));

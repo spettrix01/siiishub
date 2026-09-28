@@ -488,6 +488,8 @@ export const FI = {
   "settings.account.synced": "Kaikki ajan tasalla.",
   "settings.account.lastSync": "Viimeisin synkronointi: {time}",
   "settings.account.never": "Ei vielä synkronoitu",
+  "settings.account.checking": "Tarkistetaan yhteyttä…",
+  "settings.account.connected": "Yhdistetty palvelimeen",
   "settings.account.fillIn": "Täytä palvelin, käyttäjänimi ja salasana.",
   "settings.account.changePassword": "Vaihda salasana",
   "settings.account.currentPassword": "Nykyinen salasana",

@@ -488,6 +488,8 @@ export const UK = {
   "settings.account.synced": "Усе актуально.",
   "settings.account.lastSync": "Остання синхронізація: {time}",
   "settings.account.never": "Ще не синхронізовано",
+  "settings.account.checking": "Перевірка з’єднання…",
+  "settings.account.connected": "Під’єднано до сервера",
   "settings.account.fillIn": "Укажіть сервер, ім’я користувача та пароль.",
   "settings.account.changePassword": "Змінити пароль",
   "settings.account.currentPassword": "Поточний пароль",

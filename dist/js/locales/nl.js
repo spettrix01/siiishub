@@ -488,6 +488,8 @@ export const NL = {
   "settings.account.synced": "Alles is bijgewerkt.",
   "settings.account.lastSync": "Laatst gesynchroniseerd: {time}",
   "settings.account.never": "Nog niet gesynchroniseerd",
+  "settings.account.checking": "Verbinding controleren…",
+  "settings.account.connected": "Verbonden met de server",
   "settings.account.fillIn": "Vul de server, de gebruikersnaam en het wachtwoord in.",
   "settings.account.changePassword": "Wachtwoord wijzigen",
   "settings.account.currentPassword": "Huidig wachtwoord",

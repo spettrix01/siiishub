@@ -488,6 +488,8 @@ export const IT = {
   "settings.account.synced": "Tutto aggiornato.",
   "settings.account.lastSync": "Ultima sincronizzazione: {time}",
   "settings.account.never": "Non ancora sincronizzato",
+  "settings.account.checking": "Verifica del collegamento…",
+  "settings.account.connected": "Collegato al server",
   "settings.account.fillIn": "Inserisci server, utente e password.",
   "settings.account.changePassword": "Cambia password",
   "settings.account.currentPassword": "Password attuale",

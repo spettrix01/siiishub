@@ -488,6 +488,8 @@ export const ZH = {
   "settings.account.synced": "已是最新。",
   "settings.account.lastSync": "上次同步：{time}",
   "settings.account.never": "尚未同步",
+  "settings.account.checking": "正在检查连接…",
+  "settings.account.connected": "已连接到服务器",
   "settings.account.fillIn": "请填写服务器、用户名和密码。",
   "settings.account.changePassword": "修改密码",
   "settings.account.currentPassword": "当前密码",

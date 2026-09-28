@@ -488,6 +488,8 @@ export const CS = {
   "settings.account.synced": "Vše je aktuální.",
   "settings.account.lastSync": "Poslední synchronizace: {time}",
   "settings.account.never": "Zatím nesynchronizováno",
+  "settings.account.checking": "Kontrola připojení…",
+  "settings.account.connected": "Připojeno k serveru",
   "settings.account.fillIn": "Vyplňte server, uživatelské jméno a heslo.",
   "settings.account.changePassword": "Změnit heslo",
   "settings.account.currentPassword": "Současné heslo",

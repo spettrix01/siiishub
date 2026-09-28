@@ -221,6 +221,7 @@ pub fn run() {
             commands::userdata_set,
             commands::userdata_remove,
             commands::sync_status,
+            commands::sync_now,
             commands::sync_sign_in,
             commands::sync_sign_out,
             commands::open_download_dir,

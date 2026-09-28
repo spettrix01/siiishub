@@ -488,6 +488,8 @@ export const NB = {
   "settings.account.synced": "Alt er oppdatert.",
   "settings.account.lastSync": "Siste synkronisering: {time}",
   "settings.account.never": "Ikke synkronisert ennå",
+  "settings.account.checking": "Sjekker tilkoblingen…",
+  "settings.account.connected": "Koblet til serveren",
   "settings.account.fillIn": "Fyll inn server, brukernavn og passord.",
   "settings.account.changePassword": "Endre passord",
   "settings.account.currentPassword": "Nåværende passord",

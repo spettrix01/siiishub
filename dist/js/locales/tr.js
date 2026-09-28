@@ -488,6 +488,8 @@ export const TR = {
   "settings.account.synced": "Her şey güncel.",
   "settings.account.lastSync": "Son senkronizasyon: {time}",
   "settings.account.never": "Henüz senkronize edilmedi",
+  "settings.account.checking": "Bağlantı kontrol ediliyor…",
+  "settings.account.connected": "Sunucuya bağlı",
   "settings.account.fillIn": "Sunucuyu, kullanıcı adını ve parolayı girin.",
   "settings.account.changePassword": "Parolayı değiştir",
   "settings.account.currentPassword": "Geçerli parola",

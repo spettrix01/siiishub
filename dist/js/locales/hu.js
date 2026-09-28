@@ -488,6 +488,8 @@ export const HU = {
   "settings.account.synced": "Minden naprakész.",
   "settings.account.lastSync": "Utolsó szinkronizálás: {time}",
   "settings.account.never": "Még nincs szinkronizálva",
+  "settings.account.checking": "Kapcsolat ellenőrzése…",
+  "settings.account.connected": "Csatlakozva a szerverhez",
   "settings.account.fillIn": "Add meg a szervert, a felhasználónevet és a jelszót.",
   "settings.account.changePassword": "Jelszó módosítása",
   "settings.account.currentPassword": "Jelenlegi jelszó",

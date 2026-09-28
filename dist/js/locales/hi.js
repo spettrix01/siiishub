@@ -488,6 +488,8 @@ export const HI = {
   "settings.account.synced": "सब अद्यतित है।",
   "settings.account.lastSync": "पिछला सिंक: {time}",
   "settings.account.never": "अभी तक सिंक नहीं हुआ",
+  "settings.account.checking": "कनेक्शन जाँचा जा रहा है…",
+  "settings.account.connected": "सर्वर से जुड़ा है",
   "settings.account.fillIn": "सर्वर, उपयोगकर्ता नाम और पासवर्ड भरें।",
   "settings.account.changePassword": "पासवर्ड बदलें",
   "settings.account.currentPassword": "मौजूदा पासवर्ड",

@@ -4746,6 +4746,28 @@ body.is-player-open .backdrop { display: none; }
 .account-who strong { font-size: 15px; font-weight: 600; }
 .account-sub { font-size: 12px; color: var(--text-3); }
 .account-sub:empty { display: none; }
+/* Whether the server answers (account-ui.js): a dot and a word. */
+.account-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.account-link::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-3);
+}
+.account-link[data-state="checking"]::before { animation: pts-pulse 1.4s ease-in-out infinite; }
+.account-link[data-state="ok"] { color: var(--good); }
+.account-link[data-state="ok"]::before { background: var(--good); }
+.account-link[data-state="error"] { color: var(--danger); }
+.account-link[data-state="error"]::before { background: var(--danger); }
 /* Sign in, for the browser without an account. */
 .account-signin {
   display: inline-flex;

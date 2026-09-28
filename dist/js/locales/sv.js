@@ -488,6 +488,8 @@ export const SV = {
   "settings.account.synced": "Allt är uppdaterat.",
   "settings.account.lastSync": "Senaste synkronisering: {time}",
   "settings.account.never": "Inte synkroniserat än",
+  "settings.account.checking": "Kontrollerar anslutningen…",
+  "settings.account.connected": "Ansluten till servern",
   "settings.account.fillIn": "Fyll i server, användarnamn och lösenord.",
   "settings.account.changePassword": "Byt lösenord",
   "settings.account.currentPassword": "Nuvarande lösenord",

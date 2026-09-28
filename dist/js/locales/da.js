@@ -488,6 +488,8 @@ export const DA = {
   "settings.account.synced": "Alt er opdateret.",
   "settings.account.lastSync": "Seneste synkronisering: {time}",
   "settings.account.never": "Ikke synkroniseret endnu",
+  "settings.account.checking": "Tjekker forbindelsen…",
+  "settings.account.connected": "Forbundet til serveren",
   "settings.account.fillIn": "Udfyld server, brugernavn og adgangskode.",
   "settings.account.changePassword": "Skift adgangskode",
   "settings.account.currentPassword": "Nuværende adgangskode",

@@ -488,6 +488,8 @@ export const RU = {
   "settings.account.synced": "Всё актуально.",
   "settings.account.lastSync": "Последняя синхронизация: {time}",
   "settings.account.never": "Ещё не синхронизировано",
+  "settings.account.checking": "Проверка подключения…",
+  "settings.account.connected": "Подключено к серверу",
   "settings.account.fillIn": "Укажите сервер, имя пользователя и пароль.",
   "settings.account.changePassword": "Сменить пароль",
   "settings.account.currentPassword": "Текущий пароль",

@@ -8,7 +8,7 @@ import { t, intlLocale } from './i18n.js';
 import { IS_WEB, IS_ANDROID, IS_TV } from './platform.js';
 import { showConfirm, showForm } from './modal.js';
 import {
-  syncStatus, syncSignIn, syncSignOut,
+  syncStatus, syncSignIn, syncSignOut, syncNow,
   accountStatus, accountsList, accountCreate, accountDelete, accountPassword,
 } from './api.js';
 import { refreshAfterSync } from './sync-client.js';
@@ -65,7 +65,7 @@ function confirmSignOut(key) {
 
 // ---------- Apps ----------
 
-async function renderApp() {
+async function renderApp({ check = false } = {}) {
   const status = await syncStatus().catch(() => null);
   const signedIn = !!status?.signed_in;
   $('#accountDesc').textContent = t('settings.account.descApp');
@@ -81,8 +81,45 @@ async function renderApp() {
       ? t('settings.account.lastSync', { time: syncTime(status.last_sync) })
       : t('settings.account.never');
     card(status.username, `${status.server.replace(/^https?:\/\//, '')} · ${when}`);
+    if (check) checkLink();
+    else if (status.error) linkState('error', errorText(status.error));
+  } else {
+    $('#accountLink').hidden = true;
+    if (status?.error) hint(errorText(status.error), 'error');
   }
-  if (status?.error) hint(errorText(status.error), 'error');
+}
+
+// Whether the server answers, under the account's name: a dot and a word.
+function linkState(state, text) {
+  const el = $('#accountLink');
+  el.dataset.state = state;
+  el.textContent = text;
+  el.hidden = false;
+}
+
+// Opened, the section syncs at once: the server answering is the check, and
+// the time of the last sync comes up to date with it. A server that no
+// longer knows this device signs it out, back to the sign-in form.
+let checking = 0;
+async function checkLink() {
+  const run = ++checking;
+  linkState('checking', t('settings.account.checking'));
+  try {
+    const applied = await syncNow();
+    if (run !== checking) return;
+    await refreshAfterSync(applied);
+    await renderApp();
+    linkState('ok', t('settings.account.connected'));
+  } catch (err) {
+    if (run !== checking) return;
+    const code = typeof err === 'string' ? err : (err?.message || String(err));
+    if (code === 'signed-out') {
+      await renderApp();
+      hint(errorText(err), 'error');
+      return;
+    }
+    linkState('error', errorText(err));
+  }
 }
 
 function wireApp() {
@@ -103,6 +140,7 @@ function wireApp() {
       $('#accountPasswordInput').value = '';
       await refreshAfterSync(applied);
       await renderApp();
+      linkState('ok', t('settings.account.connected'));
       hint(t('settings.account.synced'), 'success');
     } catch (err) {
       hint(errorText(err), 'error');
@@ -252,5 +290,5 @@ export async function setupAccountSection() {
   }
   hint('');
   if (IS_WEB) await renderWeb();
-  else await renderApp();
+  else await renderApp({ check: true });
 }

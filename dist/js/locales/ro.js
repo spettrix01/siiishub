@@ -488,6 +488,8 @@ export const RO = {
   "settings.account.synced": "Totul e la zi.",
   "settings.account.lastSync": "Ultima sincronizare: {time}",
   "settings.account.never": "Încă nesincronizat",
+  "settings.account.checking": "Se verifică conexiunea…",
+  "settings.account.connected": "Conectat la server",
   "settings.account.fillIn": "Completează serverul, numele de utilizator și parola.",
   "settings.account.changePassword": "Schimbă parola",
   "settings.account.currentPassword": "Parola actuală",

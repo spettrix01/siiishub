@@ -488,6 +488,8 @@ export const JA = {
   "settings.account.synced": "最新の状態です。",
   "settings.account.lastSync": "最終同期: {time}",
   "settings.account.never": "まだ同期されていません",
+  "settings.account.checking": "接続を確認中…",
+  "settings.account.connected": "サーバーに接続済み",
   "settings.account.fillIn": "サーバー、ユーザー名、パスワードを入力してください。",
   "settings.account.changePassword": "パスワードを変更",
   "settings.account.currentPassword": "現在のパスワード",
