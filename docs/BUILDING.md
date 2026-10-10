@@ -8,7 +8,7 @@ code base builds all three platforms.
 |---|---|---|---|
 | Windows x64 | Windows with MSVC | libmpv-2.dll, composited under WebView2 | NSIS installer |
 | Linux x64 | Debian 13, Ubuntu 24.04 or newer | system libmpv, OpenGL under WebKitGTK | .deb, AppImage optional |
-| Android arm64 and armv7 | Debian, native or WSL 2 | libmpv-android through a Kotlin plugin | one APK per ABI |
+| Android arm64, armv7 and x86_64 | Debian, native or WSL 2 | libmpv-android through a Kotlin plugin | one APK per ABI |
 
 The build scripts copy the finished packages to `installers/<platform>/`,
 which git ignores. Set `OUT_DIR` to use another folder.
@@ -75,7 +75,7 @@ the same home:
 ```bash
 bash scripts/linux-deps.sh           # Rust and tauri-cli
 bash scripts/android-setup.sh        # JDK, Android SDK and NDK, Rust targets
-bash scripts/android-build.sh apk    # installers/android/SIIISHUB{,-TV}_<version>_{arm64,armv7}.apk
+bash scripts/android-build.sh apk    # installers/android/SIIISHUB{,-TV}_<version>_{arm64,armv7,x86_64}.apk
 ```
 
 `android-setup.sh` accepts the Android SDK licenses on your behalf. The build
@@ -83,7 +83,10 @@ makes two APKs per ABI: `SIIISHUB` for phones and tablets, `SIIISHUB-TV` for
 Android TV (Cargo feature `tv`, listed in the TV launcher). `apk phone` or
 `apk tv` builds only one of them. The APKs need Android 8.0 or newer: `arm64`
 fits almost every phone and tablet, `armv7` is for older 32-bit devices and
-for the many TVs with a 32-bit system.
+for the many TVs with a 32-bit system, `x86_64` is for Android on x86 PCs,
+mini PCs and VMs. The arm64 APK does not work there: under the Houdini ARM
+translation layer the interface runs, but mpv hangs while loading its Lua
+scripts and Android kills the app as soon as playback starts.
 
 From Windows, with the sources on the Windows drive:
 

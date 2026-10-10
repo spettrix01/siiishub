@@ -93,6 +93,7 @@ Get the latest build from the [Releases](../../releases/latest) page.
 | Debian 13+, Ubuntu 24.04+, 64-bit | `SIIISHUB_<version>_amd64.deb` |
 | Android 8.0+ phones and tablets | `SIIISHUB_<version>_arm64.apk`, or `_armv7.apk` for older 32-bit devices |
 | Android TV and Google TV | `SIIISHUB-TV_<version>_arm64.apk`, or `_armv7.apk` for TVs with a 32-bit system |
+| Android on x86 PCs, mini PCs and VMs (Android-x86, Bliss OS, LineageOS x86) | `SIIISHUB_<version>_x86_64.apk`, or `SIIISHUB-TV_<version>_x86_64.apk` for a TV setup |
 | Docker: NAS, mini PC, server | `ghcr.io/spettrix01/siiishub`, set up as in [docs/WEB.md](docs/WEB.md) |
 
 The packages are not code-signed, so Windows SmartScreen and Android ask for

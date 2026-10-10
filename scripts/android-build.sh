@@ -1,6 +1,6 @@
 #!/bin/bash
-# Builds the SIIISHUB Android APKs, one per ABI (arm64 and armv7), for the
-# phone and for the TV.
+# Builds the SIIISHUB Android APKs, one per ABI (arm64, armv7 and x86_64),
+# for the phone and for the TV.
 # Usage: scripts/android-build.sh [apk|check] [phone|tv|all]
 #        (default: apk all)
 # Requires scripts/android-setup.sh to have run once.
@@ -182,7 +182,7 @@ for VARIANT in $VARIANTS; do
       # One APK per ABI: libmpv weighs tens of MB per ABI. The previous
       # variant's APKs go first, so only this one's are copied.
       rm -rf gen/android/app/build/outputs/apk
-      cargo tauri android build --apk --split-per-abi --target aarch64 --target armv7 "${FEATURE_ARGS[@]}"
+      cargo tauri android build --apk --split-per-abi --target aarch64 --target armv7 --target x86_64 "${FEATURE_ARGS[@]}"
       mkdir -p "$OUT_DIR"
       find gen/android/app/build/outputs/apk -name '*release*.apk' | while read -r apk; do
         case "$apk" in

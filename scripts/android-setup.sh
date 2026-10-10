@@ -47,7 +47,7 @@ echo "== platform-tools, platform $PLATFORM, build-tools $BUILD_TOOLS, NDK $NDK_
 
 echo "== Rust Android targets =="
 . "$HOME/.cargo/env"
-rustup target add aarch64-linux-android armv7-linux-androideabi
+rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android
 cargo tauri --version
 
 cat > "$ENV_FILE" <<EOF
